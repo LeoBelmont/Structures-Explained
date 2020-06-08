@@ -19,6 +19,7 @@ class MplWidget(QWidget):
         self.vertical_layout.addWidget(self.canvas)
 
         self.setLayout(self.vertical_layout)
+        plt.tight_layout()
 
     def plot(self, new_figure=None):
 
