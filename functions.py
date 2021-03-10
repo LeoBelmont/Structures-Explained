@@ -1,5 +1,5 @@
 eq = []
-c = len(eq) - 1
-size = 16
-eqsize = 16
 n = []
+c = len(eq) - 1
+size = 12
+eqsize = 14
