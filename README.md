@@ -1,4 +1,4 @@
-# Tenshi
+# Solid Mechanics Solver
 Didactic 2D structural analysis software. Includes 2D structures, cross section and Mohr's Circle calculations and step by step solution in a PDF file. Also has a user friendly UI, with manual and examples.
 
 2D Structure:
