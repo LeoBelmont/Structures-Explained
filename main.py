@@ -1947,6 +1947,7 @@ class Ui_tenshi(QWidget):
 
         self.rect_list.currentIndexChanged.connect(self.change_table_rect)
         self.rect_plus.clicked.connect(self.add_rect_item)
+        self.circle_plus.clicked.connect(self.add_cir_item)
         self.circle_list.currentIndexChanged.connect(self.change_table_circ)
         self.rect_visualize.stateChanged.connect(self.plot_sec)
         self.circle_visualize.stateChanged.connect(self.plot_sec)
@@ -1985,7 +1986,7 @@ class Ui_tenshi(QWidget):
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        tenshi.setWindowTitle(_translate("tenshi", "Tenshi"))
+        tenshi.setWindowTitle(_translate("tenshi", "Solid Mechanics Solver"))
         self.toolButton_4.setToolTip(_translate("tenshi", "Adicionar apoios"))
         self.toolButton.setToolTip(_translate("tenshi", "Adicionar elemento de estrutura"))
         self.toolButton_3.setToolTip(_translate("tenshi", "Adicionar nó"))
@@ -2008,7 +2009,7 @@ class Ui_tenshi(QWidget):
                                                         "Fluxo de \n"
                                                         "Cisalha-\n"
                                                         "mento"))
-        self.toolButton_8.setToolTip(_translate("tenshi", "Adicionar arcos"))
+        self.toolButton_8.setToolTip(_translate("tenshi", "Adicionar setores circulares"))
         self.toolButton_9.setToolTip(_translate("tenshi", "Dados / Resultados"))
         self.toolButton_9.setText(_translate("tenshi", "Dados \n"
                                                        "Gerais"))
@@ -2131,13 +2132,14 @@ class Ui_tenshi(QWidget):
         self.rect_apply.setText(_translate("tenshi", "Aplicar"))
         self.rect_remove.setText(_translate("tenshi", "Remover"))
         self.label_52.setText(_translate("tenshi", "Subárea Circular"))
-        self.circle_list.setItemText(0, _translate("tenshi", "Arco 1"))
+        self.circle_list.setItemText(0, _translate("tenshi", "Cir. 1"))
         self.circle_plus.setText(_translate("tenshi", "+"))
         self.circle_visualize.setText(_translate("tenshi", "Destacar Subárea"))
         self.label_56.setText(_translate("tenshi", "Raio"))
         self.label_55.setText(_translate("tenshi", "Y"))
         self.label_54.setText(_translate("tenshi", "X"))
         self.label_57.setText(_translate("tenshi", "Ângulo Inicial"))
+        self.label_57.setText("Ângulo (bissetriz)")
         self.label_58.setText(_translate("tenshi", "Ângulo Final"))
         self.label_135.setText(_translate("tenshi", "m"))
         self.label_136.setText(_translate("tenshi", "m"))
@@ -2246,8 +2248,11 @@ class Ui_tenshi(QWidget):
         self.light_theme_button.setText(_translate("tenshi", "Tema Claro"))
         self.dark_theme_button.setText(_translate("tenshi", "Tema Escuro"))
         self.aboutButton.setText(_translate("tenshi", "Sobre"))
+
         self.load_structure_str = "Carregar Arquivo"
         self.strucutre_type_str = "Estrutura(*.pkl)"
+        self.save_strucutre_text = "Estrutura"
+        self.save_strucutre_title = "Salvar Estrutura"
         self.static_warning_str = "Apenas disponível para estruturas estáticas " \
                                   "(que contenham um apoio móvel e um apoio fixo ou um engaste apenas)."
         self.warning_str = "É necessário mais informações"
@@ -2265,24 +2270,84 @@ class Ui_tenshi(QWidget):
         self.rect_values_error = "Valores inválidos. Provavelmente valores foram invertidos."
         self.pdf_title = "Gerar resolução"
         self.pdf_text = "Resolução"
+        self.howtouse_title = "Como Utilizar"
+        self.howtouse_text = ("Manual de utilização: link aqui\n"
+                              "Exemplos de utilização: link aqui")
+        self.about_title = "Sobre"
+        self.about_text = ("Desenvolvido como trabalho de Iniciação Científica na EESC-USP em 2020.\n"
+                            "\n"
+                            "Agradecimentos:\n"
+                            "Eng. Me. Henrique Borges Garcia\n"
+                            "Prof. Me. Gustavo Lahr\n"
+                            "Prof. Dr. Glauco Augusto de Paula Caurin\n"
+                            "Fundação de Apoio à Física e à Química\n")
 
     def retranslateUiEN(self):
         _translate = QtCore.QCoreApplication.translate
+        tenshi.setWindowTitle(_translate("tenshi", "Solid Mechanics Solver"))
+        self.toolButton_4.setToolTip(_translate("tenshi", "Add supports"))
+        self.toolButton.setToolTip(_translate("tenshi", "Add structure element"))
+        self.toolButton_3.setToolTip(_translate("tenshi", "Add node"))
+        self.show_structure.setToolTip(_translate("tenshi", "Visualize structure"))
+        self.show_structure.setText(_translate("tenshi", "Structure"))
+        self.show_normal.setToolTip(_translate("tenshi", "Visualize normal force"))
+        self.toolButton_6.setToolTip(_translate("tenshi", "Add distributed loads"))
+        self.show_shear.setToolTip(_translate("tenshi", "Visualize shear force"))
+        self.show_displacement.setToolTip(_translate("tenshi", "Visualize displacement"))
+        self.label.setText(_translate("tenshi", "Build"))
+        self.show_supports.setToolTip(_translate("tenshi", "Visualize support reactions"))
+        self.show_diagram.setText(_translate("tenshi", "Free \n"
+                                                       "Body \n"
+                                                       "Diagram"))
+        self.show_moment.setToolTip(_translate("tenshi", "Visualize bending moment"))
+        self.label_2.setText(_translate("tenshi", "Visualize"))
+        self.toolButton_5.setToolTip(_translate("tenshi", "Add point loads"))
+        self.toolBox.setItemText(self.toolBox.indexOf(self.page_9), _translate("tenshi", "Structure"))
+        self.toolButton_11.setText(_translate("tenshi", "Shear\n"
+                                                        "Stress\n"
+                                                        "and\n"
+                                                        "Flow"))
+        self.toolButton_8.setToolTip(_translate("tenshi", "Add circular sectors"))
+        self.toolButton_9.setToolTip(_translate("tenshi", "Data / Results"))
+        self.toolButton_9.setText(_translate("tenshi", "General \n"
+                                                       "Data"))
+        self.toolButton_7.setToolTip(_translate("tenshi", "Add rectangles"))
+        self.label_84.setText(_translate("tenshi", "Build"))
+        self.label_85.setText(_translate("tenshi", "Visualize"))
+        self.toolButton_2.setText(_translate("tenshi", "Normal\n"
+                                                       "Stress"))
+        self.show_sec.setToolTip(_translate("tenshi", "Visualize cross sections"))
+        self.label_81.setText(_translate("tenshi", "Calculate"))
+        self.toolBox.setItemText(self.toolBox.indexOf(self.page_10), _translate("tenshi", "Cross Section"))
+        self.show_mohr.setToolTip(_translate("tenshi", "Visualize Mohr's Circle"))
+        self.show_mohr.setText(_translate("tenshi", "Visualize"))
+        self.toolButton_10.setToolTip(_translate("tenshi", "Mohr's Circle"))
+        self.toolButton_10.setText(_translate("tenshi", "Build"))
+        self.label_82.setText(_translate("tenshi", "Build"))
+        self.label_83.setText(_translate("tenshi", "Visualize"))
+        self.toolBox.setItemText(self.toolBox.indexOf(self.page_11), _translate("tenshi", "Mohr's Circle"))
         self.label_13.setText(_translate("tenshi", "Structure Element"))
-        self.label_7.setText(_translate("tenshi", "Coordinates"))
-        self.label_6.setText(_translate("tenshi", "Y2"))
-        self.label_5.setText(_translate("tenshi", "X2"))
         self.label_3.setText(_translate("tenshi", "X1"))
         self.label_4.setText(_translate("tenshi", "Y1"))
+        self.label_6.setText(_translate("tenshi", "Y2"))
+        self.label_5.setText(_translate("tenshi", "X2"))
+        self.label_7.setText(_translate("tenshi", "Coordinates"))
         self.beam_list.setItemText(0, _translate("tenshi", "Section 1"))
         self.beam_plus.setText(_translate("tenshi", "+"))
+        self.label_123.setText(_translate("tenshi", "m"))
+        self.label_124.setText(_translate("tenshi", "m"))
+        self.label_125.setText(_translate("tenshi", "m"))
+        self.label_126.setText(_translate("tenshi", "m"))
         self.utilizeinfo.setText(_translate("tenshi", "Specify Material"))
         self.label_10.setText(_translate("tenshi", "Moment of Inertia"))
         self.label_14.setText(_translate("tenshi", "Element Type"))
         self.label_9.setText(_translate("tenshi", "Modulus of Elasticity"))
+        self.label_11.setText(_translate("tenshi", "Cross Section Area"))
+        self.label_114.setText(_translate("tenshi", "m²"))
         self.elementtype.setItemText(0, _translate("tenshi", "Beam"))
         self.elementtype.setItemText(1, _translate("tenshi", "Truss"))
-        self.label_11.setText(_translate("tenshi", "Cross Section Area"))
+        self.label_115.setText(_translate("tenshi", "GPa"))
+        self.label_116.setText(_translate("tenshi", "m⁴"))
         self.label_8.setText(_translate("tenshi", "Material Information"))
         self.beam_apply.setText(_translate("tenshi", "Apply"))
         self.beam_remove.setText(_translate("tenshi", "Remove"))
@@ -2290,8 +2355,10 @@ class Ui_tenshi(QWidget):
         self.node_list.setItemText(0, _translate("tenshi", "Node 1"))
         self.node_plus.setText(_translate("tenshi", "+"))
         self.label_29.setText(_translate("tenshi", "Coordinates"))
-        self.label_31.setText(_translate("tenshi", "Y"))
         self.label_30.setText(_translate("tenshi", "X"))
+        self.label_31.setText(_translate("tenshi", "Y"))
+        self.label_129.setText(_translate("tenshi", "m"))
+        self.label_130.setText(_translate("tenshi", "m"))
         self.label_17.setText(_translate("tenshi", "Add after node:"))
         self.label_43.setText(_translate("tenshi", "ID"))
         self.node_apply.setText(_translate("tenshi", "Apply"))
@@ -2299,132 +2366,197 @@ class Ui_tenshi(QWidget):
         self.label_25.setText(_translate("tenshi", "Supports"))
         self.support_list.setItemText(0, _translate("tenshi", "Support 1"))
         self.support_plus.setText(_translate("tenshi", "+"))
-        self.support_roll.setText(_translate("tenshi", "Roll"))
-        self.support_hinged.setText(_translate("tenshi", "Hinged"))
-        self.support_fixed.setText(_translate("tenshi", "Fixed"))
-        self.label_26.setText(_translate("tenshi", "Position"))
         self.label_27.setText(_translate("tenshi", "Angle"))
+        self.label_26.setText(_translate("tenshi", "Position (ID)"))
+        self.label_73.setText(_translate("tenshi", "K"))
+        self.spring_k.setText(_translate("tenshi", "1"))
+        self.label_71.setText(_translate("tenshi", "Translation"))
+        self.label_127.setText(_translate("tenshi", "N/m"))
+        self.spring_translation.setText(_translate("tenshi", "y"))
+        self.label_113.setText(_translate("tenshi", "°"))
+        self.support_angle.setText(_translate("tenshi", "0"))
+        self.support_internal_hinge.setText(_translate("tenshi", "Internal Hinge"))
+        self.support_roll.setText(_translate("tenshi", "Roll"))
+        self.support_fixed.setText(_translate("tenshi", "Fixed"))
+        self.support_hinged.setText(_translate("tenshi", "Hinged"))
+        self.support_spring.setText(_translate("tenshi", "Spring"))
         self.support_apply.setText(_translate("tenshi", "Apply"))
         self.support_remove.setText(_translate("tenshi", "Remove"))
-        self.label_28.setText(_translate("tenshi", "Loads"))
+        self.label_28.setText(_translate("tenshi", "Point Loads"))
         self.load_list.setItemText(0, _translate("tenshi", "Load 1"))
         self.load_plus.setText(_translate("tenshi", "+"))
-        self.label_36.setText(_translate("tenshi", "Position"))
         self.label_32.setText(_translate("tenshi", "Y Intensity"))
+        self.label_36.setText(_translate("tenshi", "Position (ID)"))
         self.label_33.setText(_translate("tenshi", "X Intensity"))
+        self.load_moment.setText(_translate("tenshi", "0"))
+        self.load_x.setText(_translate("tenshi", "0"))
+        self.label_86.setText(_translate("tenshi", "N"))
+        self.label_89.setText(_translate("tenshi", "Nm"))
         self.label_34.setText(_translate("tenshi", "Angle"))
+        self.load_angle.setText(_translate("tenshi", "0"))
+        self.load_y.setText(_translate("tenshi", "0"))
+        self.label_87.setText(_translate("tenshi", "N"))
         self.label_35.setText(_translate("tenshi", "Moment"))
+        self.label_88.setText(_translate("tenshi", "°"))
         self.load_apply.setText(_translate("tenshi", "Apply"))
         self.load_remove.setText(_translate("tenshi", "Remove"))
         self.label_37.setText(_translate("tenshi", "Distributed Loads"))
         self.qload_list.setItemText(0, _translate("tenshi", "Load 1"))
         self.qload_plus.setText(_translate("tenshi", "+"))
-        self.label_38.setText(_translate("tenshi", "Position"))
         self.label_39.setText(_translate("tenshi", "Initial Intensity"))
+        self.qload_initial.setText(_translate("tenshi", "0"))
         self.label_40.setText(_translate("tenshi", "Final Intensity"))
+        self.label_38.setText(_translate("tenshi", "Position (ID)"))
+        self.qload_final.setText(_translate("tenshi", "0"))
+        self.label_90.setText(_translate("tenshi", "N"))
+        self.label_91.setText(_translate("tenshi", "N"))
         self.qload_apply.setText(_translate("tenshi", "Apply"))
         self.qload_remove.setText(_translate("tenshi", "Remove"))
-        self.label_44.setText(_translate("tenshi", "Rectangular Sub-Area"))
-        self.rect_list.setItemText(0, _translate("tenshi", "Rect. 1"))
+        self.label_44.setText(_translate("tenshi", "Rectangular Subarea"))
+        self.rect_list.setItemText(0, _translate("tenshi", "Ret. 1"))
         self.rect_plus.setText(_translate("tenshi", "+"))
-        self.rect_visualize.setText(_translate("tenshi", "Highlight Sub-Area"))
-        self.label_49.setText(_translate("tenshi", "Vertex Coordinates"))
-        self.label_50.setText(_translate("tenshi", "Upper Left"))
+        self.rect_visualize.setText(_translate("tenshi", "Highlight Subarea"))
         self.label_45.setText(_translate("tenshi", "X"))
-        self.label_46.setText(_translate("tenshi", "Y"))
-        self.label_51.setText(_translate("tenshi", "Down Right"))
-        self.label_47.setText(_translate("tenshi", "X"))
         self.label_48.setText(_translate("tenshi", "Y"))
+        self.label_46.setText(_translate("tenshi", "Y"))
+        self.label_47.setText(_translate("tenshi", "X"))
+        self.label_131.setText(_translate("tenshi", "m"))
+        self.label_132.setText(_translate("tenshi", "m"))
+        self.label_133.setText(_translate("tenshi", "m"))
+        self.label_134.setText(_translate("tenshi", "m"))
+        self.label_51.setText(_translate("tenshi", "Down Right"))
+        self.label_49.setText(_translate("tenshi", "Vertices Coordinates"))
+        self.label_50.setText(_translate("tenshi", "Up Left"))
         self.rect_apply.setText(_translate("tenshi", "Apply"))
         self.rect_remove.setText(_translate("tenshi", "Remove"))
-        self.label_52.setText(_translate("tenshi", "Circular Sub-Area"))
-        self.circle_list.setItemText(0, _translate("tenshi", "Arc 1"))
+        self.label_52.setText(_translate("tenshi", "Circular Subarea"))
+        self.circle_list.setItemText(0, _translate("tenshi", "Cir. 1"))
         self.circle_plus.setText(_translate("tenshi", "+"))
-        self.circle_visualize.setText(_translate("tenshi", "Highlight Sub-Area"))
-        self.label_53.setText(_translate("tenshi", "Center Coordinates"))
-        self.label_54.setText(_translate("tenshi", "X"))
-        self.label_55.setText(_translate("tenshi", "Y"))
+        self.circle_visualize.setText(_translate("tenshi", "Highlight Subarea"))
         self.label_56.setText(_translate("tenshi", "Radius"))
+        self.label_55.setText(_translate("tenshi", "Y"))
+        self.label_54.setText(_translate("tenshi", "X"))
         self.label_57.setText(_translate("tenshi", "Initial Angle"))
+        self.label_57.setText("Angle (bisectrix)")
         self.label_58.setText(_translate("tenshi", "Final Angle"))
+        self.label_135.setText(_translate("tenshi", "m"))
+        self.label_136.setText(_translate("tenshi", "m"))
+        self.label_53.setText(_translate("tenshi", "Center Coordinates"))
+        self.label_92.setText(_translate("tenshi", "m"))
+        self.label_93.setText(_translate("tenshi", "°"))
+        self.label_94.setText(_translate("tenshi", "°"))
         self.circle_apply.setText(_translate("tenshi", "Apply"))
         self.circle_remove.setText(_translate("tenshi", "Remove"))
-        self.label_70.setText(_translate("tenshi", "Normal Tension:"))
-        self.tncalculate.setText(_translate("tenshi", "Calculate"))
-        self.label_67.setText(_translate("tenshi", "Normal Force"))
-        self.label_66.setText(_translate("tenshi", "Normal Tension"))
-        self.label_68.setText(_translate("tenshi", "Y Moment"))
-        self.label_69.setText(_translate("tenshi", "Z Moment"))
-        self.label_72.setText(_translate("tenshi", "Neutral Line:"))
-        self.label_65.setText(_translate("tenshi", "Q (Centroid)"))
-        self.label_63.setText(_translate("tenshi", "Y Moment of Inertia (Centroid)"))
+        self.label_59.setText(_translate("tenshi", "Data/Results"))
+        self.label_95.setText(_translate("tenshi", "m²"))
+        self.label_96.setText(_translate("tenshi", "m⁴"))
+        self.label_97.setText(_translate("tenshi", "m⁴"))
+        self.label_98.setText(_translate("tenshi", "m³"))
+        self.label_99.setText(_translate("tenshi", "m³"))
+        self.label_60.setText(_translate("tenshi", "Z Static Moment (Origin)"))
         self.label_61.setText(_translate("tenshi", "Y Static Moment (Origin)"))
+        self.label_62.setText(_translate("tenshi", "Z Moment of Inertia (Centroid)"))
+        self.label_63.setText(_translate("tenshi", "Y Moment of Inertia (Centroid)"))
         self.label_64.setText(_translate("tenshi", "Total Area"))
-        self.label_62.setText(_translate("tenshi", "X Moment of Inertia (Centroid)"))
-        self.label_60.setText(_translate("tenshi", "X Static Moment (Origin)"))
-        self.label_59.setText(_translate("tenshi", "Results"))
-        self.reset_st.setText(_translate("tenshi", "Reset Cross Section"))
-        self.label_74.setText(_translate("tenshi", "Shear Tension and Flux"))
+        self.label_66.setText(_translate("tenshi", "Normal Stress"))
+        self.label_69.setText(_translate("tenshi", "Z Moment"))
+        self.specify_y.setText(_translate("tenshi", "Specify Y"))
+        self.checkBox.setText(_translate("tenshi", "Add to PDF"))
+        self.specify_z.setText(_translate("tenshi", "Specify Z"))
+        self.label_68.setText(_translate("tenshi", "Y Moment"))
+        self.label_67.setText(_translate("tenshi", "Normal Force"))
+        self.label_100.setText(_translate("tenshi", "N"))
+        self.label_101.setText(_translate("tenshi", "Nm"))
+        self.label_102.setText(_translate("tenshi", "Nm"))
+        self.label_103.setText(_translate("tenshi", "m"))
+        self.label_104.setText(_translate("tenshi", "m"))
+        self.label_105.setText(_translate("tenshi", "Pa"))
+        self.label_106.setText(_translate("tenshi", "m"))
+        self.label_70.setText(_translate("tenshi", "Normal Stress:"))
+        self.label_72.setText(_translate("tenshi", "Neutral Line:"))
+        self.tncalculate.setText(_translate("tenshi", "Calculate"))
+        self.label_74.setText(_translate("tenshi", "Shear Stress and Flow"))
         self.tfosbox.setItemText(0, _translate("tenshi", "Force"))
         self.tfosbox.setItemText(1, _translate("tenshi", "Spacing"))
         self.label_75.setText(_translate("tenshi", "Shear Force"))
-        self.label_80.setText(_translate("tenshi", "Shear Flux:"))
-        self.label_78.setText(_translate("tenshi", "Shear Tension:"))
+        self.label_41.setText(_translate("tenshi", "Cut Height"))
+        self.tscalculate.setText(_translate("tenshi", "Calculate"))
         self.label_77.setText(_translate("tenshi", "Thickness (t)"))
         self.label_76.setText(_translate("tenshi", "Contact Areas"))
-        self.tscalculate.setText(_translate("tenshi", "Calculate"))
-        self.pushButton_6.setToolTip(_translate("tenshi", "Add distributed loads"))
-        self.toolButton_10.setToolTip(_translate("tenshi", "Add structure element"))
-        self.toolButton_5.setToolTip(_translate("tenshi", "Add loads"))
-        self.label.setText(_translate("tenshi", "Structure"))
-        self.pushButton_4.setToolTip(_translate("tenshi", "Add supports"))
-        self.pushButton_3.setToolTip(_translate("tenshi", "Add node"))
-        self.label_2.setText(_translate("tenshi", "Cross Section"))
-        self.pushButton_7.setToolTip(_translate("tenshi", "Add rectangles"))
-        self.pushButton_8.setToolTip(_translate("tenshi", "Add arcs"))
-        self.pushButton_9.setToolTip(_translate("tenshi", "Results"))
-        self.show_supports.setToolTip(_translate("tenshi", "Visualize support reactions"))
-        self.show_sec.setToolTip(_translate("tenshi", "Visualize cross section"))
-        self.show_displacement.setToolTip(_translate("tenshi", "Visualize displacement"))
-        self.show_moment.setToolTip(_translate("tenshi", "Visualize bending moment"))
-        self.show_normal.setToolTip(_translate("tenshi", "Visualize normal force"))
-        self.show_structure.setToolTip(_translate("tenshi", "Visualize structure"))
-        self.show_shear.setToolTip(_translate("tenshi", "Visualize shear force"))
-        self.label_41.setText(_translate("tenshi", "Drawings and Diagrams"))
+        self.label_107.setText(_translate("tenshi", "N"))
+        self.label_108.setText(_translate("tenshi", "m"))
+        self.label_109.setText(_translate("tenshi", "m"))
+        self.checkBox_2.setText(_translate("tenshi", "Add to PDF"))
+        self.label_65.setText(_translate("tenshi", "Q:"))
+        self.label_78.setText(_translate("tenshi", "Shear Stress:"))
+        self.label_80.setText(_translate("tenshi", "Shear Flow:"))
+        self.label_110.setText(_translate("tenshi", "m³"))
+        self.label_111.setText(_translate("tenshi", "Pa"))
+        self.label_112.setText(_translate("tenshi", "N/m"))
+        self.label_12.setText(_translate("tenshi", "Mohr's Cricle"))
+        self.radio_plane.setText(_translate("tenshi", "Plane State"))
+        self.radio_triple.setText(_translate("tenshi", "Triple State"))
+        self.label_18.setText(_translate("tenshi", "τxy"))
+        self.label_15.setText(_translate("tenshi", "σx"))
+        self.label_21.setText(_translate("tenshi", "τyz"))
+        self.mohr_apply.setText(_translate("tenshi", "Apply"))
+        self.label_20.setText(_translate("tenshi", "τxz"))
+        self.label_19.setText(_translate("tenshi", "σz"))
+        self.label_16.setText(_translate("tenshi", "σy"))
+        self.label_117.setText(_translate("tenshi", "Pa"))
+        self.label_118.setText(_translate("tenshi", "Pa"))
+        self.label_119.setText(_translate("tenshi", "Pa"))
+        self.label_120.setText(_translate("tenshi", "Pa"))
+        self.label_121.setText(_translate("tenshi", "Pa"))
+        self.label_122.setText(_translate("tenshi", "Pa"))
+        self.label_22.setText(_translate("tenshi", "Mouse Precision (Decimals)"))
+        self.int_plot.setText(_translate("tenshi", "Interactive Graph"))
+        self.push_to_talk.setToolTip(_translate("tenshi", "Utilize voice commands"))
+        self.push_to_talk.setShortcut(_translate("tenshi", "V"))
+        self.label_23.setText(_translate("tenshi", "X"))
+        self.label_24.setText(_translate("tenshi", "Y"))
+        self.deadzone_x.setText(_translate("tenshi", "0"))
+        self.deadzone_y.setText(_translate("tenshi", "0"))
         self.menuOp_es.setTitle(_translate("tenshi", "Options"))
         self.menuResetar.setTitle(_translate("tenshi", "Reset..."))
         self.menuFonte.setTitle(_translate("tenshi", "Font..."))
-        self.menuSalvar_e_Carregar.setTitle(_translate("tenshi", "Save and Load"))
-        self.menuGerar_Explica_es.setTitle(_translate("tenshi", "Generate Resolution"))
-        self.save.setText(_translate("tenshi", "Save Structure"))
-        self.load_button.setText(_translate("tenshi", "Load Structure"))
+        self.translate_menu.setTitle(_translate("tenshi", "Translate..."))
+        self.menuMudar_Temas.setTitle(_translate("tenshi", "Change Background"))
+        self.menuSalvar_e_Carregar.setTitle(_translate("tenshi", "Save and Loads"))
+        self.menuGerar_Explica_es.setTitle(_translate("tenshi", "Generate PDF"))
+        self.save.setText(_translate("tenshi", "Save All"))
+        self.load_button.setText(_translate("tenshi", "Load"))
         self.howToUseButton.setText(_translate("tenshi", "How to Use"))
         self.solvestatic.setText(_translate("tenshi", "Structure"))
         self.solveresist.setText(_translate("tenshi", "Cross Section"))
-        self.resetloads.setText(_translate("tenshi", "Loads"))
+        self.resetloads.setText(_translate("tenshi", "Stress"))
         self.resetall.setText(_translate("tenshi", "Elements"))
         self.undo.setText(_translate("tenshi", "Previous Action"))
         self.undo.setShortcut(_translate("tenshi", "Ctrl+Z"))
         self.fontstructure.setText(_translate("tenshi", "Structure"))
         self.fontequations.setText(_translate("tenshi", "Equations"))
-        self.translate_menu.setTitle(_translate("tenshi", "Translate..."))
         self.translate_pt.setText(_translate("tenshi", "Português"))
         self.translate_en.setText(_translate("tenshi", "English"))
         self.translate_nihongo.setText(_translate("tenshi", "日本語"))
-        self.radio_plane.setText(_translate("tenshi", "Plane State"))
-        self.radio_triple.setText(_translate("tenshi", "Triple State"))
+        self.reset_st.setText(_translate("tenshi", "Cross Section"))
+        self.font_interface.setText(_translate("tenshi", "Interface"))
+        self.action.setText(_translate("tenshi", "Load Cross Section"))
+        self.load_mohr.setText(_translate("tenshi", "Load Mohr's Circle"))
         self.solvermohr.setText(_translate("tenshi", "Mohr's Circle"))
-        self.int_plot.setText(_translate("tenshi", "Interactive Plot"))
-        self.label_22.setText(_translate("tenshi", "Deadzone"))
-        self.show_mohr.setToolTip(_translate("tenshi", "Visualize Mohr's Circle"))
+        self.light_theme_button.setText(_translate("tenshi", "Light Theme"))
+        self.dark_theme_button.setText(_translate("tenshi", "Dark Theme"))
+        self.aboutButton.setText(_translate("tenshi", "About"))
+
         self.load_structure_str = "Load Structure"
         self.strucutre_type_str = "Structure(*.pkl)"
+        self.save_strucutre_text = "Structure"
+        self.save_strucutre_title = "Save Structure"
         self.static_warning_str = "Only available for static structures (which contain a roll and hinged supports or a fixed support only)."
         self.warning_str = "More information is required"
         self.warning_title = "Error"
         self.geometry_change_title = "Warning"
         self.geometry_change_warning = "If you make changes to the geometry, calculations previously added to the PDF will be lost. Continue?"
-        self.pdf_generated_title = "Ready!"
+        self.pdf_generated_title = "Done!"
         self.pdf_generated_str = "PDF successfully generated"
         self.shear_warning_title = "Unavailable"
         self.shear_warning_str = "Cross section wasn't drawn or contains circular sectors."
@@ -2435,6 +2567,17 @@ class Ui_tenshi(QWidget):
         self.rect_values_error = "Invalid Values. Values were likely inverted."
         self.pdf_title = "Generate resolution"
         self.pdf_text = "resolution"
+        self.howtouse_title = "How to Use"
+        self.howtouse_text = ("User Manual: link aqui\n"
+                              "Utilization Examples: link aqui")
+        self.about_title = "About"
+        self.about_text = ("Developed as a Scientific Initiation work at EESC-USP (Brazil) in 2020.\n"
+                           "\n"
+                           "Acknowledgements:\n"
+                           "Eng. Me. Henrique Borges Garcia\n"
+                           "Prof. Me. Gustavo Lahr\n"
+                           "Prof. Dr. Glauco Augusto de Paula Caurin\n"
+                           "Fundação de Apoio à Física e à Química\n")
 
     def beam(self):
         try:
@@ -2720,10 +2863,8 @@ class Ui_tenshi(QWidget):
         functions.n.clear()
 
     def save_structure(self):
-        if self.translate_menu.title() == "Traduzir...":
-            file, ok = QFileDialog.getSaveFileName(self, "Salvar Estrutura", "Estrutura", "Estrutura (*.pkl)")
-        else:
-            file, ok = QFileDialog.getSaveFileName(self, "Save Structure", "Structure", "Structure (*.pkl)")
+        file, ok = QFileDialog.getSaveFileName(self, self.save_strucutre_title,
+                                               self.save_strucutre_text, self.strucutre_type_str)
         if ok:
             with open(f'{file}', 'wb') as f:
                 pickle.dump((self.ss, self.sig, self.mohr), f)
@@ -3241,7 +3382,6 @@ class Ui_tenshi(QWidget):
         self.label_58.setHidden(True)
         self.label_94.setHidden(True)
         self.circle_af.setHidden(True)
-        self.label_57.setText("Ângulo (bissetriz)")
         self.support_internal_hinge.setHidden(True)
         self.support_spring.setHidden(True)
 
@@ -3259,17 +3399,10 @@ class Ui_tenshi(QWidget):
             self.MplWidget.interactive_mode(1)
 
     def howToUse(self):
-        QMessageBox.about(self, "Sobre", "Manual de utilização: link aqui\n"
-                                         "Exemplos de utilização: link aqui")
+        QMessageBox.about(self, self.howtouse_title, self.howtouse_text)
 
     def aboutDialog(self):
-        QMessageBox.about(self, "Sobre", "Desenvolvido como trabalho de Iniciação Científica na EESC-USP em 2020.\n"
-                                         "\n"
-                                         "Agradecimentos:\n"
-                                         "Eng. Me. Henrique Borges Garcia\n"
-                                         "Prof. Me. Gustavo Lahr\n"
-                                         "Prof. Dr. Glauco Augusto de Paula Caurin\n"
-                                         "Fundação de Apoio à Física e à Química\n")
+        QMessageBox.about(self, self.about_title, self.about_text)
 
 
 if __name__ == "__main__":
