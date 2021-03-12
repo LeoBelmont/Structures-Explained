@@ -1,12 +1,12 @@
 from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 import matplotlib.backends.backend_qt5 as qt5agg
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
-# import matplotlib
-# matplotlib.use('Qt5Agg')
+import numpy as np
 
 
 class MplWidget(QWidget):
@@ -32,6 +32,7 @@ class MplWidget(QWidget):
 
         self.setLayout(self.vertical_layout)
         plt.tight_layout()
+        self.setGrid()
 
     def toolbar_buttons(self):
         backend_bases.NavigationToolbar2.toolitems = (
@@ -43,12 +44,13 @@ class MplWidget(QWidget):
             ('Save', 'Save the figure', 'filesave', 'save_figure'),
         )
 
-    def plot(self, new_figure=None):
+    def plot(self, new_figure=None, hasGrid=True):
 
         if not new_figure:
             self.canvas.figure.clear()
             self.canvas.figure.add_subplot(111)
             self.set_background_alpha()
+            self.setGrid(hasGrid)
         else:
             self.canvas.figure = new_figure
 
@@ -83,3 +85,30 @@ class MplWidget(QWidget):
         for i in range(len(ax)):
             ax[i].relim()
             ax[i].autoscale_view()
+
+    def setGrid(self, hasGrid=True):
+        ax = self.canvas.figure.get_axes()
+        if hasGrid:
+            for i in range(len(ax)):
+                ax[i].grid(hasGrid, linestyle="--", color=(29/255,40/255,51/255))
+        else:
+            for i in range(len(ax)):
+                ax[i].grid(False)
+
+    def setXTicks(self, xInterval):
+        if int(xInterval) in (0, 1, 2):
+            ax = self.canvas.figure.get_axes()
+            for i in range(len(ax)):
+                start, end = ax[i].get_xlim()
+                ax[i].xaxis.set_ticks(np.arange(start, end, (1*10**(-int(xInterval)))))
+                ax[i].xaxis.set_major_formatter(ticker.FormatStrFormatter(f'%.{xInterval}f'))
+            self.canvas.draw()
+
+    def setYTicks(self, yInterval):
+        if int(yInterval) in (0, 1, 2):
+            ax = self.canvas.figure.get_axes()
+            for i in range(len(ax)):
+                start, end = ax[i].get_xlim()
+                ax[i].yaxis.set_ticks(np.arange(start, end, (1*10**(-int(yInterval)))))
+                ax[i].yaxis.set_major_formatter(ticker.FormatStrFormatter(f'%.{yInterval}f'))
+            self.canvas.draw()

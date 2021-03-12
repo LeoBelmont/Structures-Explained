@@ -1,7 +1,8 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
 from PyQt5.QtWidgets import *
 from anastruct import SystemElements
 from sympy.parsing.sympy_parser import parse_expr
+from decimal import Decimal
 import pickle
 import functions
 from sympy import Symbol
@@ -22,6 +23,8 @@ import loadprompt
 import sr
 import sys
 import qdarkstyle
+import webbrowser
+import numpy as np
 
 
 class Ui_tenshi(QWidget):
@@ -64,13 +67,20 @@ class Ui_tenshi(QWidget):
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout_11 = QtWidgets.QGridLayout(self.centralwidget)
         self.gridLayout_11.setObjectName("gridLayout_11")
+        self.MplWidget = MplWidget(self.centralwidget)
+        self.MplWidget.setMinimumSize(QtCore.QSize(673, 0))
+        self.MplWidget.setObjectName("MplWidget")
+        self.gridLayout_11.addWidget(self.MplWidget, 0, 3, 1, 1)
+        self.WebView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
+        self.WebView.setObjectName("WebView")
+        self.gridLayout_11.addWidget(self.WebView, 0, 4, 1, 1)
         self.toolBox = QtWidgets.QToolBox(self.centralwidget)
         self.toolBox.setMinimumSize(QtCore.QSize(105, 0))
         self.toolBox.setMaximumSize(QtCore.QSize(105, 16777215))
         self.toolBox.setAutoFillBackground(True)
         self.toolBox.setObjectName("toolBox")
         self.page_9 = QtWidgets.QWidget()
-        self.page_9.setGeometry(QtCore.QRect(0, 0, 86, 898))
+        self.page_9.setGeometry(QtCore.QRect(0, -312, 86, 898))
         self.page_9.setObjectName("page_9")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.page_9)
         self.gridLayout_3.setObjectName("gridLayout_3")
@@ -397,6 +407,11 @@ class Ui_tenshi(QWidget):
         self.gridLayout_5.addWidget(self.line_15, 0, 0, 1, 1)
         self.toolBox.addItem(self.page_11, "")
         self.gridLayout_11.addWidget(self.toolBox, 0, 0, 1, 1)
+        self.line = QtWidgets.QFrame(self.centralwidget)
+        self.line.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.gridLayout_11.addWidget(self.line, 0, 2, 1, 1)
         self.verticalLayout_9 = QtWidgets.QVBoxLayout()
         self.verticalLayout_9.setObjectName("verticalLayout_9")
         self.stackedWidget = QtWidgets.QStackedWidget(self.centralwidget)
@@ -1146,81 +1161,95 @@ class Ui_tenshi(QWidget):
         self.page_8.setObjectName("page_8")
         self.gridLayout_28 = QtWidgets.QGridLayout(self.page_8)
         self.gridLayout_28.setObjectName("gridLayout_28")
-        self.label_59 = QtWidgets.QLabel(self.page_8)
-        self.label_59.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.label_59.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_59.setObjectName("label_59")
-        self.gridLayout_28.addWidget(self.label_59, 0, 0, 1, 1)
         self.frame_16 = QtWidgets.QFrame(self.page_8)
         self.frame_16.setFrameShape(QtWidgets.QFrame.Box)
         self.frame_16.setFrameShadow(QtWidgets.QFrame.Raised)
         self.frame_16.setObjectName("frame_16")
         self.gridLayout_25 = QtWidgets.QGridLayout(self.frame_16)
         self.gridLayout_25.setObjectName("gridLayout_25")
-        self.mix = QtWidgets.QLineEdit(self.frame_16)
-        self.mix.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.mix.setObjectName("mix")
-        self.gridLayout_25.addWidget(self.mix, 5, 0, 1, 1)
-        self.msy = QtWidgets.QLineEdit(self.frame_16)
-        self.msy.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.msy.setObjectName("msy")
-        self.gridLayout_25.addWidget(self.msy, 3, 0, 1, 1)
         self.at = QtWidgets.QLineEdit(self.frame_16)
         self.at.setFrame(True)
         self.at.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.at.setObjectName("at")
-        self.gridLayout_25.addWidget(self.at, 9, 0, 1, 1)
-        self.miy = QtWidgets.QLineEdit(self.frame_16)
-        self.miy.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.miy.setObjectName("miy")
-        self.gridLayout_25.addWidget(self.miy, 7, 0, 1, 1)
-        self.msx = QtWidgets.QLineEdit(self.frame_16)
-        self.msx.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.msx.setObjectName("msx")
-        self.gridLayout_25.addWidget(self.msx, 1, 0, 1, 1)
-        self.label_95 = QtWidgets.QLabel(self.frame_16)
-        self.label_95.setObjectName("label_95")
-        self.gridLayout_25.addWidget(self.label_95, 9, 1, 1, 1)
-        self.label_96 = QtWidgets.QLabel(self.frame_16)
-        self.label_96.setObjectName("label_96")
-        self.gridLayout_25.addWidget(self.label_96, 7, 1, 1, 1)
-        self.label_97 = QtWidgets.QLabel(self.frame_16)
-        self.label_97.setObjectName("label_97")
-        self.gridLayout_25.addWidget(self.label_97, 5, 1, 1, 1)
-        self.label_98 = QtWidgets.QLabel(self.frame_16)
-        self.label_98.setObjectName("label_98")
-        self.gridLayout_25.addWidget(self.label_98, 3, 1, 1, 1)
-        self.label_99 = QtWidgets.QLabel(self.frame_16)
-        self.label_99.setObjectName("label_99")
-        self.gridLayout_25.addWidget(self.label_99, 1, 1, 1, 1)
-        self.label_60 = QtWidgets.QLabel(self.frame_16)
-        self.label_60.setAlignment(QtCore.Qt.AlignCenter)
-        self.label_60.setWordWrap(True)
-        self.label_60.setObjectName("label_60")
-        self.gridLayout_25.addWidget(self.label_60, 0, 0, 1, 2)
+        self.gridLayout_25.addWidget(self.at, 10, 0, 1, 1)
         self.label_61 = QtWidgets.QLabel(self.frame_16)
         self.label_61.setAlignment(QtCore.Qt.AlignCenter)
         self.label_61.setWordWrap(True)
         self.label_61.setObjectName("label_61")
-        self.gridLayout_25.addWidget(self.label_61, 2, 0, 1, 2)
+        self.gridLayout_25.addWidget(self.label_61, 3, 0, 1, 2)
         self.label_62 = QtWidgets.QLabel(self.frame_16)
         self.label_62.setAlignment(QtCore.Qt.AlignCenter)
         self.label_62.setWordWrap(True)
         self.label_62.setObjectName("label_62")
-        self.gridLayout_25.addWidget(self.label_62, 4, 0, 1, 2)
+        self.gridLayout_25.addWidget(self.label_62, 5, 0, 1, 2)
         self.label_63 = QtWidgets.QLabel(self.frame_16)
         self.label_63.setAlignment(QtCore.Qt.AlignCenter)
         self.label_63.setWordWrap(True)
         self.label_63.setObjectName("label_63")
-        self.gridLayout_25.addWidget(self.label_63, 6, 0, 1, 2)
+        self.gridLayout_25.addWidget(self.label_63, 7, 0, 1, 2)
         self.label_64 = QtWidgets.QLabel(self.frame_16)
         self.label_64.setAlignment(QtCore.Qt.AlignCenter)
         self.label_64.setWordWrap(True)
         self.label_64.setObjectName("label_64")
-        self.gridLayout_25.addWidget(self.label_64, 8, 0, 1, 2)
-        self.gridLayout_28.addWidget(self.frame_16, 1, 0, 1, 1)
+        self.gridLayout_25.addWidget(self.label_64, 9, 0, 1, 2)
+        self.msy = QtWidgets.QLineEdit(self.frame_16)
+        self.msy.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        self.msy.setObjectName("msy")
+        self.gridLayout_25.addWidget(self.msy, 4, 0, 1, 1)
+        self.msx = QtWidgets.QLineEdit(self.frame_16)
+        self.msx.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        self.msx.setObjectName("msx")
+        self.gridLayout_25.addWidget(self.msx, 2, 0, 1, 1)
+        self.label_95 = QtWidgets.QLabel(self.frame_16)
+        self.label_95.setObjectName("label_95")
+        self.gridLayout_25.addWidget(self.label_95, 10, 1, 1, 1)
+        self.label_98 = QtWidgets.QLabel(self.frame_16)
+        self.label_98.setObjectName("label_98")
+        self.gridLayout_25.addWidget(self.label_98, 4, 1, 1, 1)
+        self.mix = QtWidgets.QLineEdit(self.frame_16)
+        self.mix.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        self.mix.setObjectName("mix")
+        self.gridLayout_25.addWidget(self.mix, 6, 0, 1, 1)
+        self.label_60 = QtWidgets.QLabel(self.frame_16)
+        self.label_60.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_60.setWordWrap(True)
+        self.label_60.setObjectName("label_60")
+        self.gridLayout_25.addWidget(self.label_60, 1, 0, 1, 2)
+        self.miy = QtWidgets.QLineEdit(self.frame_16)
+        self.miy.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        self.miy.setObjectName("miy")
+        self.gridLayout_25.addWidget(self.miy, 8, 0, 1, 1)
+        self.label_96 = QtWidgets.QLabel(self.frame_16)
+        self.label_96.setObjectName("label_96")
+        self.gridLayout_25.addWidget(self.label_96, 8, 1, 1, 1)
+        self.label_97 = QtWidgets.QLabel(self.frame_16)
+        self.label_97.setObjectName("label_97")
+        self.gridLayout_25.addWidget(self.label_97, 6, 1, 1, 1)
+        self.label_99 = QtWidgets.QLabel(self.frame_16)
+        self.label_99.setObjectName("label_99")
+        self.gridLayout_25.addWidget(self.label_99, 2, 1, 1, 1)
+        self.gridLayout_28.addWidget(self.frame_16, 2, 0, 1, 1)
         spacerItem10 = QtWidgets.QSpacerItem(20, 243, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout_28.addItem(spacerItem10, 2, 0, 1, 1)
+        self.gridLayout_28.addItem(spacerItem10, 3, 0, 1, 1)
+        self.label_59 = QtWidgets.QLabel(self.page_8)
+        self.label_59.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.label_59.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_59.setObjectName("label_59")
+        self.gridLayout_28.addWidget(self.label_59, 0, 0, 1, 1)
+        self.frame = QtWidgets.QFrame(self.page_8)
+        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setObjectName("frame")
+        self.gridLayout_29 = QtWidgets.QGridLayout(self.frame)
+        self.gridLayout_29.setObjectName("gridLayout_29")
+        self.figureResultsButton = QtWidgets.QRadioButton(self.frame)
+        self.figureResultsButton.setChecked(True)
+        self.figureResultsButton.setObjectName("figureResultsButton")
+        self.gridLayout_29.addWidget(self.figureResultsButton, 0, 0, 1, 1)
+        self.insertDataButton = QtWidgets.QRadioButton(self.frame)
+        self.insertDataButton.setObjectName("insertDataButton")
+        self.gridLayout_29.addWidget(self.insertDataButton, 1, 0, 1, 1)
+        self.gridLayout_28.addWidget(self.frame, 1, 0, 1, 1)
         self.stackedWidget.addWidget(self.page_8)
         self.page_15 = QtWidgets.QWidget()
         self.page_15.setObjectName("page_15")
@@ -1559,6 +1588,10 @@ class Ui_tenshi(QWidget):
         self.int_plot.setChecked(True)
         self.int_plot.setObjectName("int_plot")
         self.horizontalLayout_2.addWidget(self.int_plot)
+        self.gridBox = QtWidgets.QCheckBox(self.frame_6)
+        self.gridBox.setChecked(True)
+        self.gridBox.setObjectName("gridBox")
+        self.horizontalLayout_2.addWidget(self.gridBox)
         spacerItem14 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem14)
         self.push_to_talk = QtWidgets.QToolButton(self.frame_6)
@@ -1589,41 +1622,43 @@ class Ui_tenshi(QWidget):
         self.label_24.setWordWrap(False)
         self.label_24.setObjectName("label_24")
         self.gridLayout_13.addWidget(self.label_24, 0, 1, 1, 1)
-        self.deadzone_x = QtWidgets.QLineEdit(self.frame_6)
-        self.deadzone_x.setMaximumSize(QtCore.QSize(16777215, 16777215))
-        self.deadzone_x.setAlignment(QtCore.Qt.AlignCenter)
+        self.deadzone_x = QtWidgets.QSpinBox(self.frame_6)
+        self.deadzone_x.setProperty("value", 1)
         self.deadzone_x.setObjectName("deadzone_x")
+        self.deadzone_x.setAlignment(QtCore.Qt.AlignCenter)
         self.gridLayout_13.addWidget(self.deadzone_x, 1, 0, 1, 1)
-        self.deadzone_y = QtWidgets.QLineEdit(self.frame_6)
-        self.deadzone_y.setAlignment(QtCore.Qt.AlignCenter)
+        self.deadzone_y = QtWidgets.QSpinBox(self.frame_6)
+        self.deadzone_y.setProperty("value", 1)
         self.deadzone_y.setObjectName("deadzone_y")
+        self.deadzone_y.setAlignment(QtCore.Qt.AlignCenter)
         self.gridLayout_13.addWidget(self.deadzone_y, 1, 1, 1, 1)
         self.gridLayout_15.addLayout(self.gridLayout_13, 2, 0, 1, 1)
         self.verticalLayout_9.addWidget(self.frame_6)
         self.gridLayout_11.addLayout(self.verticalLayout_9, 0, 1, 1, 1)
-        self.MplWidget = MplWidget(self.centralwidget)
-        self.MplWidget.setMinimumSize(QtCore.QSize(673, 0))
-        self.MplWidget.setObjectName("MplWidget")
-        self.gridLayout_11.addWidget(self.MplWidget, 0, 3, 1, 1)
-        self.line = QtWidgets.QFrame(self.centralwidget)
-        self.line.setFrameShape(QtWidgets.QFrame.VLine)
-        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line.setObjectName("line")
-        self.gridLayout_11.addWidget(self.line, 0, 2, 1, 1)
         tenshi.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(tenshi)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1054, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1070, 25))
         self.menubar.setObjectName("menubar")
         self.menuOp_es = QtWidgets.QMenu(self.menubar)
         self.menuOp_es.setObjectName("menuOp_es")
         self.menuResetar = QtWidgets.QMenu(self.menuOp_es)
         self.menuResetar.setObjectName("menuResetar")
+        self.menuSe_o_Transversal = QtWidgets.QMenu(self.menuResetar)
+        self.menuSe_o_Transversal.setObjectName("menuSe_o_Transversal")
+        self.menuEstrutura = QtWidgets.QMenu(self.menuResetar)
+        self.menuEstrutura.setObjectName("menuEstrutura")
         self.menuFonte = QtWidgets.QMenu(self.menuOp_es)
         self.menuFonte.setObjectName("menuFonte")
         self.translate_menu = QtWidgets.QMenu(self.menuOp_es)
         self.translate_menu.setObjectName("translate_menu")
         self.menuMudar_Temas = QtWidgets.QMenu(self.menuOp_es)
         self.menuMudar_Temas.setObjectName("menuMudar_Temas")
+        self.menuComo_utilizar = QtWidgets.QMenu(self.menuOp_es)
+        self.menuComo_utilizar.setObjectName("menuComo_utilizar")
+        self.menuManual = QtWidgets.QMenu(self.menuComo_utilizar)
+        self.menuManual.setObjectName("menuManual")
+        self.menuExemplos = QtWidgets.QMenu(self.menuComo_utilizar)
+        self.menuExemplos.setObjectName("menuExemplos")
         self.menuSalvar_e_Carregar = QtWidgets.QMenu(self.menubar)
         self.menuSalvar_e_Carregar.setObjectName("menuSalvar_e_Carregar")
         self.menuGerar_Explica_es = QtWidgets.QMenu(self.menubar)
@@ -1636,8 +1671,6 @@ class Ui_tenshi(QWidget):
         self.save.setObjectName("save")
         self.load_button = QtWidgets.QAction(tenshi)
         self.load_button.setObjectName("load_button")
-        self.howToUseButton = QtWidgets.QAction(tenshi)
-        self.howToUseButton.setObjectName("howToUseButton")
         self.solvestatic = QtWidgets.QAction(tenshi)
         self.solvestatic.setObjectName("solvestatic")
         self.solveresist = QtWidgets.QAction(tenshi)
@@ -1658,8 +1691,6 @@ class Ui_tenshi(QWidget):
         self.translate_en.setObjectName("translate_en")
         self.translate_nihongo = QtWidgets.QAction(tenshi)
         self.translate_nihongo.setObjectName("translate_nihongo")
-        self.reset_st = QtWidgets.QAction(tenshi)
-        self.reset_st.setObjectName("reset_st")
         self.font_interface = QtWidgets.QAction(tenshi)
         self.font_interface.setObjectName("font_interface")
         self.action = QtWidgets.QAction(tenshi)
@@ -1672,11 +1703,29 @@ class Ui_tenshi(QWidget):
         self.light_theme_button.setObjectName("light_theme_button")
         self.dark_theme_button = QtWidgets.QAction(tenshi)
         self.dark_theme_button.setObjectName("dark_theme_button")
-        self.menuResetar.addAction(self.resetloads)
-        self.menuResetar.addAction(self.resetall)
-        self.menuResetar.addAction(self.undo)
+        self.aboutButton = QtWidgets.QAction(tenshi)
+        self.aboutButton.setObjectName("aboutButton")
+        self.showManualButton = QtWidgets.QAction(tenshi)
+        self.showManualButton.setObjectName("showManualButton")
+        self.hideManualButton = QtWidgets.QAction(tenshi)
+        self.hideManualButton.setObjectName("hideManualButton")
+        self.actionP_gina_para_Download = QtWidgets.QAction(tenshi)
+        self.actionP_gina_para_Download.setObjectName("actionP_gina_para_Download")
+        self.showExamplesButton = QtWidgets.QAction(tenshi)
+        self.showExamplesButton.setObjectName("showExamplesButton")
+        self.hideExamplesButton = QtWidgets.QAction(tenshi)
+        self.hideExamplesButton.setObjectName("hideExamplesButton")
+        self.downloadPageButton = QtWidgets.QAction(tenshi)
+        self.downloadPageButton.setObjectName("downloadPageButton")
+        self.reset_cross_section = QtWidgets.QAction(tenshi)
+        self.reset_cross_section.setObjectName("reset_cross_section")
+        self.menuSe_o_Transversal.addAction(self.reset_cross_section)
+        self.menuEstrutura.addAction(self.undo)
+        self.menuEstrutura.addAction(self.resetloads)
+        self.menuEstrutura.addAction(self.resetall)
+        self.menuResetar.addAction(self.menuEstrutura.menuAction())
         self.menuResetar.addSeparator()
-        self.menuResetar.addAction(self.reset_st)
+        self.menuResetar.addAction(self.menuSe_o_Transversal.menuAction())
         self.menuFonte.addAction(self.font_interface)
         self.menuFonte.addAction(self.fontstructure)
         self.menuFonte.addAction(self.fontequations)
@@ -1685,13 +1734,18 @@ class Ui_tenshi(QWidget):
         self.translate_menu.addAction(self.translate_nihongo)
         self.menuMudar_Temas.addAction(self.light_theme_button)
         self.menuMudar_Temas.addAction(self.dark_theme_button)
-        self.aboutButton = QtWidgets.QAction(tenshi)
-        self.aboutButton.setObjectName("aboutButton")
+        self.menuManual.addAction(self.showManualButton)
+        self.menuManual.addAction(self.hideManualButton)
+        self.menuExemplos.addAction(self.showExamplesButton)
+        self.menuExemplos.addAction(self.hideExamplesButton)
+        self.menuComo_utilizar.addAction(self.menuManual.menuAction())
+        self.menuComo_utilizar.addAction(self.menuExemplos.menuAction())
+        self.menuComo_utilizar.addAction(self.downloadPageButton)
         self.menuOp_es.addAction(self.menuResetar.menuAction())
         self.menuOp_es.addAction(self.menuFonte.menuAction())
         self.menuOp_es.addAction(self.menuMudar_Temas.menuAction())
         self.menuOp_es.addAction(self.translate_menu.menuAction())
-        self.menuOp_es.addAction(self.howToUseButton)
+        self.menuOp_es.addAction(self.menuComo_utilizar.menuAction())
         self.menuOp_es.addAction(self.aboutButton)
         self.menuSalvar_e_Carregar.addAction(self.save)
         self.menuSalvar_e_Carregar.addAction(self.load_button)
@@ -1718,7 +1772,8 @@ class Ui_tenshi(QWidget):
         tenshi.setTabOrder(self.beam_A, self.beam_apply)
         tenshi.setTabOrder(self.beam_apply, self.beam_remove)
         tenshi.setTabOrder(self.beam_remove, self.int_plot)
-        tenshi.setTabOrder(self.int_plot, self.push_to_talk)
+        tenshi.setTabOrder(self.int_plot, self.gridBox)
+        tenshi.setTabOrder(self.gridBox, self.push_to_talk)
         tenshi.setTabOrder(self.push_to_talk, self.deadzone_x)
         tenshi.setTabOrder(self.deadzone_x, self.deadzone_y)
         tenshi.setTabOrder(self.deadzone_y, self.toolButton)
@@ -1788,7 +1843,9 @@ class Ui_tenshi(QWidget):
         tenshi.setTabOrder(self.circle_ai, self.circle_af)
         tenshi.setTabOrder(self.circle_af, self.circle_apply)
         tenshi.setTabOrder(self.circle_apply, self.circle_remove)
-        tenshi.setTabOrder(self.circle_remove, self.msx)
+        tenshi.setTabOrder(self.circle_remove, self.figureResultsButton)
+        tenshi.setTabOrder(self.figureResultsButton, self.insertDataButton)
+        tenshi.setTabOrder(self.insertDataButton, self.msx)
         tenshi.setTabOrder(self.msx, self.msy)
         tenshi.setTabOrder(self.msy, self.mix)
         tenshi.setTabOrder(self.mix, self.miy)
@@ -1854,6 +1911,7 @@ class Ui_tenshi(QWidget):
         self.load_pos.setValidator(QtGui.QIntValidator(1, 100))
         self.load_y.setValidator(QtGui.QDoubleValidator())
         self.load_x.setValidator(QtGui.QDoubleValidator())
+        self.load_angle.setValidator(QtGui.QDoubleValidator())
         self.load_moment.setValidator(QtGui.QDoubleValidator())
         self.qload_pos.setValidator(QtGui.QIntValidator(1, 100))
         self.qload_initial.setValidator(QtGui.QDoubleValidator())
@@ -1877,8 +1935,12 @@ class Ui_tenshi(QWidget):
         self.tcontact.setValidator(QtGui.QDoubleValidator())
         self.twidth.setValidator(QtGui.QDoubleValidator())
         self.tfos.setValidator(QtGui.QDoubleValidator())
-        self.deadzone_x.setValidator(QtGui.QIntValidator(0, 1000))
-        self.deadzone_y.setValidator(QtGui.QIntValidator(0, 1000))
+        self.sx.setValidator(QtGui.QDoubleValidator())
+        self.sy.setValidator(QtGui.QDoubleValidator())
+        self.sz.setValidator(QtGui.QDoubleValidator())
+        self.txy.setValidator(QtGui.QDoubleValidator())
+        self.txz.setValidator(QtGui.QDoubleValidator())
+        self.tyz.setValidator(QtGui.QDoubleValidator())
 
         self.toolButton.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(0))
         self.toolButton_3.clicked.connect(lambda: self.stackedWidget.setCurrentIndex(1))
@@ -1912,6 +1974,8 @@ class Ui_tenshi(QWidget):
         self.cs_y.setEnabled(False)
         self.cs_z.setEnabled(False)
         self.radio_plane.setChecked(True)
+        self.WebView.setHidden(True)
+        self.frame_16.setDisabled(True)
         self.switch_states_plane()
         self.change_interactive_mode()
         #self.fullscreen()
@@ -1945,6 +2009,8 @@ class Ui_tenshi(QWidget):
         self.tncalculate.clicked.connect(self.get_sigma_T)
         self.tscalculate.clicked.connect(self.get_cis)
 
+        self.figureResultsButton.clicked.connect(self.set_sigma)
+        self.insertDataButton.clicked.connect(self.insert_sigma)
         self.rect_list.currentIndexChanged.connect(self.change_table_rect)
         self.rect_plus.clicked.connect(self.add_rect_item)
         self.circle_plus.clicked.connect(self.add_cir_item)
@@ -1954,7 +2020,7 @@ class Ui_tenshi(QWidget):
         self.rect_remove.clicked.connect(self.remove_rectangle)
         self.circle_remove.clicked.connect(self.remove_circle)
         self.show_sec.clicked.connect(self.plot_sec)
-        self.reset_st.triggered.connect(self.transv_reset)
+        self.reset_cross_section.triggered.connect(self.transv_reset)
         self.specify_y.stateChanged.connect(self.cs_y_enabler)
         self.specify_z.stateChanged.connect(self.cs_z_enabler)
 
@@ -1977,12 +2043,19 @@ class Ui_tenshi(QWidget):
         self.MplWidget.canvas.mpl_connect('button_press_event', self.onclick)
         self.MplWidget.canvas.mpl_connect('button_release_event', self.on_release)
         self.int_plot.stateChanged.connect(self.change_interactive_mode)
+        self.gridBox.stateChanged.connect(self.replotGrid)
+        #self.deadzone_x.textEdited.connect(lambda: self.MplWidget.setXTicks(self.deadzone_x.text()))
+        #self.deadzone_y.textEdited.connect(lambda: self.MplWidget.setYTicks(self.deadzone_y.text()))
 
         self.push_to_talk.clicked.connect(self.listener)
         self.light_theme_button.triggered.connect(self.light_theme)
         self.dark_theme_button.triggered.connect(self.dark_theme)
         self.aboutButton.triggered.connect(self.aboutDialog)
-        self.howToUseButton.triggered.connect(self.howToUse)
+        self.showManualButton.triggered.connect(self.showManual)
+        self.showExamplesButton.triggered.connect(self.showExamples)
+        self.hideManualButton.triggered.connect(self.hideManual)
+        self.hideExamplesButton.triggered.connect(self.hideExamples)
+        self.downloadPageButton.triggered.connect(self.showDownloadPage)
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -2005,11 +2078,11 @@ class Ui_tenshi(QWidget):
         self.label_2.setText(_translate("tenshi", "Visualizar"))
         self.toolButton_5.setToolTip(_translate("tenshi", "Adicionar esforços pontuais"))
         self.toolBox.setItemText(self.toolBox.indexOf(self.page_9), _translate("tenshi", "Estrutura"))
-        self.toolButton_11.setText(_translate("tenshi", "Tensão e\n"
-                                                        "Fluxo de \n"
+        self.toolButton_11.setText(_translate("tenshi", "Tensão de \n"
                                                         "Cisalha-\n"
-                                                        "mento"))
-        self.toolButton_8.setToolTip(_translate("tenshi", "Adicionar setores circulares"))
+                                                        "mento\n"
+                                                        "e Fluxo"))
+        self.toolButton_8.setToolTip(_translate("tenshi", "Adicionar arcos"))
         self.toolButton_9.setToolTip(_translate("tenshi", "Dados / Resultados"))
         self.toolButton_9.setText(_translate("tenshi", "Dados \n"
                                                        "Gerais"))
@@ -2132,14 +2205,13 @@ class Ui_tenshi(QWidget):
         self.rect_apply.setText(_translate("tenshi", "Aplicar"))
         self.rect_remove.setText(_translate("tenshi", "Remover"))
         self.label_52.setText(_translate("tenshi", "Subárea Circular"))
-        self.circle_list.setItemText(0, _translate("tenshi", "Cir. 1"))
+        self.circle_list.setItemText(0, _translate("tenshi", "Arco 1"))
         self.circle_plus.setText(_translate("tenshi", "+"))
         self.circle_visualize.setText(_translate("tenshi", "Destacar Subárea"))
         self.label_56.setText(_translate("tenshi", "Raio"))
         self.label_55.setText(_translate("tenshi", "Y"))
         self.label_54.setText(_translate("tenshi", "X"))
         self.label_57.setText(_translate("tenshi", "Ângulo Inicial"))
-        self.label_57.setText("Ângulo (bissetriz)")
         self.label_58.setText(_translate("tenshi", "Ângulo Final"))
         self.label_135.setText(_translate("tenshi", "m"))
         self.label_136.setText(_translate("tenshi", "m"))
@@ -2149,21 +2221,22 @@ class Ui_tenshi(QWidget):
         self.label_94.setText(_translate("tenshi", "°"))
         self.circle_apply.setText(_translate("tenshi", "Aplicar"))
         self.circle_remove.setText(_translate("tenshi", "Remover"))
-        self.label_59.setText(_translate("tenshi", "Dados/Resultados"))
-        self.label_95.setText(_translate("tenshi", "m²"))
-        self.label_96.setText(_translate("tenshi", "m⁴"))
-        self.label_97.setText(_translate("tenshi", "m⁴"))
-        self.label_98.setText(_translate("tenshi", "m³"))
-        self.label_99.setText(_translate("tenshi", "m³"))
-        self.label_60.setText(_translate("tenshi", "Momento Estático em Z (Origem)"))
         self.label_61.setText(_translate("tenshi", "Momento Estático em Y (Origem)"))
         self.label_62.setText(_translate("tenshi", "Momento de Inércia em Z (CG)"))
         self.label_63.setText(_translate("tenshi", "Momento de Inércia em Y (CG)"))
         self.label_64.setText(_translate("tenshi", "Área Total"))
+        self.label_95.setText(_translate("tenshi", "m²"))
+        self.label_98.setText(_translate("tenshi", "m³"))
+        self.label_60.setText(_translate("tenshi", "Momento Estático em Z (Origem)"))
+        self.label_96.setText(_translate("tenshi", "m⁴"))
+        self.label_97.setText(_translate("tenshi", "m⁴"))
+        self.label_99.setText(_translate("tenshi", "m³"))
+        self.label_59.setText(_translate("tenshi", "Dados/Resultados"))
+        self.figureResultsButton.setText(_translate("tenshi", "Utilizar Resultados da Figura"))
+        self.insertDataButton.setText(_translate("tenshi", "Inserir Dados"))
         self.label_66.setText(_translate("tenshi", "Tensão Normal"))
         self.label_69.setText(_translate("tenshi", "Momento em Z"))
         self.specify_y.setText(_translate("tenshi", "Especificar Y"))
-        self.checkBox.setText(_translate("tenshi", "Adicionar à resolução"))
         self.specify_z.setText(_translate("tenshi", "Especificar Z"))
         self.label_68.setText(_translate("tenshi", "Momento em Y"))
         self.label_67.setText(_translate("tenshi", "Força Normal"))
@@ -2177,12 +2250,12 @@ class Ui_tenshi(QWidget):
         self.label_70.setText(_translate("tenshi", "Tensão Normal:"))
         self.label_72.setText(_translate("tenshi", "Linha Neutra:"))
         self.tncalculate.setText(_translate("tenshi", "Calcular"))
-        self.label_74.setText(_translate("tenshi", "Tensão e Fluxo de Cisalhamento"))
+        self.checkBox.setText(_translate("tenshi", "Adicionar à resolução"))
+        self.label_74.setText(_translate("tenshi", "Tensão de Cisalhamento e Fluxo"))
         self.tfosbox.setItemText(0, _translate("tenshi", "Força"))
         self.tfosbox.setItemText(1, _translate("tenshi", "Espaçamento"))
         self.label_75.setText(_translate("tenshi", "Força Cortante"))
         self.label_41.setText(_translate("tenshi", "Altura do Corte"))
-        self.tscalculate.setText(_translate("tenshi", "Calcular"))
         self.label_77.setText(_translate("tenshi", "Espessura (t)"))
         self.label_76.setText(_translate("tenshi", "Áreas de Contato"))
         self.label_107.setText(_translate("tenshi", "N"))
@@ -2195,13 +2268,13 @@ class Ui_tenshi(QWidget):
         self.label_110.setText(_translate("tenshi", "m³"))
         self.label_111.setText(_translate("tenshi", "Pa"))
         self.label_112.setText(_translate("tenshi", "N/m"))
+        self.tscalculate.setText(_translate("tenshi", "Calcular"))
         self.label_12.setText(_translate("tenshi", "Círculo de Mohr"))
         self.radio_plane.setText(_translate("tenshi", "Estado Plano"))
         self.radio_triple.setText(_translate("tenshi", "Estado Triplo"))
         self.label_18.setText(_translate("tenshi", "τxy"))
         self.label_15.setText(_translate("tenshi", "σx"))
         self.label_21.setText(_translate("tenshi", "τyz"))
-        self.mohr_apply.setText(_translate("tenshi", "Aplicar"))
         self.label_20.setText(_translate("tenshi", "τxz"))
         self.label_19.setText(_translate("tenshi", "σz"))
         self.label_16.setText(_translate("tenshi", "σy"))
@@ -2211,28 +2284,32 @@ class Ui_tenshi(QWidget):
         self.label_120.setText(_translate("tenshi", "Pa"))
         self.label_121.setText(_translate("tenshi", "Pa"))
         self.label_122.setText(_translate("tenshi", "Pa"))
+        self.mohr_apply.setText(_translate("tenshi", "Aplicar"))
         self.label_22.setText(_translate("tenshi", "Precisão do Mouse (Decimais)"))
         self.int_plot.setText(_translate("tenshi", "Gráfico Interativo"))
+        self.gridBox.setText(_translate("tenshi", "Grid"))
         self.push_to_talk.setToolTip(_translate("tenshi", "Utilizar comandos de voz"))
         self.push_to_talk.setShortcut(_translate("tenshi", "V"))
         self.label_23.setText(_translate("tenshi", "X"))
         self.label_24.setText(_translate("tenshi", "Y"))
-        self.deadzone_x.setText(_translate("tenshi", "0"))
-        self.deadzone_y.setText(_translate("tenshi", "0"))
         self.menuOp_es.setTitle(_translate("tenshi", "Opções"))
         self.menuResetar.setTitle(_translate("tenshi", "Resetar..."))
+        self.menuSe_o_Transversal.setTitle(_translate("tenshi", "Seção Transversal"))
+        self.menuEstrutura.setTitle(_translate("tenshi", "Estrutura"))
         self.menuFonte.setTitle(_translate("tenshi", "Fonte..."))
         self.translate_menu.setTitle(_translate("tenshi", "Traduzir..."))
         self.menuMudar_Temas.setTitle(_translate("tenshi", "Mudar Temas"))
+        self.menuComo_utilizar.setTitle(_translate("tenshi", "Como utilizar"))
+        self.menuManual.setTitle(_translate("tenshi", "Manual"))
+        self.menuExemplos.setTitle(_translate("tenshi", "Exemplos"))
         self.menuSalvar_e_Carregar.setTitle(_translate("tenshi", "Salvar e Carregar"))
         self.menuGerar_Explica_es.setTitle(_translate("tenshi", "Gerar Resoluções"))
         self.save.setText(_translate("tenshi", "Salvar Tudo"))
         self.load_button.setText(_translate("tenshi", "Carregar"))
-        self.howToUseButton.setText(_translate("tenshi", "Como utilizar"))
         self.solvestatic.setText(_translate("tenshi", "Estrutura"))
         self.solveresist.setText(_translate("tenshi", "Seção Transversal"))
         self.resetloads.setText(_translate("tenshi", "Esforços"))
-        self.resetall.setText(_translate("tenshi", "Elementos"))
+        self.resetall.setText(_translate("tenshi", "Tudo"))
         self.undo.setText(_translate("tenshi", "Ação Anterior"))
         self.undo.setShortcut(_translate("tenshi", "Ctrl+Z"))
         self.fontstructure.setText(_translate("tenshi", "Estrutura"))
@@ -2240,7 +2317,6 @@ class Ui_tenshi(QWidget):
         self.translate_pt.setText(_translate("tenshi", "Português"))
         self.translate_en.setText(_translate("tenshi", "English"))
         self.translate_nihongo.setText(_translate("tenshi", "日本語"))
-        self.reset_st.setText(_translate("tenshi", "Seção Transversal"))
         self.font_interface.setText(_translate("tenshi", "Interface"))
         self.action.setText(_translate("tenshi", "Carregar Seção Transversal"))
         self.load_mohr.setText(_translate("tenshi", "Carregar Círculo de Mohr"))
@@ -2248,6 +2324,13 @@ class Ui_tenshi(QWidget):
         self.light_theme_button.setText(_translate("tenshi", "Tema Claro"))
         self.dark_theme_button.setText(_translate("tenshi", "Tema Escuro"))
         self.aboutButton.setText(_translate("tenshi", "Sobre"))
+        self.showManualButton.setText(_translate("tenshi", "Mostrar Manual (requer Internet)"))
+        self.hideManualButton.setText(_translate("tenshi", "Esconder Manual"))
+        self.actionP_gina_para_Download.setText(_translate("tenshi", "Página para Download"))
+        self.showExamplesButton.setText(_translate("tenshi", "Mostrar Exemplos (requer Internet)"))
+        self.hideExamplesButton.setText(_translate("tenshi", "Esconder Exemplos"))
+        self.downloadPageButton.setText(_translate("tenshi", "Página para Download"))
+        self.reset_cross_section.setText(_translate("tenshi", "Tudo"))
 
         self.load_structure_str = "Carregar Arquivo"
         self.strucutre_type_str = "Estrutura(*.pkl)"
@@ -2257,12 +2340,13 @@ class Ui_tenshi(QWidget):
                                   "(que contenham um apoio móvel e um apoio fixo ou um engaste apenas)."
         self.warning_str = "É necessário mais informações"
         self.warning_title = "Erro"
+        self.id_warning_str = "ID inválido. Esse ID não existe."
         self.geometry_change_title = "Aviso"
         self.geometry_change_warning = "Se fizer alterações à geometria, os cálculos adicionados à resolução previamente serão perdidos. Fazer alterações?"
         self.pdf_generated_title = "Pronto!"
         self.pdf_generated_str = "PDF gerado com succeso"
         self.shear_warning_title = "Indisponível"
-        self.shear_warning_str = "Seções transversal não foi desenhada ou contém setores circulares."
+        self.shear_warning_str = "Seções transversal não foi desenhada, contém setores circulares ou os resultados não foram obtidos da figura."
         self.latex_error_str = "É necessário ter o Miktex instalado para gerar a resolução."
         self.font_size_str = "Tamanho da Fonte"
         self.font_strucuture_str = "Fonte da Estrutura:"
@@ -2275,6 +2359,8 @@ class Ui_tenshi(QWidget):
                               "Exemplos de utilização: link aqui")
         self.about_title = "Sobre"
         self.about_text = ("Desenvolvido como trabalho de Iniciação Científica na EESC-USP em 2020.\n"
+                            "\n"
+                            "Desenvolvido por Leonardo de Souza Bornia\n"
                             "\n"
                             "Agradecimentos:\n"
                             "Eng. Me. Henrique Borges Garcia\n"
@@ -2448,6 +2534,8 @@ class Ui_tenshi(QWidget):
         self.circle_apply.setText(_translate("tenshi", "Apply"))
         self.circle_remove.setText(_translate("tenshi", "Remove"))
         self.label_59.setText(_translate("tenshi", "Data/Results"))
+        self.figureResultsButton.setText(_translate("tenshi", "Get Results from Figure"))
+        self.insertDataButton.setText(_translate("tenshi", "Insert Data"))
         self.label_95.setText(_translate("tenshi", "m²"))
         self.label_96.setText(_translate("tenshi", "m⁴"))
         self.label_97.setText(_translate("tenshi", "m⁴"))
@@ -2515,8 +2603,6 @@ class Ui_tenshi(QWidget):
         self.push_to_talk.setShortcut(_translate("tenshi", "V"))
         self.label_23.setText(_translate("tenshi", "X"))
         self.label_24.setText(_translate("tenshi", "Y"))
-        self.deadzone_x.setText(_translate("tenshi", "0"))
-        self.deadzone_y.setText(_translate("tenshi", "0"))
         self.menuOp_es.setTitle(_translate("tenshi", "Options"))
         self.menuResetar.setTitle(_translate("tenshi", "Reset..."))
         self.menuFonte.setTitle(_translate("tenshi", "Font..."))
@@ -2526,7 +2612,7 @@ class Ui_tenshi(QWidget):
         self.menuGerar_Explica_es.setTitle(_translate("tenshi", "Generate PDF"))
         self.save.setText(_translate("tenshi", "Save All"))
         self.load_button.setText(_translate("tenshi", "Load"))
-        self.howToUseButton.setText(_translate("tenshi", "How to Use"))
+        self.menuComo_utilizar.setTitle(_translate("tenshi", "How to Use"))
         self.solvestatic.setText(_translate("tenshi", "Structure"))
         self.solveresist.setText(_translate("tenshi", "Cross Section"))
         self.resetloads.setText(_translate("tenshi", "Stress"))
@@ -2538,7 +2624,7 @@ class Ui_tenshi(QWidget):
         self.translate_pt.setText(_translate("tenshi", "Português"))
         self.translate_en.setText(_translate("tenshi", "English"))
         self.translate_nihongo.setText(_translate("tenshi", "日本語"))
-        self.reset_st.setText(_translate("tenshi", "Cross Section"))
+        self.reset_cross_section.setText(_translate("tenshi", "Cross Section"))
         self.font_interface.setText(_translate("tenshi", "Interface"))
         self.action.setText(_translate("tenshi", "Load Cross Section"))
         self.load_mohr.setText(_translate("tenshi", "Load Mohr's Circle"))
@@ -2546,6 +2632,14 @@ class Ui_tenshi(QWidget):
         self.light_theme_button.setText(_translate("tenshi", "Light Theme"))
         self.dark_theme_button.setText(_translate("tenshi", "Dark Theme"))
         self.aboutButton.setText(_translate("tenshi", "About"))
+        self.showManualButton.setText(_translate("tenshi", "Show Manual (requires Internet)"))
+        self.hideManualButton.setText(_translate("tenshi", "Hide Manual"))
+        self.actionP_gina_para_Download.setText(_translate("tenshi", "Download Page"))
+        self.showExamplesButton.setText(_translate("tenshi", "Show Examples (requires Internet)"))
+        self.hideExamplesButton.setText(_translate("tenshi", "Hide Exemples"))
+        self.downloadPageButton.setText(_translate("tenshi", "Download Page"))
+        self.menuManual.setTitle(_translate("tenshi", "Manual"))
+        self.menuExemplos.setTitle(_translate("tenshi", "Exemples"))
 
         self.load_structure_str = "Load Structure"
         self.strucutre_type_str = "Structure(*.pkl)"
@@ -2554,12 +2648,13 @@ class Ui_tenshi(QWidget):
         self.static_warning_str = "Only available for static structures (which contain a roll and hinged supports or a fixed support only)."
         self.warning_str = "More information is required"
         self.warning_title = "Error"
+        self.id_warning_str = "Invalid ID. This ID doesn't exist."
         self.geometry_change_title = "Warning"
         self.geometry_change_warning = "If you make changes to the geometry, calculations previously added to the PDF will be lost. Continue?"
         self.pdf_generated_title = "Done!"
         self.pdf_generated_str = "PDF successfully generated"
         self.shear_warning_title = "Unavailable"
-        self.shear_warning_str = "Cross section wasn't drawn or contains circular sectors."
+        self.shear_warning_str = "Cross section wasn't drawn, contains circular sectors or results weren't calculated from figure."
         self.latex_error_str = "Please install Miktex to generate resolutions"
         self.font_size_str = "Font Size"
         self.font_strucuture_str = "Structure Font:"
@@ -2568,10 +2663,11 @@ class Ui_tenshi(QWidget):
         self.pdf_title = "Generate resolution"
         self.pdf_text = "resolution"
         self.howtouse_title = "How to Use"
-        self.howtouse_text = ("User Manual: link aqui\n"
-                              "Utilization Examples: link aqui")
+        self.howtouse_text = "User Manual and Utilization Examples available at:"
         self.about_title = "About"
         self.about_text = ("Developed as a Scientific Initiation work at EESC-USP (Brazil) in 2020.\n"
+                           "\n"
+                           "Developed by Leonardo de Souza Bornia\n"
                            "\n"
                            "Acknowledgements:\n"
                            "Eng. Me. Henrique Borges Garcia\n"
@@ -2615,32 +2711,38 @@ class Ui_tenshi(QWidget):
 
     def node(self):
         try:
-            self.workaround()
-            self.ss.insert_node(element_id=int(self.node_id.text()), location=[self.filter(self.node_x.text()),
-                                                                               self.filter(self.node_y.text())])
-            self.visualize_structure()
-            self.states.append(pickle.dumps(self.ss))
+            if int(self.node_id.text()) in self.ss.node_map.keys():
+                self.workaround()
+                self.ss.insert_node(element_id=int(self.node_id.text()), location=[self.filter(self.node_x.text()),
+                                                                                   self.filter(self.node_y.text())])
+                self.visualize_structure()
+                self.states.append(pickle.dumps(self.ss))
+            else:
+                self.invalid_id_warning()
         except:
             self.warning()
 
     def support(self):
         try:
-            self.workaround()
-            if self.support_hinged.isChecked():
-                self.ss.add_support_hinged(node_id=int(self.support_pos.text()))
-            elif self.support_roll.isChecked():
-                self.ss.add_support_roll(node_id=int(self.support_pos.text()),
-                                         angle=float(self.filter(self.support_angle.text())))
-            elif self.support_fixed.isChecked():
-                self.ss.add_support_fixed(node_id=int(self.support_pos.text()))
-            elif self.support_spring.isChecked():
-                self.ss.add_support_spring(node_id=int(self.support_pos.text()), translation=self.spring_translation.text(), k=self.spring_k.text())
-            elif self.support_internal_hinge.isChecked():
-                pass
+            if int(self.support_pos.text()) in self.ss.node_map.keys():
+                self.workaround()
+                if self.support_hinged.isChecked():
+                    self.ss.add_support_hinged(node_id=int(self.support_pos.text()))
+                elif self.support_roll.isChecked():
+                    self.ss.add_support_roll(node_id=int(self.support_pos.text()),
+                                             angle=float(self.filter(self.support_angle.text())))
+                elif self.support_fixed.isChecked():
+                    self.ss.add_support_fixed(node_id=int(self.support_pos.text()))
+                elif self.support_spring.isChecked():
+                    self.ss.add_support_spring(node_id=int(self.support_pos.text()), translation=self.spring_translation.text(), k=self.spring_k.text())
+                elif self.support_internal_hinge.isChecked():
+                    pass
 
-            self.visualize_structure()
-            self.states.append(pickle.dumps(self.ss))
-            self.enable_buttons()
+                self.visualize_structure()
+                self.states.append(pickle.dumps(self.ss))
+                self.enable_buttons()
+            else:
+                self.invalid_id_warning()
         except:
             self.warning()
 
@@ -2673,34 +2775,40 @@ class Ui_tenshi(QWidget):
 
     def load(self):
         try:
-            self.workaround()
-            if self.load_moment.text() != '' and float(self.load_moment.text()) != 0:
-                self.ss.moment_load(node_id=int(self.load_pos.text()), Ty=float(self.filter(self.load_moment.text())))
+            if int(self.load_pos.text()) in self.ss.node_map.keys():
+                self.workaround()
+                if self.load_moment.text() != '' and float(self.load_moment.text()) != 0:
+                    self.ss.moment_load(node_id=int(self.load_pos.text()), Ty=float(self.filter(self.load_moment.text())))
 
-            if float(self.load_y.text()) == 0 and float(self.load_x.text()) == 0 and float(self.load_angle.text()) == 0:
-                pass
-            elif self.load_y.text() != '' and self.load_x.text() != '' and self.load_angle.text() != '':
-                self.ss.point_load(node_id=int(self.load_pos.text()), Fy=float(self.filter(self.load_y.text())),
-                                   Fx=float(self.filter(self.load_x.text())),
-                                   rotation=float(self.filter(self.load_angle.text())))
-            self.visualize_structure()
-            self.states.append(pickle.dumps(self.ss))
-            self.enable_buttons()
+                if float(self.load_y.text()) == 0 and float(self.load_x.text()) == 0 and float(self.load_angle.text()) == 0:
+                    pass
+                elif self.load_y.text() != '' and self.load_x.text() != '' and self.load_angle.text() != '':
+                    self.ss.point_load(node_id=int(self.load_pos.text()), Fy=float(self.filter(self.load_y.text())),
+                                       Fx=float(self.filter(self.load_x.text())),
+                                       rotation=float(self.filter(self.load_angle.text())))
+                self.visualize_structure()
+                self.states.append(pickle.dumps(self.ss))
+                self.enable_buttons()
+            else:
+                self.invalid_id_warning()
         except:
             self.warning()
 
     def qload(self):
         try:
-            self.workaround()
-            if self.qload_initial.text() == '':
-                self.qload_final.setText(self.filter(self.qload_final.text()))
-            if self.qload_final.text() == '':
-                self.qload_final.setText(self.filter(self.qload_initial.text()))
-            self.ss.q_load(element_id=int(self.qload_pos.text()), q=float(self.filter(self.qload_final.text())),
-                           qi=float(self.filter(self.qload_initial.text())))
-            self.visualize_structure()
-            self.states.append(pickle.dumps(self.ss))
-            self.enable_buttons()
+            if int(self.qload_pos.text()) in self.ss.node_map.keys():
+                self.workaround()
+                if self.qload_initial.text() == '':
+                    self.qload_final.setText(self.filter(self.qload_final.text()))
+                if self.qload_final.text() == '':
+                    self.qload_final.setText(self.filter(self.qload_initial.text()))
+                self.ss.q_load(element_id=int(self.qload_pos.text()), q=float(self.filter(self.qload_final.text())),
+                               qi=float(self.filter(self.qload_initial.text())))
+                self.visualize_structure()
+                self.states.append(pickle.dumps(self.ss))
+                self.enable_buttons()
+            else:
+                self.invalid_id_warning()
         except:
             self.warning()
 
@@ -2709,7 +2817,7 @@ class Ui_tenshi(QWidget):
             self.visualize(self.ss.show_structure(show=False, figure=self.MplWidget.canvas.figure))
             self.last_figure = self.show_structure
         else:
-            self.MplWidget.plot()
+            self.MplWidget.plot(hasGrid=self.gridBox.isChecked())
             self.figurefix()
             self.last_figure = None
 
@@ -2751,11 +2859,12 @@ class Ui_tenshi(QWidget):
             self.last_figure = self.show_mohr
             self.MplWidget.set_background_alpha(0)
         else:
-            self.MplWidget.plot()
+            self.MplWidget.plot(hasGrid=self.gridBox.isChecked())
             self.figurefix()
             self.last_figure = None
 
     def visualize(self, figure=None):
+        self.MplWidget.setGrid(self.gridBox.isChecked())
         self.MplWidget.plot(figure)
         self.MplWidget.set_background_alpha()
         self.figurefix()
@@ -2854,7 +2963,7 @@ class Ui_tenshi(QWidget):
 
     def reset_struct_elems(self):
         self.ss = pickle.loads(self.blankss)
-        self.MplWidget.plot()
+        self.MplWidget.plot(hasGrid=self.gridBox.isChecked())
         self.figurefix()
         self.solvetrue = False
         self.states.append(pickle.dumps(self.ss))
@@ -2911,6 +3020,13 @@ class Ui_tenshi(QWidget):
         msg.setIcon(QMessageBox.Warning)
         x = msg.exec_()
 
+    def invalid_id_warning(self):
+        msg = QMessageBox()
+        msg.setWindowTitle(self.warning_title)
+        msg.setText(self.id_warning_str)
+        msg.setIcon(QMessageBox.Warning)
+        msg.exec_()
+
     def static_warning(self):
         msg = QMessageBox()
         msg.setWindowTitle(self.warning_title)
@@ -2940,7 +3056,7 @@ class Ui_tenshi(QWidget):
 
     def enable_buttons(self):
         if (len(self.ss.supports_roll) + len(self.ss.supports_hinged) + len(self.ss.supports_spring_x) +
-            len(self.ss.supports_spring_z) + len(self.ss.supports_spring_y) >= 1 or len(self.ss.supports_fixed) >= 1) \
+            len(self.ss.supports_spring_z) + len(self.ss.supports_spring_y) >= 2 or len(self.ss.supports_fixed) >= 1) \
                 and (len(self.ss.loads_point) + len(self.ss.loads_q) + len(self.ss.loads_moment)) >= 1:
             self.show_diagram.setEnabled(True)
             self.show_supports.setEnabled(True)
@@ -2992,16 +3108,17 @@ class Ui_tenshi(QWidget):
             functions.eqsize = i
             self.last_figure.click()
 
-    def get_sigma(self):
-        self.sig.det_values()
-        self.set_sigma()
-
     def set_sigma(self):
-        self.msx.setText(f"{parse_expr(self.sig.My):.2f}")
-        self.msy.setText(f"{parse_expr(self.sig.Mx):.2f}")
-        self.mix.setText(f"{parse_expr(self.sig.Ix):.2f}")
-        self.miy.setText(f"{parse_expr(self.sig.Iy):.2f}")
-        self.at.setText(f"{parse_expr(self.sig.At):.2f}")
+        self.frame_16.setDisabled(True)
+        if len(self.sig.sub_areas_rect) != 0 or len(self.sig.sub_areas_cir) != 0:
+            self.msx.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.My))))}")
+            self.msy.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.Mx))))}")
+            self.mix.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.Ix))))}")
+            self.miy.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.Iy))))}")
+            self.at.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.At))))}")
+
+    def insert_sigma(self):
+        self.frame_16.setDisabled(False)
 
     def get_sigma_T(self):
         N = self.tnormal.text()
@@ -3024,7 +3141,7 @@ class Ui_tenshi(QWidget):
             self.warning()
 
     def get_cis(self):
-        if not self.sig.sub_areas_cir and len(self.sig.sub_areas_rect) >= 1:
+        if not self.sig.sub_areas_cir and len(self.sig.sub_areas_rect) >= 1 and self.figureResultsButton.isChecked():
             try:
                 V = self.tshear.text()
                 if self.cut_y.text() == '':
@@ -3080,11 +3197,12 @@ class Ui_tenshi(QWidget):
             d = self.circle_list.currentIndex()
         if self.sig.sub_areas_cir or self.sig.sub_areas_rect:
             fig = self.sig.plot(p, d, self.MplWidget.canvas.figure)
+            self.MplWidget.setGrid(self.gridBox.isChecked())
             self.MplWidget.plot(fig)
             fig.savefig("Settings\\figs\\sectransv", transparent=True)
             self.last_figure = self.show_sec
         else:
-            self.MplWidget.plot()
+            self.MplWidget.plot(hasGrid=self.gridBox.isChecked())
             self.last_figure = None
         self.figurefix()
         self.MplWidget.set_background_alpha()
@@ -3147,14 +3265,18 @@ class Ui_tenshi(QWidget):
         self.circle_list.setCurrentIndex(c)
 
     def finish_applying(self):
-        self.get_sigma()
+        self.sig.det_values()
+        if self.figureResultsButton.isChecked():
+            self.set_sigma()
         self.plot_sec()
 
     def remove_rectangle(self):
         c = self.rect_list.currentIndex()
         try:
             self.sig.sub_areas_rect.pop(c, None)
-            self.get_sigma()
+            self.sig.det_values()
+            if self.figureResultsButton.isChecked():
+                self.set_sigma()
             self.plot_sec()
             self.change_table_rect()
         except:
@@ -3164,7 +3286,9 @@ class Ui_tenshi(QWidget):
         c = self.circle_list.currentIndex()
         try:
             self.sig.sub_areas_cir.pop(c, None)
-            self.get_sigma()
+            self.sig.det_values()
+            if self.figureResultsButton.isChecked():
+                self.set_sigma()
             self.plot_sec()
             self.change_table_circ()
         except:
@@ -3193,7 +3317,7 @@ class Ui_tenshi(QWidget):
         self.tfresult.clear()
         self.rect_visualize.setChecked(False)
         self.circle_visualize.setChecked(False)
-        self.MplWidget.plot()
+        self.MplWidget.plot(hasGrid=self.gridBox.isChecked())
         self.figurefix()
 
     def clear_rect_text(self):
@@ -3293,25 +3417,56 @@ class Ui_tenshi(QWidget):
                     self.node_x.setText(str(round(event.xdata, px)))
                     self.node_y.setText(str(round(event.ydata, py)))
                 elif 'RIGHT' in str(event.button):
+                    error = 1e20
+                    id = ""
                     for keys, values in self.ss.node_map.items():
                         id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
-                        if round(event.xdata, px) == round(x, px) and round(event.ydata, py) == round(y, py):
-                            self.node_id.setText(str(id_))
+                        xerror = event.xdata - x
+                        yerror = event.ydata - y
+                        new_error = np.sqrt(np.mean(np.square(xerror + yerror)))
+                        if new_error <= error:
+                            error = new_error
+                            id = id_
+                    self.node_id.setText(str(id))
             elif self.stackedWidget.currentIndex() == 2:
+                error = 1e20
+                id = ""
                 for keys, values in self.ss.node_map.items():
                     id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
-                    if round(event.xdata, px) == round(x, px) and round(event.ydata, py) == round(y, py):
-                        self.support_pos.setText(str(id_))
+                    xerror = event.xdata - x
+                    yerror = event.ydata - y
+                    new_error = np.sqrt(np.mean(np.square(xerror + yerror)))
+                    if new_error <= error:
+                        error = new_error
+                        id = id_
+                self.support_pos.setText(str(id))
             elif self.stackedWidget.currentIndex() == 3:
+                error = 1e20
+                id = ""
                 for keys, values in self.ss.node_map.items():
                     id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
-                    if round(event.xdata, px) == round(x, px) and round(event.ydata, py) == round(y, py):
-                        self.load_pos.setText(str(id_))
+                    xerror = event.xdata - x
+                    yerror = event.ydata - y
+                    new_error = np.sqrt(np.mean(np.square(xerror + yerror)))
+                    if new_error <= error:
+                        error = new_error
+                        id = id_
+                self.load_pos.setText(str(id))
             elif self.stackedWidget.currentIndex() == 4:
+                error = 1e20
+                id = ""
                 for keys, values in self.ss.node_map.items():
-                    id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
-                    if round(event.xdata, px) == round(x, px) and round(event.ydata, py) == round(y, py):
-                        self.qload_pos.setText(str(id_))
+                    id_, xi, yi, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
+                    _, xf, yf, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys + 1))
+                    xerror = event.xdata - (xi + (xf - xi)/2)
+                    yerror = event.ydata - (yi + (yf - yi)/2)
+                    new_error = np.sqrt(np.mean(np.square(xerror + yerror)))
+                    if new_error <= error:
+                        error = new_error
+                        id = id_
+                    if keys == len(self.ss.node_map) - 1:
+                        break
+                self.qload_pos.setText(str(id))
             elif self.stackedWidget.currentIndex() == 5:
                 if 'LEFT' in str(event.button):
                     self.rect_x1.setText(str(round(event.xdata, px)))
@@ -3384,6 +3539,7 @@ class Ui_tenshi(QWidget):
         self.circle_af.setHidden(True)
         self.support_internal_hinge.setHidden(True)
         self.support_spring.setHidden(True)
+        self.menuMudar_Temas.setEnabled(False)
 
     def light_theme(self):
         app.setStyleSheet("")
@@ -3398,12 +3554,34 @@ class Ui_tenshi(QWidget):
         else:
             self.MplWidget.interactive_mode(1)
 
-    def howToUse(self):
-        QMessageBox.about(self, self.howtouse_title, self.howtouse_text)
-
     def aboutDialog(self):
         QMessageBox.about(self, self.about_title, self.about_text)
 
+    def showManual(self):
+        self.WebView.load(QtCore.QUrl("https://unipead-my.sharepoint.com/:b:/g/personal/leonardo_bornia_aluno_unip_br"
+                              "/EbpYfMNo_jxGttd41fAbP7kBaMt3yOvBJdb1TqQsaqQrgA?e=3h8ni3"))
+        self.WebView.setHidden(False)
+
+    def hideManual(self):
+        self.WebView.setHidden(True)
+
+    def showExamples(self):
+        self.WebView.load(QtCore.QUrl("https://pt.overleaf.com/read/xbgmjcngdzst"))
+        self.WebView.setHidden(False)
+
+    def hideExamples(self):
+        self.WebView.setHidden(True)
+
+    def showDownloadPage(self):
+        webbrowser.open("https://github.com/LeoBelmont/Solid-Mechanics-Solver/releases")
+
+    def replotGrid(self):
+        self.MplWidget.setGrid(self.gridBox.isChecked())
+        self.MplWidget.canvas.draw()
+
+    def scientific_format(self, number):
+        var = '%E' % number
+        return var.split('E')[0].rstrip('0').rstrip('.') + 'E' + var.split('E')[1]
 
 if __name__ == "__main__":
     import sys
