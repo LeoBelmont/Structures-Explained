@@ -74,6 +74,7 @@ class Ui_tenshi(QWidget):
         self.WebView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
         self.WebView.setObjectName("WebView")
         self.gridLayout_11.addWidget(self.WebView, 0, 4, 1, 1)
+        self.WebView.setMinimumWidth(500)
         self.toolBox = QtWidgets.QToolBox(self.centralwidget)
         self.toolBox.setMinimumSize(QtCore.QSize(105, 0))
         self.toolBox.setMaximumSize(QtCore.QSize(105, 16777215))
@@ -3453,20 +3454,28 @@ class Ui_tenshi(QWidget):
                         id = id_
                 self.load_pos.setText(str(id))
             elif self.stackedWidget.currentIndex() == 4:
-                error = 1e20
-                id = ""
                 for keys, values in self.ss.node_map.items():
                     id_, xi, yi, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
                     _, xf, yf, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys + 1))
-                    xerror = event.xdata - (xi + (xf - xi)/2)
-                    yerror = event.ydata - (yi + (yf - yi)/2)
-                    new_error = np.sqrt(np.mean(np.square(xerror + yerror)))
-                    if new_error <= error:
-                        error = new_error
-                        id = id_
+                    #lenience =
+                    if xi > xf:
+                        xit = xf
+                        xft = xi
+                    else:
+                        xit = xi
+                        xft = xf
+                    if yi > yf:
+                        yit = yf
+                        yft = yi
+                    else:
+                        yit = yi
+                        yft = yf
+                    if (xit <= np.float32(round(event.xdata, 2)) <= xft) and \
+                       (yit <= np.float32(round(event.ydata, 2)) <= yft):
+                            self.qload_pos.setText(str(id_))
+                            break
                     if keys == len(self.ss.node_map) - 1:
                         break
-                self.qload_pos.setText(str(id))
             elif self.stackedWidget.currentIndex() == 5:
                 if 'LEFT' in str(event.button):
                     self.rect_x1.setText(str(round(event.xdata, px)))
@@ -3584,7 +3593,6 @@ class Ui_tenshi(QWidget):
         return var.split('E')[0].rstrip('0').rstrip('.') + 'E' + var.split('E')[1]
 
 if __name__ == "__main__":
-    import sys
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
     app = QtWidgets.QApplication(sys.argv)
     app.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
