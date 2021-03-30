@@ -51,7 +51,11 @@ class mohr_circle():
                                 [txy, sy, tyz],
                                 [txz, tyz, sz]])
 
-        (sigma1, sigma2, sigma3), _ = numpy.linalg.eig(matrix)
+        sigmalist, _ = numpy.linalg.eig(matrix)
+        sigmalist.sort()
+        sigma1 = sigmalist[0]
+        sigma2 = sigmalist[1]
+        sigma3 = sigmalist[2]
         Tmax = (sigma1 - sigma3) / 2
         if self.triple:
             self.save_values(sigma1, sigma2, Tmax, sx, sy, txy, sigma3, sz, txz, tyz)

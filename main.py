@@ -1,4 +1,4 @@
-from PyQt5 import QtCore, QtGui, QtWidgets, QtWebEngineWidgets
+from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from anastruct import SystemElements
 from sympy.parsing.sympy_parser import parse_expr
@@ -71,10 +71,6 @@ class Ui_tenshi(QWidget):
         self.MplWidget.setMinimumSize(QtCore.QSize(673, 0))
         self.MplWidget.setObjectName("MplWidget")
         self.gridLayout_11.addWidget(self.MplWidget, 0, 3, 1, 1)
-        self.WebView = QtWebEngineWidgets.QWebEngineView(self.centralwidget)
-        self.WebView.setObjectName("WebView")
-        self.gridLayout_11.addWidget(self.WebView, 0, 4, 1, 1)
-        self.WebView.setMinimumWidth(500)
         self.toolBox = QtWidgets.QToolBox(self.centralwidget)
         self.toolBox.setMinimumSize(QtCore.QSize(105, 0))
         self.toolBox.setMaximumSize(QtCore.QSize(105, 16777215))
@@ -1656,10 +1652,6 @@ class Ui_tenshi(QWidget):
         self.menuMudar_Temas.setObjectName("menuMudar_Temas")
         self.menuComo_utilizar = QtWidgets.QMenu(self.menuOp_es)
         self.menuComo_utilizar.setObjectName("menuComo_utilizar")
-        self.menuManual = QtWidgets.QMenu(self.menuComo_utilizar)
-        self.menuManual.setObjectName("menuManual")
-        self.menuExemplos = QtWidgets.QMenu(self.menuComo_utilizar)
-        self.menuExemplos.setObjectName("menuExemplos")
         self.menuSalvar_e_Carregar = QtWidgets.QMenu(self.menubar)
         self.menuSalvar_e_Carregar.setObjectName("menuSalvar_e_Carregar")
         self.menuGerar_Explica_es = QtWidgets.QMenu(self.menubar)
@@ -1712,10 +1704,6 @@ class Ui_tenshi(QWidget):
         self.hideManualButton.setObjectName("hideManualButton")
         self.actionP_gina_para_Download = QtWidgets.QAction(tenshi)
         self.actionP_gina_para_Download.setObjectName("actionP_gina_para_Download")
-        self.showExamplesButton = QtWidgets.QAction(tenshi)
-        self.showExamplesButton.setObjectName("showExamplesButton")
-        self.hideExamplesButton = QtWidgets.QAction(tenshi)
-        self.hideExamplesButton.setObjectName("hideExamplesButton")
         self.downloadPageButton = QtWidgets.QAction(tenshi)
         self.downloadPageButton.setObjectName("downloadPageButton")
         self.reset_cross_section = QtWidgets.QAction(tenshi)
@@ -1735,12 +1723,6 @@ class Ui_tenshi(QWidget):
         self.translate_menu.addAction(self.translate_nihongo)
         self.menuMudar_Temas.addAction(self.light_theme_button)
         self.menuMudar_Temas.addAction(self.dark_theme_button)
-        self.menuManual.addAction(self.showManualButton)
-        self.menuManual.addAction(self.hideManualButton)
-        self.menuExemplos.addAction(self.showExamplesButton)
-        self.menuExemplos.addAction(self.hideExamplesButton)
-        self.menuComo_utilizar.addAction(self.menuManual.menuAction())
-        self.menuComo_utilizar.addAction(self.menuExemplos.menuAction())
         self.menuComo_utilizar.addAction(self.downloadPageButton)
         self.menuOp_es.addAction(self.menuResetar.menuAction())
         self.menuOp_es.addAction(self.menuFonte.menuAction())
@@ -1962,23 +1944,7 @@ class Ui_tenshi(QWidget):
         self.blankss = pickle.dumps(self.ss)
         self.blanksig = pickle.dumps(self.sig)
 
-        self.disable_buttons()
-        self.frame_4.setHidden(True)
-        self.support_angle.setHidden(True)
-        self.label_27.setHidden(True)
-        self.label_71.setHidden(True)
-        self.label_73.setHidden(True)
-        self.spring_k.setHidden(True)
-        self.label_113.setHidden(True)
-        self.label_127.setHidden(True)
-        self.spring_translation.setHidden(True)
-        self.cs_y.setEnabled(False)
-        self.cs_z.setEnabled(False)
-        self.radio_plane.setChecked(True)
-        self.WebView.setHidden(True)
-        self.frame_16.setDisabled(True)
-        self.switch_states_plane()
-        self.change_interactive_mode()
+        self.doStartUpStuff()
         #self.fullscreen()
 
         self.beam_apply.clicked.connect(self.beam)
@@ -2020,10 +1986,12 @@ class Ui_tenshi(QWidget):
         self.circle_visualize.stateChanged.connect(self.plot_sec)
         self.rect_remove.clicked.connect(self.remove_rectangle)
         self.circle_remove.clicked.connect(self.remove_circle)
-        self.show_sec.clicked.connect(self.plot_sec)
         self.reset_cross_section.triggered.connect(self.transv_reset)
         self.specify_y.stateChanged.connect(self.cs_y_enabler)
         self.specify_z.stateChanged.connect(self.cs_z_enabler)
+
+        self.show_sec.clicked.connect(self.plot_sec)
+        self.toolBox.currentChanged.connect(self.visualizeCurrentIndex)
 
         self.radio_plane.clicked.connect(self.switch_states_plane)
         self.radio_triple.clicked.connect(self.switch_states_triple)
@@ -2052,10 +2020,6 @@ class Ui_tenshi(QWidget):
         self.light_theme_button.triggered.connect(self.light_theme)
         self.dark_theme_button.triggered.connect(self.dark_theme)
         self.aboutButton.triggered.connect(self.aboutDialog)
-        self.showManualButton.triggered.connect(self.showManual)
-        self.showExamplesButton.triggered.connect(self.showExamples)
-        self.hideManualButton.triggered.connect(self.hideManual)
-        self.hideExamplesButton.triggered.connect(self.hideExamples)
         self.downloadPageButton.triggered.connect(self.showDownloadPage)
 
     def retranslateUi(self):
@@ -2098,7 +2062,7 @@ class Ui_tenshi(QWidget):
         self.show_mohr.setToolTip(_translate("tenshi", "Visualizar Círculo de Mohr"))
         self.show_mohr.setText(_translate("tenshi", "Visualizar"))
         self.toolButton_10.setToolTip(_translate("tenshi", "Círculo de Mohr"))
-        self.toolButton_10.setText(_translate("tenshi", "Construir"))
+        self.toolButton_10.setText(_translate("tenshi", "Inserir\nDados"))
         self.label_82.setText(_translate("tenshi", "Construir"))
         self.label_83.setText(_translate("tenshi", "Visualizar"))
         self.toolBox.setItemText(self.toolBox.indexOf(self.page_11), _translate("tenshi", "Círculo de Mohr"))
@@ -2206,7 +2170,7 @@ class Ui_tenshi(QWidget):
         self.rect_apply.setText(_translate("tenshi", "Aplicar"))
         self.rect_remove.setText(_translate("tenshi", "Remover"))
         self.label_52.setText(_translate("tenshi", "Subárea Circular"))
-        self.circle_list.setItemText(0, _translate("tenshi", "Arco 1"))
+        self.circle_list.setItemText(0, _translate("tenshi", "Cir. 1"))
         self.circle_plus.setText(_translate("tenshi", "+"))
         self.circle_visualize.setText(_translate("tenshi", "Destacar Subárea"))
         self.label_56.setText(_translate("tenshi", "Raio"))
@@ -2301,8 +2265,6 @@ class Ui_tenshi(QWidget):
         self.translate_menu.setTitle(_translate("tenshi", "Traduzir..."))
         self.menuMudar_Temas.setTitle(_translate("tenshi", "Mudar Temas"))
         self.menuComo_utilizar.setTitle(_translate("tenshi", "Como utilizar"))
-        self.menuManual.setTitle(_translate("tenshi", "Manual"))
-        self.menuExemplos.setTitle(_translate("tenshi", "Exemplos"))
         self.menuSalvar_e_Carregar.setTitle(_translate("tenshi", "Salvar e Carregar"))
         self.menuGerar_Explica_es.setTitle(_translate("tenshi", "Gerar Resoluções"))
         self.save.setText(_translate("tenshi", "Salvar Tudo"))
@@ -2327,10 +2289,8 @@ class Ui_tenshi(QWidget):
         self.aboutButton.setText(_translate("tenshi", "Sobre"))
         self.showManualButton.setText(_translate("tenshi", "Mostrar Manual (requer Internet)"))
         self.hideManualButton.setText(_translate("tenshi", "Esconder Manual"))
-        self.actionP_gina_para_Download.setText(_translate("tenshi", "Página para Download"))
-        self.showExamplesButton.setText(_translate("tenshi", "Mostrar Exemplos (requer Internet)"))
-        self.hideExamplesButton.setText(_translate("tenshi", "Esconder Exemplos"))
-        self.downloadPageButton.setText(_translate("tenshi", "Página para Download"))
+        self.actionP_gina_para_Download.setText(_translate("tenshi", "Baixar Manual e Exemplos"))
+        self.downloadPageButton.setText(_translate("tenshi", "Baixar Manual e Exemplos"))
         self.reset_cross_section.setText(_translate("tenshi", "Tudo"))
 
         self.load_structure_str = "Carregar Arquivo"
@@ -2635,12 +2595,8 @@ class Ui_tenshi(QWidget):
         self.aboutButton.setText(_translate("tenshi", "About"))
         self.showManualButton.setText(_translate("tenshi", "Show Manual (requires Internet)"))
         self.hideManualButton.setText(_translate("tenshi", "Hide Manual"))
-        self.actionP_gina_para_Download.setText(_translate("tenshi", "Download Page"))
-        self.showExamplesButton.setText(_translate("tenshi", "Show Examples (requires Internet)"))
-        self.hideExamplesButton.setText(_translate("tenshi", "Hide Exemples"))
-        self.downloadPageButton.setText(_translate("tenshi", "Download Page"))
-        self.menuManual.setTitle(_translate("tenshi", "Manual"))
-        self.menuExemplos.setTitle(_translate("tenshi", "Exemples"))
+        self.actionP_gina_para_Download.setText(_translate("tenshi", "Download Manual and Examples"))
+        self.downloadPageButton.setText(_translate("tenshi", "Download Manual and Examples"))
 
         self.load_structure_str = "Load Structure"
         self.strucutre_type_str = "Structure(*.pkl)"
@@ -2874,6 +2830,14 @@ class Ui_tenshi(QWidget):
         if functions.eq:
             functions.eq.clear()
             functions.n.clear()
+
+    def visualizeCurrentIndex(self, index):
+        if index == 0:
+            self.show_structure.click()
+        elif index == 1:
+            self.show_sec.click()
+        elif index == 2:
+            self.show_mohr.click()
 
     def solve(self):
         self.solvetrue = True
@@ -3122,40 +3086,40 @@ class Ui_tenshi(QWidget):
         self.frame_16.setDisabled(False)
 
     def get_sigma_T(self):
-        N = self.tnormal.text()
-        At = self.at.text()
-        My = self.tmy.text()
-        Mx = self.tmz.text()
-        Ix = self.mix.text()
-        Iy = self.miy.text()
+        N = self.filter(self.tnormal.text())
+        At = self.filter(self.at.text())
+        My = self.filter(self.tmy.text())
+        Mx = self.filter(self.tmz.text())
+        Ix = self.filter(self.mix.text())
+        Iy = self.filter(self.miy.text())
         y = Symbol('y')
         z = Symbol('z')
         if N != '' and At != '' and My != '' and Mx != '' and Ix != '' and Iy != '':
             if self.specify_y.isChecked():
-                y = self.cs_y.text()
+                y = self.filter(self.cs_y.text())
             if self.specify_z.isChecked():
-                z = self.cs_z.text()
+                z = self.filter(self.cs_z.text())
             results = self.sig.det_normal_tension(N, At, My, Mx, Ix, Iy, self.checkBox.isChecked(), y, z)
             self.tnresult.setText(f'{results[0]}')
-            self.tneutral.setText(f'{results[1]}')
+            self.tneutral.setText(f"{Decimal(str(results[1]))}")
         else:
             self.warning()
 
     def get_cis(self):
         if not self.sig.sub_areas_cir and len(self.sig.sub_areas_rect) >= 1 and self.figureResultsButton.isChecked():
             try:
-                V = self.tshear.text()
+                V = self.filter(self.tshear.text())
                 if self.cut_y.text() == '':
                     self.cut_y.setText("0")
-                Q = self.sig.full_sm(float(self.cut_y.text()))
-                self.label_79.setText(f'{Q}')
+                Q = self.sig.full_sm(float(self.filter(self.cut_y.text())))
+                self.label_79.setText(self.scientific_format(Decimal(Q)))
                 if self.twidth.text() == '':
                     self.twidth.setText('0')
-                t = self.twidth.text()
-                Ix = self.mix.text()
+                t = self.filter(self.twidth.text())
+                Ix = self.filter(self.mix.text())
                 results = self.sig.det_cis(V, Q, t, Ix, self.checkBox_2.isChecked())
-                self.tfresult.setText(f"{results[0]:.2f}")
-                self.tsresult.setText(f"{results[1]:.2f}")
+                self.tfresult.setText(self.scientific_format(Decimal(results[0])))
+                self.tsresult.setText(self.scientific_format(Decimal(results[1])))
             except:
                 self.warning()
         else:
@@ -3184,7 +3148,7 @@ class Ui_tenshi(QWidget):
             self.circle_y.setText(f"{self.sig.sub_areas_cir[c][1]}")
             self.circle_r.setText(f"{self.sig.sub_areas_cir[c][2]}")
             self.circle_ai.setText(f"{self.sig.sub_areas_cir[c][3]}")
-            self.circle_af.setText(f"{self.sig.sub_areas_cir[c][4]}")
+            #self.circle_af.setText(f"{self.sig.sub_areas_cir[c][4]}")
         else:
             self.clear_cir_text()
         if self.circle_visualize.isChecked():
@@ -3227,10 +3191,14 @@ class Ui_tenshi(QWidget):
     def update_ret(self):
         if self.rect_x1.text() != '' and self.rect_y1.text() != '' and\
                 self.rect_x2.text() != '' and self.rect_y2.text() != '':
-            if float(self.rect_y1.text()) > float(self.rect_y2.text()) and float(self.rect_x2.text()) > float(self.rect_x1.text()):
+            x1 = self.filter(self.rect_x1.text())
+            y1 = self.filter(self.rect_y1.text())
+            x2 = self.filter(self.rect_x2.text())
+            y2 = self.filter(self.rect_y2.text())
+            if float(y1) > float(y2) and float(x2) > float(x1):
                 c = self.rect_list.currentIndex()
-                self.sig.sub_areas_rect.update({c: [float(self.rect_x1.text()), float(self.rect_y1.text()),
-                                                    float(self.rect_x2.text()), float(self.rect_y2.text())]})
+                self.sig.sub_areas_rect.update({c: [float(x1), float(y1),
+                                                    float(x2), float(y2)]})
                 self.finish_applying()
             else:
                 msg = QMessageBox()
@@ -3238,6 +3206,8 @@ class Ui_tenshi(QWidget):
                 msg.setText(self.rect_values_error)
                 msg.setIcon(QMessageBox.Warning)
                 x = msg.exec_()
+        else:
+            self.warning()
 
     def add_rect_item(self):
         c = len(self.rect_list)
@@ -3254,11 +3224,17 @@ class Ui_tenshi(QWidget):
     def update_cir(self):
         if self.circle_x.text() != '' and self.circle_y.text() != '' and \
                 self.circle_r.text() != '' and self.circle_ai.text() != '': #and self.circle_af.text() != '':
+            x = self.filter(self.circle_x.text())
+            y = self.filter(self.circle_y.text())
+            r = self.filter(self.circle_r.text())
+            ai = self.filter(self.circle_ai.text())
             c = self.circle_list.currentIndex()
-            self.sig.sub_areas_cir.update({c: [float(self.circle_x.text()), float(self.circle_y.text()),
-                                               float(self.circle_r.text()), float(self.circle_ai.text())]})
+            self.sig.sub_areas_cir.update({c: [float(x), float(y),
+                                               float(r), float(ai)]})
                                                #self.circle_af.text()]})
             self.finish_applying()
+        else:
+            self.warning()
 
     def add_cir_item(self):
         c = len(self.circle_list)
@@ -3369,17 +3345,20 @@ class Ui_tenshi(QWidget):
         self.tyz.setHidden(False)
 
     def draw_mohr(self):
+        sx = self.filter(self.sx.text())
+        sy = self.filter(self.sy.text())
+        txy = self.filter(self.txy.text())
         if self.radio_plane.isChecked():
             self.mohr.triple = False
-            self.visualize_mohr(self.mohr.plain_state(float(self.sx.text()), float(self.sy.text()),
-                                                               float(self.txy.text()), self.MplWidget.canvas.figure))
+            self.visualize_mohr(self.mohr.plain_state(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
 
         elif self.radio_triple.isChecked():
+            sz = self.filter(self.sz.text())
+            txz = self.filter(self.txz.text())
+            tyz = self.filter(self.tyz.text())
             self.mohr.triple = True
-            self.visualize_mohr(self.mohr.triple_state(float(self.sx.text()), float(self.sy.text()),
-                                                                float(self.sz.text()), float(self.txy.text()),
-                                                                float(self.txz.text()), float(self.tyz.text()),
-                                                                self.MplWidget.canvas.figure))
+            self.visualize_mohr(self.mohr.triple_state(float(sx), float(sy), float(sz), float(txy),
+                                                       float(txz), float(tyz), self.MplWidget.canvas.figure))
 
     def UI_font(self):
         font, ok = QtWidgets.QFontDialog.getFont()
@@ -3454,28 +3433,28 @@ class Ui_tenshi(QWidget):
                         id = id_
                 self.load_pos.setText(str(id))
             elif self.stackedWidget.currentIndex() == 4:
-                for keys, values in self.ss.node_map.items():
-                    id_, xi, yi, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
-                    _, xf, yf, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys + 1))
-                    #lenience =
-                    if xi > xf:
-                        xit = xf
-                        xft = xi
-                    else:
-                        xit = xi
-                        xft = xf
-                    if yi > yf:
-                        yit = yf
-                        yft = yi
-                    else:
-                        yit = yi
-                        yft = yf
-                    if (xit <= np.float32(round(event.xdata, 2)) <= xft) and \
-                       (yit <= np.float32(round(event.ydata, 2)) <= yft):
-                            self.qload_pos.setText(str(id_))
-                            break
+
+                def find_nearest(xarray, yarray, xvalue, yvalue):
+                    nearestDistance = 1e20
+                    for index in range(len(xarray)):
+                        pointDistance = (((xarray[index] - xvalue) ** 2 + (yarray[index] - yvalue) ** 2) ** .5)
+                        if pointDistance < nearestDistance:
+                            nearestDistance = pointDistance
+                    return abs(nearestDistance)
+
+                nearest = 1e20
+                for keys, values in self.ss.element_map.items():
+                    _, xi, yi, _, _, _ = self.teach.fetcher(self.ss.node_map.get(self.ss.element_map.get(keys).node_id1))
+                    id_, xf, yf, _, _, _ = self.teach.fetcher(self.ss.node_map.get(self.ss.element_map.get(keys).node_id2))
+                    xarray = np.linspace(xi, xf, 11)
+                    yarray = np.linspace(yi, yf, 11)
+                    newNearest = find_nearest(xarray, yarray, event.xdata, event.ydata)
+                    if newNearest < nearest:
+                        nearest = newNearest
+                        self.qload_pos.setText(str(id_-1))
                     if keys == len(self.ss.node_map) - 1:
                         break
+
             elif self.stackedWidget.currentIndex() == 5:
                 if 'LEFT' in str(event.button):
                     self.rect_x1.setText(str(round(event.xdata, px)))
@@ -3566,21 +3545,6 @@ class Ui_tenshi(QWidget):
     def aboutDialog(self):
         QMessageBox.about(self, self.about_title, self.about_text)
 
-    def showManual(self):
-        self.WebView.load(QtCore.QUrl("https://unipead-my.sharepoint.com/:b:/g/personal/leonardo_bornia_aluno_unip_br"
-                              "/EbpYfMNo_jxGttd41fAbP7kBaMt3yOvBJdb1TqQsaqQrgA?e=3h8ni3"))
-        self.WebView.setHidden(False)
-
-    def hideManual(self):
-        self.WebView.setHidden(True)
-
-    def showExamples(self):
-        self.WebView.load(QtCore.QUrl("https://pt.overleaf.com/read/xbgmjcngdzst"))
-        self.WebView.setHidden(False)
-
-    def hideExamples(self):
-        self.WebView.setHidden(True)
-
     def showDownloadPage(self):
         webbrowser.open("https://github.com/LeoBelmont/Solid-Mechanics-Solver/releases")
 
@@ -3591,6 +3555,32 @@ class Ui_tenshi(QWidget):
     def scientific_format(self, number):
         var = '%E' % number
         return var.split('E')[0].rstrip('0').rstrip('.') + 'E' + var.split('E')[1]
+
+    def doStartUpStuff(self):
+        self.disable_buttons()
+        self.frame_4.setHidden(True)
+        self.support_angle.setHidden(True)
+        self.label_27.setHidden(True)
+        self.label_71.setHidden(True)
+        self.label_73.setHidden(True)
+        self.spring_k.setHidden(True)
+        self.label_113.setHidden(True)
+        self.label_127.setHidden(True)
+        self.spring_translation.setHidden(True)
+        self.cs_y.setEnabled(False)
+        self.cs_z.setEnabled(False)
+        self.radio_plane.setChecked(True)
+        self.frame_16.setDisabled(True)
+        self.label_83.setHidden(True)
+        self.label_85.setHidden(True)
+        self.show_mohr.setHidden(True)
+        self.show_sec.setHidden(True)
+        self.line_3.setHidden(True)
+        self.line_10.setHidden(True)
+        self.line_13.setHidden(True)
+        self.line_4.setHidden(True)
+        self.switch_states_plane()
+        self.change_interactive_mode()
 
 if __name__ == "__main__":
     os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"

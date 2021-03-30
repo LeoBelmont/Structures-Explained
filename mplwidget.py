@@ -20,7 +20,7 @@ class MplWidget(QWidget):
         self.ax = self.canvas.figure.add_subplot(111)
         self.ax.patch.set_alpha(0.2)
 
-        #self.toolbar_buttons()
+        self.toolbar_buttons()
         self.toolbar = NavigationToolbar(self.canvas, self)
 
         self.default_cursor = qt5agg.cursord[1]
@@ -35,7 +35,7 @@ class MplWidget(QWidget):
         self.setGrid()
 
     def toolbar_buttons(self):
-        backend_bases.NavigationToolbar2.toolitems = (
+        NavigationToolbar.toolitems = (
             ('Home', 'Reset original view', 'home', 'home'),
             (None, None, None, None),
             ('Pan', 'Pan axes with left mouse, zoom with right', 'move', 'pan'),
@@ -90,7 +90,7 @@ class MplWidget(QWidget):
         ax = self.canvas.figure.get_axes()
         if hasGrid:
             for i in range(len(ax)):
-                ax[i].grid(hasGrid, linestyle="--", color=(29/255,40/255,51/255))
+                ax[i].grid(hasGrid, linestyle="--", color=(46/255, 64/255, 82/255))
         else:
             for i in range(len(ax)):
                 ax[i].grid(False)
