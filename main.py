@@ -2309,6 +2309,7 @@ class Ui_tenshi(QWidget):
         self.shear_warning_title = "Indisponível"
         self.shear_warning_str = "Seções transversal não foi desenhada, contém setores circulares ou os resultados não foram obtidos da figura."
         self.latex_error_str = "É necessário ter o Miktex instalado para gerar a resolução."
+        self.packages_error_str = "Algo deu errado. É provavel que você não tenha os pacotes do Latex instalados."
         self.font_size_str = "Tamanho da Fonte"
         self.font_strucuture_str = "Fonte da Estrutura:"
         self.font_equations_str = "Fonte das Equações:"
@@ -2612,7 +2613,8 @@ class Ui_tenshi(QWidget):
         self.pdf_generated_str = "PDF successfully generated"
         self.shear_warning_title = "Unavailable"
         self.shear_warning_str = "Cross section wasn't drawn, contains circular sectors or results weren't calculated from figure."
-        self.latex_error_str = "Please install Miktex to generate resolutions"
+        self.latex_error_str = "Please install Miktex to generate resolutions."
+        self.packages_error_str = "Something went wrong. It's likely you don't have the Latex packages installed."
         self.font_size_str = "Font Size"
         self.font_strucuture_str = "Structure Font:"
         self.font_equations_str = "Equations Font:"
@@ -2849,14 +2851,17 @@ class Ui_tenshi(QWidget):
                 if len(self.ss.supports_roll) == 1 and len(self.ss.supports_hinged) == 1:
                     file, ok = QFileDialog.getSaveFileName(self, self.pdf_title, self.pdf_text, "PDF (*.pdf)")
                     if ok:
-                        functions.eq.clear()
-                        functions.n.clear()
-                        self.structure_savefig()
-                        self.teach.solver(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
-                                          self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
-                                          self.ss.loads_qi, self.ss.node_map)
-                        os.replace("Settings\\resolucao.pdf", f"{file}")
-                        self.pdf_generated_prompt()
+                        try:
+                            functions.eq.clear()
+                            functions.n.clear()
+                            self.structure_savefig()
+                            self.teach.solver(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
+                                              self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
+                                              self.ss.loads_qi, self.ss.node_map)
+                            os.replace("Settings\\resolucao.pdf", f"{file}")
+                            self.pdf_generated_prompt()
+                        except:
+                            self.latex_packages_warning()
                 else:
                     self.static_warning()
             else:
@@ -2869,10 +2874,13 @@ class Ui_tenshi(QWidget):
             if self.mohr.sx is not None:
                 file, ok = QFileDialog.getSaveFileName(self, self.pdf_title, self.pdf_text, "PDF (*.pdf)")
                 if ok:
-                    self.mohr_savefig()
-                    self.mohr.solver()
-                    os.replace("Settings\\resolucaomohr.pdf", f"{file}")
-                    self.pdf_generated_prompt()
+                    try:
+                        self.mohr_savefig()
+                        self.mohr.solver()
+                        os.replace("Settings\\resolucaomohr.pdf", f"{file}")
+                        self.pdf_generated_prompt()
+                    except:
+                        self.latex_packages_warning()
             else:
                 self.warning()
         else:
@@ -2883,9 +2891,12 @@ class Ui_tenshi(QWidget):
             if self.sig.sub_areas_cir or self.sig.sub_areas_rect:
                 file, ok = QFileDialog.getSaveFileName(self, self.pdf_title, self.pdf_text, "PDF (*.pdf)")
                 if ok:
-                    self.sig.solver()
-                    os.replace("Settings\\resolucaorm.pdf", f"{file}")
-                    self.pdf_generated_prompt()
+                    try:
+                        self.sig.solver()
+                        os.replace("Settings\\resolucaorm.pdf", f"{file}")
+                        self.pdf_generated_prompt()
+                    except:
+                        self.latex_packages_warning()
             else:
                 self.warning()
         else:
@@ -2928,10 +2939,10 @@ class Ui_tenshi(QWidget):
 
     def reset_struct_elems(self):
         self.ss = pickle.loads(self.blankss)
+        self.states.clear()
         self.MplWidget.plot(hasGrid=self.gridBox.isChecked())
         self.figurefix()
         self.solvetrue = False
-        self.states.append(pickle.dumps(self.ss))
         self.disable_buttons()
         functions.eq.clear()
         functions.n.clear()
@@ -3006,6 +3017,13 @@ class Ui_tenshi(QWidget):
         msg.setIcon(QMessageBox.Warning)
         x = msg.exec_()
 
+    def latex_packages_warning(self):
+        msg = QMessageBox()
+        msg.setWindowTitle(self.warning_title)
+        msg.setText(self.packages_error_str)
+        msg.setIcon(QMessageBox.Warning)
+        x = msg.exec_()
+
     def pdf_generated_prompt(self):
         msg = QMessageBox()
         msg.setWindowTitle(self.pdf_generated_title)
@@ -3042,16 +3060,16 @@ class Ui_tenshi(QWidget):
 
     def undo_previous(self):
         if self.last_figure != self.show_sec and self.last_figure != self.show_mohr:
-            if self.states:
+            if len(self.states) != 0:
                 del self.states[-1]
-            if len(self.states) >= 2:
+                print(len(self.states))
+            if len(self.states) != 0:
                 self.ss = pickle.loads(self.states[-1])
                 self.visualize(self.ss.show_structure(show=False, figure=self.MplWidget.canvas.figure))
                 self.enable_buttons()
                 if self.solvetrue == True:
                     self.solvetrue = False
             else:
-                self.states.clear()
                 self.reset_struct_elems()
 
     def workaround(self):
@@ -3101,7 +3119,7 @@ class Ui_tenshi(QWidget):
                 z = self.filter(self.cs_z.text())
             results = self.sig.det_normal_tension(N, At, My, Mx, Ix, Iy, self.checkBox.isChecked(), y, z)
             self.tnresult.setText(f'{results[0]}')
-            self.tneutral.setText(f"{Decimal(str(results[1]))}")
+            self.tneutral.setText(f"{results[1]}")
         else:
             self.warning()
 
@@ -3349,16 +3367,22 @@ class Ui_tenshi(QWidget):
         sy = self.filter(self.sy.text())
         txy = self.filter(self.txy.text())
         if self.radio_plane.isChecked():
-            self.mohr.triple = False
-            self.visualize_mohr(self.mohr.plain_state(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
+            if sx != '' and sy != '' and txy != '':
+                self.mohr.triple = False
+                self.visualize_mohr(self.mohr.plain_state(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
+            else:
+                self.warning()
 
         elif self.radio_triple.isChecked():
-            sz = self.filter(self.sz.text())
-            txz = self.filter(self.txz.text())
-            tyz = self.filter(self.tyz.text())
-            self.mohr.triple = True
-            self.visualize_mohr(self.mohr.triple_state(float(sx), float(sy), float(sz), float(txy),
-                                                       float(txz), float(tyz), self.MplWidget.canvas.figure))
+                sz = self.filter(self.sz.text())
+                txz = self.filter(self.txz.text())
+                tyz = self.filter(self.tyz.text())
+                if sx != '' and sy != '' and sz != '' and txy != '' and txz != '' and tyz != '':
+                    self.mohr.triple = True
+                    self.visualize_mohr(self.mohr.triple_state(float(sx), float(sy), float(sz), float(txy),
+                                                               float(txz), float(tyz), self.MplWidget.canvas.figure))
+                else:
+                    self.warning()
 
     def UI_font(self):
         font, ok = QtWidgets.QFontDialog.getFont()
