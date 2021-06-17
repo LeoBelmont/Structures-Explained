@@ -14,6 +14,7 @@ class MplWidget(QWidget):
         QWidget.__init__(self, parent)
 
         plt.style.use('dark_background')
+
         figure = plt.figure()
         self.canvas = FigureCanvas(figure)
         self.canvas.figure.patch.set_alpha(0)
@@ -32,6 +33,7 @@ class MplWidget(QWidget):
 
         self.setLayout(self.vertical_layout)
         plt.tight_layout()
+        plt.autoscale(enable=True, tight=True)
         self.setGrid()
 
     def toolbar_buttons(self):
