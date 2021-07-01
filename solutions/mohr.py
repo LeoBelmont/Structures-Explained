@@ -3,6 +3,7 @@ import numpy
 from solutions import functions
 from pylatex import Document, Section, Subsection, Figure, NoEscape
 from sympy import Symbol, latex, simplify
+from solutions import header
 
 
 class mohr_circle():
@@ -339,31 +340,10 @@ class mohr_circle():
 
     def solver(self):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
-        doc.preamble.append(NoEscape(r"""
-        \usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
-        \usepackage{setspace}
-        \onehalfspacing
-        \usepackage[portuguese]{babel}
-        \usepackage{indentfirst}
-        \usepackage{graphicx}
-        \usepackage{caption}
-        \usepackage{amsmath}
-        \usepackage{multicol}
-        \usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
-        \usepackage{cals, ragged2e, lmodern}
-        \usepackage{pdflscape}
-        \usepackage{float}
-        \usepackage{breqn}
-        \usepackage{helvet}
-        \renewcommand{\familydefault}{\sfdefault}
-        """))
+        doc.preamble.append(NoEscape(header.PDFsettings))
 
         if not self.sigma3:
-            doc.preamble.append(NoEscape(r"""
-            \title{Estado Plano de Tensões}
-            \author{}
-            """))
-            doc.append(NoEscape(r"\maketitle"))
+            doc.append(NoEscape(header.makeCover("Estado Duplo de Tensões")))
             with doc.create(Section('Calculo do raio ou tensão de cisalhamento máxima')):
                 with doc.create(Subsection(r'Fórmula do raio/tensão de cisalhamento máxima')):
                     doc.append(NoEscape(r'\begin{dmath*}'))
@@ -429,10 +409,7 @@ class mohr_circle():
                     fig_mohrleft.add_caption(NoEscape(r'\label{fig:estrutura} Estado Plano de Tensões e círculo de Mohr'))
 
         elif self.sigma3:
-            doc.preamble.append(NoEscape(r"""
-                        \title{Estado Triplo de Tensões}
-                        \author{}"""))
-            doc.append(NoEscape(r"\maketitle"))
+            doc.append(NoEscape(header.makeCover("Estado Triplo de Tensões")))
             with doc.create(Section("Fórmulas para os cálculos")):
                 with doc.create(Subsection(r'Fórmula para cálculo das tensões principais')):
                     doc.append(NoEscape(r"O cálculo das tensões principais pode ser realizado por meio do cálculo dos "
@@ -535,8 +512,8 @@ class mohr_circle():
                     fig_mohrleft.add_caption(
                         NoEscape(r'\label{fig:estrutura} Estado Triplo de Tensões e círculo de Mohr'))
 
+        doc.generate_tex('tmp\\resolucaomohrt')
         doc.generate_pdf('tmp\\resolucaomohr',
                          compiler='pdflatex',
                          win_no_console=True,
                          compiler_args=["-enable-installer"])
-        #doc.generate_tex('tmp\\resolucaomohr')

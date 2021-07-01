@@ -7,6 +7,7 @@ from matplotlib.patches import Rectangle, Wedge
 from solutions import functions
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
 import numpy as np
+from solutions import header
 
 
 class sigma():

@@ -3,6 +3,7 @@ import numpy
 from solutions import functions
 import re
 import pickle
+from solutions import header
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import savefig
 from sympy import symbols, Number
@@ -238,25 +239,9 @@ class Teacher():
 
     def savior(self, hinged, roll, roll_direction, fixed, node_map, moment, df, target_dir):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
-        doc.preamble.append(NoEscape(r"""
-                \usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
-                \usepackage{setspace}
-                \onehalfspacing
-                \usepackage[portuguese]{babel}
-                \usepackage{indentfirst}
-                \usepackage{graphicx}
-                \usepackage{caption}
-                \usepackage{amsmath}
-                \usepackage{multicol}
-                \usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
-                \usepackage{cals, ragged2e, lmodern}
-                \usepackage{pdflscape}
-                \usepackage{float}
-                \usepackage{breqn}
-                \usepackage{gensymb}
-                \usepackage{helvet}
-                \renewcommand{\familydefault}{\sfdefault}
+        doc.preamble.append(NoEscape(header.PDFsettings))
 
+        doc.preamble.append(NoEscape(r"""
                 \title{Cálculos da Estrutura}
                 \author{}
                 """))

@@ -76,53 +76,25 @@ class Ui_loading_prompt(QWidget):
         self.userTerminated = True
 
 
-class StructureThread(QThread):
+class PDFGeneratorThread(QThread):
 
-    def __init__(self, UI, loadingScreen, file, ss):
+    def __init__(self, loadingScreen, fig_grabber, PDF_generator, ss=None, file=None):
         QThread.__init__(self)
-        self.UI = UI
         self.loadingScreen = loadingScreen
-        self.file = file
+        self.fig_grabber = fig_grabber
+        self.PDF_generator = PDF_generator
         self.ss = ss
+        self.file = file
 
     def __del__(self):
         self.wait()
 
     def run(self):
-        self.UI.structure_savefig()
-        self.UI.teach.solver(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
-                             self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
-                             self.ss.loads_qi, self.ss.node_map, self.file)
-        self.loadingScreen.close()
-
-
-class CrossSectionThread(QThread):
-
-    def __init__(self, UI, loadingScreen):
-        QThread.__init__(self)
-        self.UI = UI
-        self.loadingScreen = loadingScreen
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        self.UI.rm_savefig()
-        self.UI.sig.solver()
-        self.loadingScreen.close()
-
-
-class MohrThread(QThread):
-
-    def __init__(self, UI, loadingScreen):
-        QThread.__init__(self)
-        self.UI = UI
-        self.loadingScreen = loadingScreen
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        self.UI.mohr_savefig()
-        self.UI.mohr.solver()
+        self.fig_grabber()
+        if self.ss is None and self.file is None:
+            self.PDF_generator()
+        else:
+            self.PDF_generator(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
+                               self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
+                               self.ss.loads_qi, self.ss.node_map, self.file)
         self.loadingScreen.close()

@@ -3,6 +3,7 @@ import inspect
 import locale
 import ctypes
 import sys
+import time
 import webbrowser
 import shutil
 import pickle
@@ -28,7 +29,6 @@ from solutions.sigma import sigma
 
 
 class Ui_tenshi(QWidget):
-
     sig = sigma()
     teach = Teacher()
     ss = SystemElements()
@@ -40,6 +40,7 @@ class Ui_tenshi(QWidget):
     struct_loaded = False
     cross_loaded = False
     mohr_loaded = False
+    isPresenting = False
 
     def setupUi(self, tenshi):
         tenshi.setObjectName("tenshi")
@@ -1945,8 +1946,6 @@ class Ui_tenshi(QWidget):
         self.blankss = pickle.dumps(self.ss)
         self.blanksig = pickle.dumps(self.sig)
 
-        #self.fullscreen()
-
         self.beam_apply.clicked.connect(self.beam)
         self.utilizeinfo.stateChanged.connect(self.beam_info)
         self.elementtype.currentIndexChanged.connect(self.element_type_list)
@@ -2014,14 +2013,14 @@ class Ui_tenshi(QWidget):
         self.MplWidget.canvas.mpl_connect('button_release_event', self.on_release)
         self.int_plot.stateChanged.connect(self.change_interactive_mode)
         self.gridBox.stateChanged.connect(self.replotGrid)
-        #self.deadzone_x.textEdited.connect(lambda: self.MplWidget.setXTicks(self.deadzone_x.text()))
-        #self.deadzone_y.textEdited.connect(lambda: self.MplWidget.setYTicks(self.deadzone_y.text()))
+        # self.deadzone_x.textEdited.connect(lambda: self.MplWidget.setXTicks(self.deadzone_x.text()))
+        # self.deadzone_y.textEdited.connect(lambda: self.MplWidget.setYTicks(self.deadzone_y.text()))
 
         self.light_theme_button.triggered.connect(self.light_theme)
         self.dark_theme_button.triggered.connect(self.dark_theme)
         self.aboutButton.triggered.connect(self.aboutDialog)
         self.downloadPageButton.triggered.connect(self.showDownloadPage)
-        self.fullscreenButton.triggered.connect(self.fullscreen)
+        self.fullscreenButton.triggered.connect(self.toggle_presentation_mode)
 
         # eech recognition (unfinished)
         # sr.SetupUISecretary(self)
@@ -2193,7 +2192,8 @@ class Ui_tenshi(QWidget):
         self.label_94.setText(_translate("tenshi", "°"))
         self.circle_apply.setText(_translate("tenshi", "Aplicar"))
         self.circle_remove.setText(_translate("tenshi", "Remover"))
-        self.label_128.setText(_translate("tenshi", "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adicionar semicírculos impossibilitará o cálculo da tensão de cisalhamento e fluxo.</span></p></body></html>"))
+        self.label_128.setText(_translate("tenshi",
+                                          "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adicionar semicírculos impossibilitará o cálculo da tensão de cisalhamento e fluxo.</span></p></body></html>"))
         self.label_61.setText(_translate("tenshi", "Momento Estático em Y (Origem)"))
         self.label_62.setText(_translate("tenshi", "Momento de Inércia em Z (CG)"))
         self.label_63.setText(_translate("tenshi", "Momento de Inércia em Y (CG)"))
@@ -2219,7 +2219,7 @@ class Ui_tenshi(QWidget):
         self.label_103.setText(_translate("tenshi", "m"))
         self.label_104.setText(_translate("tenshi", "m"))
         self.label_105.setText(_translate("tenshi", "Pa"))
-        #self.label_106.setText(_translate("tenshi", "m")) unidade linha neutra
+        # self.label_106.setText(_translate("tenshi", "m")) unidade linha neutra
         self.label_70.setText(_translate("tenshi", "Tensão Normal:"))
         self.label_72.setText(_translate("tenshi", "Linha Neutra:"))
         self.tncalculate.setText(_translate("tenshi", "Calcular"))
@@ -2299,6 +2299,7 @@ class Ui_tenshi(QWidget):
         self.actionP_gina_para_Download.setText(_translate("tenshi", "Baixar Manual e Exemplos"))
         self.downloadPageButton.setText(_translate("tenshi", "Baixar Manual e Exemplos"))
         self.reset_cross_section.setText(_translate("tenshi", "Tudo"))
+        self.fullscreenButton.setText(_translate("tenshi", "Alternar Modo Tela Cheia"))
 
         self.load_structure_str = "Carregar Arquivo"
         self.strucutre_type_str = "Estrutura(*.pkl)"
@@ -2331,14 +2332,14 @@ class Ui_tenshi(QWidget):
                               "Exemplos de utilização: link aqui")
         self.about_title = "Sobre"
         self.about_text = ("Desenvolvido como trabalho de Iniciação Científica na EESC-USP em 2020.\n"
-                            "\n"
-                            "Desenvolvido por Leonardo de Souza Bornia\n"
-                            "\n"
-                            "Agradecimentos:\n"
-                            "Eng. Me. Henrique Borges Garcia\n"
-                            "Prof. Me. Gustavo Lahr\n"
-                            "Prof. Dr. Glauco Augusto de Paula Caurin\n"
-                            "Fundação de Apoio à Física e à Química\n")
+                           "\n"
+                           "Desenvolvido por Leonardo de Souza Bornia\n"
+                           "\n"
+                           "Agradecimentos:\n"
+                           "Eng. Me. Henrique Borges Garcia\n"
+                           "Prof. Me. Gustavo Lahr\n"
+                           "Prof. Dr. Glauco Augusto de Paula Caurin\n"
+                           "Fundação de Apoio à Física e à Química\n")
 
     def retranslateUiEN(self):
         _translate = QtCore.QCoreApplication.translate
@@ -2506,7 +2507,8 @@ class Ui_tenshi(QWidget):
         self.label_94.setText(_translate("tenshi", "°"))
         self.circle_apply.setText(_translate("tenshi", "Apply"))
         self.circle_remove.setText(_translate("tenshi", "Remove"))
-        self.label_128.setText(_translate("tenshi", "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adding semicircles will unable calculations of the shear stress and flux.</span></p></body></html>"))
+        self.label_128.setText(_translate("tenshi",
+                                          "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adding semicircles will unable calculations of the shear stress and flux.</span></p></body></html>"))
         self.label_59.setText(_translate("tenshi", "Data/Results"))
         self.figureResultsButton.setText(_translate("tenshi", "Get Results from Figure"))
         self.insertDataButton.setText(_translate("tenshi", "Insert Data"))
@@ -2533,7 +2535,7 @@ class Ui_tenshi(QWidget):
         self.label_103.setText(_translate("tenshi", "m"))
         self.label_104.setText(_translate("tenshi", "m"))
         self.label_105.setText(_translate("tenshi", "Pa"))
-        #self.label_106.setText(_translate("tenshi", "m")) neutral line unity
+        # self.label_106.setText(_translate("tenshi", "m")) neutral line unity
         self.label_70.setText(_translate("tenshi", "Normal Stress:"))
         self.label_72.setText(_translate("tenshi", "Neutral Line:"))
         self.tncalculate.setText(_translate("tenshi", "Calculate"))
@@ -2609,6 +2611,7 @@ class Ui_tenshi(QWidget):
         self.hideManualButton.setText(_translate("tenshi", "Hide Manual"))
         self.actionP_gina_para_Download.setText(_translate("tenshi", "Download Manual and Examples"))
         self.downloadPageButton.setText(_translate("tenshi", "Download Manual and Examples"))
+        self.fullscreenButton.setText(_translate("tenshi", "Toggle Fullscreen Mode"))
 
         self.load_structure_str = "Load Structure"
         self.strucutre_type_str = "Structure(*.pkl)"
@@ -2658,7 +2661,7 @@ class Ui_tenshi(QWidget):
                 EA = float(self.filter(self.beam_E.text())) * float(self.filter(self.beam_A.text()))
                 element_types = ["beam", "truss"]
                 self.ss.add_element(location=[[self.filter(self.beam_x1.text()), self.filter(self.beam_y1.text())],
-                                          [self.filter(self.beam_x2.text()), self.filter(self.beam_y2.text())]],
+                                              [self.filter(self.beam_x2.text()), self.filter(self.beam_y2.text())]],
                                     EI=EI, EA=EA, element_type=element_types[e])
 
             else:
@@ -2707,7 +2710,8 @@ class Ui_tenshi(QWidget):
                 elif self.support_fixed.isChecked():
                     self.ss.add_support_fixed(node_id=int(self.support_pos.text()))
                 elif self.support_spring.isChecked():
-                    self.ss.add_support_spring(node_id=int(self.support_pos.text()), translation=self.spring_translation.text(), k=self.spring_k.text())
+                    self.ss.add_support_spring(node_id=int(self.support_pos.text()),
+                                               translation=self.spring_translation.text(), k=self.spring_k.text())
                 elif self.support_internal_hinge.isChecked():
                     pass
 
@@ -2751,9 +2755,11 @@ class Ui_tenshi(QWidget):
             if int(self.load_pos.text()) in self.ss.node_map.keys():
                 self.workaround()
                 if self.load_moment.text() != '' and float(self.load_moment.text()) != 0:
-                    self.ss.moment_load(node_id=int(self.load_pos.text()), Ty=float(self.filter(self.load_moment.text())))
+                    self.ss.moment_load(node_id=int(self.load_pos.text()),
+                                        Ty=float(self.filter(self.load_moment.text())))
 
-                if float(self.load_y.text()) == 0 and float(self.load_x.text()) == 0 and float(self.load_angle.text()) == 0:
+                if float(self.load_y.text()) == 0 and float(self.load_x.text()) == 0 and float(
+                        self.load_angle.text()) == 0:
                     pass
                 elif self.load_y.text() != '' and self.load_x.text() != '' and self.load_angle.text() != '':
                     self.ss.point_load(node_id=int(self.load_pos.text()), Fy=float(self.filter(self.load_y.text())),
@@ -2881,7 +2887,11 @@ class Ui_tenshi(QWidget):
                             functions.eq.clear()
                             functions.n.clear()
                             self.setupLoading()
-                            thread = loadingPrompt.StructureThread(self, self.loadingScreen, file, self.ss)
+                            thread = loadingPrompt.PDFGeneratorThread(self.loadingScreen,
+                                                                      self.structure_savefig,
+                                                                      self.teach.solver,
+                                                                      self.ss,
+                                                                      file)
                             thread.start()
                             self.loadingScreen.exec_()
                             if not self.loadingUi.userTerminated:
@@ -2904,8 +2914,11 @@ class Ui_tenshi(QWidget):
                 if ok:
                     try:
                         self.toolBox.setCurrentIndex(2)
+                        self.MplWidget.fix_plot_scale()
                         self.setupLoading()
-                        thread = loadingPrompt.MohrThread(self, self.loadingScreen)
+                        thread = loadingPrompt.PDFGeneratorThread(self.loadingScreen,
+                                                                  self.mohr_savefig,
+                                                                  self.mohr.solver)
                         thread.start()
                         self.loadingScreen.exec_()
                         if not self.loadingUi.userTerminated:
@@ -2927,7 +2940,9 @@ class Ui_tenshi(QWidget):
                     try:
                         self.toolBox.setCurrentIndex(1)
                         self.setupLoading()
-                        thread = loadingPrompt.CrossSectionThread(self, self.loadingScreen)
+                        thread = loadingPrompt.PDFGeneratorThread(self.loadingScreen,
+                                                                  self.rm_savefig,
+                                                                  self.sig.solver)
                         thread.start()
                         self.loadingScreen.exec_()
                         if not self.loadingUi.userTerminated:
@@ -3249,7 +3264,7 @@ class Ui_tenshi(QWidget):
             self.circle_y.setText(f"{self.sig.sub_areas_cir[c][1]}")
             self.circle_r.setText(f"{self.sig.sub_areas_cir[c][2]}")
             self.circle_ai.setText(f"{self.sig.sub_areas_cir[c][3]}")
-            #self.circle_af.setText(f"{self.sig.sub_areas_cir[c][4]}")
+            # self.circle_af.setText(f"{self.sig.sub_areas_cir[c][4]}")
         else:
             self.clear_cir_text()
         if self.circle_visualize.isChecked():
@@ -3289,7 +3304,7 @@ class Ui_tenshi(QWidget):
             self.update_ret()
 
     def update_ret(self):
-        if self.rect_x1.text() != '' and self.rect_y1.text() != '' and\
+        if self.rect_x1.text() != '' and self.rect_y1.text() != '' and \
                 self.rect_x2.text() != '' and self.rect_y2.text() != '':
             x1 = self.filter(self.rect_x1.text())
             y1 = self.filter(self.rect_y1.text())
@@ -3323,7 +3338,7 @@ class Ui_tenshi(QWidget):
 
     def update_cir(self):
         if self.circle_x.text() != '' and self.circle_y.text() != '' and \
-                self.circle_r.text() != '' and self.circle_ai.text() != '': #and self.circle_af.text() != '':
+                self.circle_r.text() != '' and self.circle_ai.text() != '':  # and self.circle_af.text() != '':
             x = self.filter(self.circle_x.text())
             y = self.filter(self.circle_y.text())
             r = self.filter(self.circle_r.text())
@@ -3331,7 +3346,7 @@ class Ui_tenshi(QWidget):
             c = self.circle_list.currentIndex()
             self.sig.sub_areas_cir.update({c: [float(x), float(y),
                                                float(r), float(ai)]})
-                                               #self.circle_af.text()]})
+            # self.circle_af.text()]})
             self.finish_applying()
         else:
             self.warning()
@@ -3451,20 +3466,21 @@ class Ui_tenshi(QWidget):
         if self.radio_plane.isChecked():
             if sx != '' and sy != '' and txy != '':
                 self.mohr.triple = False
-                self.visualize_mohr(self.mohr.plain_state(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
+                self.visualize_mohr(
+                    self.mohr.plain_state(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
             else:
                 self.warning()
 
         elif self.radio_triple.isChecked():
-                sz = self.filter(self.sz.text())
-                txz = self.filter(self.txz.text())
-                tyz = self.filter(self.tyz.text())
-                if sx != '' and sy != '' and sz != '' and txy != '' and txz != '' and tyz != '':
-                    self.mohr.triple = True
-                    self.visualize_mohr(self.mohr.triple_state(float(sx), float(sy), float(sz), float(txy),
-                                                               float(txz), float(tyz), self.MplWidget.canvas.figure))
-                else:
-                    self.warning()
+            sz = self.filter(self.sz.text())
+            txz = self.filter(self.txz.text())
+            tyz = self.filter(self.tyz.text())
+            if sx != '' and sy != '' and sz != '' and txy != '' and txz != '' and tyz != '':
+                self.mohr.triple = True
+                self.visualize_mohr(self.mohr.triple_state(float(sx), float(sy), float(sz), float(txy),
+                                                           float(txz), float(tyz), self.MplWidget.canvas.figure))
+            else:
+                self.warning()
 
     def UI_font(self):
         font, ok = QtWidgets.QFontDialog.getFont()
@@ -3473,9 +3489,25 @@ class Ui_tenshi(QWidget):
                 if isinstance(obj, QtWidgets.QLabel):
                     obj.setFont(font)
 
-    def fullscreen(self):
-        print('oi')
+    def toggle_presentation_mode(self):
+        if self.isPresenting:
+            self.exit_presentation_mode()
+        else:
+            self.enter_presentation_mode()
+
+    def enter_presentation_mode(self):
+        self.isPresenting = True
+        #self.menubar.setHidden(True)
+        self.stackedWidget.setHidden(True)
+        self.frame_6.setHidden(True)
         tenshi.showFullScreen()
+
+    def exit_presentation_mode(self):
+        self.isPresenting = False
+        #self.menubar.setHidden(False)
+        self.stackedWidget.setHidden(False)
+        self.frame_6.setHidden(False)
+        tenshi.showNormal()
 
     def filter(self, string):
         return string.replace(",", ".")
@@ -3491,7 +3523,8 @@ class Ui_tenshi(QWidget):
             if self.last_figure == self.show_mohr:
                 if 'RIGHT' in str(event.button) and self.mohr.sz is not None:
                     self.visualize_mohr(self.mohr.triple_state(self.mohr.sx, self.mohr.sy, self.mohr.sz, self.mohr.txy,
-                                                               self.mohr.txz, self.mohr.tyz, self.MplWidget.canvas.figure))
+                                                               self.mohr.txz, self.mohr.tyz,
+                                                               self.MplWidget.canvas.figure))
             elif self.stackedWidget.currentIndex() == 0:
                 if 'LEFT' in str(event.button):
                     self.beam_x1.setText(str(round(event.xdata, px)))
@@ -3510,7 +3543,7 @@ class Ui_tenshi(QWidget):
                         id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
                         xdistance = event.xdata - x
                         ydistance = event.ydata - y
-                        new_distance = np.sqrt(xdistance**2 + ydistance**2)
+                        new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
                         if new_distance <= distance:
                             distance = new_distance
                             id = id_
@@ -3522,7 +3555,7 @@ class Ui_tenshi(QWidget):
                     id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
                     xdistance = event.xdata - x
                     ydistance = event.ydata - y
-                    new_distance = np.sqrt(xdistance**2 + ydistance**2)
+                    new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
                     if new_distance < distance:
                         distance = new_distance
                         id = id_
@@ -3534,7 +3567,7 @@ class Ui_tenshi(QWidget):
                     id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
                     xdistance = event.xdata - x
                     ydistance = event.ydata - y
-                    new_distance = np.sqrt(xdistance**2 + ydistance**2)
+                    new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
                     if new_distance < distance:
                         distance = new_distance
                         id = id_
@@ -3551,8 +3584,10 @@ class Ui_tenshi(QWidget):
 
                 nearest = 1e20
                 for keys, values in self.ss.element_map.items():
-                    _, xi, yi, _, _, _ = self.teach.fetcher(self.ss.node_map.get(self.ss.element_map.get(keys).node_id1))
-                    id_, xf, yf, _, _, _ = self.teach.fetcher(self.ss.node_map.get(self.ss.element_map.get(keys).node_id2))
+                    _, xi, yi, _, _, _ = self.teach.fetcher(
+                        self.ss.node_map.get(self.ss.element_map.get(keys).node_id1))
+                    id_, xf, yf, _, _, _ = self.teach.fetcher(
+                        self.ss.node_map.get(self.ss.element_map.get(keys).node_id2))
                     xarray = np.linspace(xi, xf, 11)
                     yarray = np.linspace(yi, yf, 11)
                     newNearest = find_nearest(xarray, yarray, event.xdata, event.ydata)
@@ -3576,7 +3611,8 @@ class Ui_tenshi(QWidget):
 
     def on_release(self, event):
         if self.int_plot.isChecked():
-            if self.last_figure == self.show_mohr and 'RIGHT' not in str(event.button) and self.MplWidget.canvas.figure.gca().name == "3d":
+            if self.last_figure == self.show_mohr and 'RIGHT' not in str(
+                    event.button) and self.MplWidget.canvas.figure.gca().name == "3d":
                 self.visualize_mohr(self.mohr.on_release(self.MplWidget.canvas.figure))
 
     def get_prompt_values(self):
@@ -3703,7 +3739,7 @@ class CustomQMainWindow(QMainWindow):
 
     def closeEvent(self, event, *args, **kwargs):
         reply = QMessageBox.question(self, ui.close_title, ui.close_text,
-                             QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+                                     QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
 
         if reply == QMessageBox.Yes:
             event.accept()
