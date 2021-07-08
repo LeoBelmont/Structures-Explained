@@ -8,6 +8,7 @@ from solutions import functions
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
 import numpy as np
 from solutions import header
+from solutions.translations.cross_sec_strings import translate_PDF_cross_section
 
 
 class sigma():
@@ -232,51 +233,32 @@ class sigma():
         self.one_fig.set_alpha(0.2)
         return fig
 
-    def solver(self):
+    def solver(self, language):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
-        doc.preamble.append(NoEscape(r"""
-                \usepackage[left=1.5cm,right=1.5cm,top=2cm,bottom=2cm]{geometry}
-                \usepackage{setspace}
-                \onehalfspacing
-                \usepackage[portuguese]{babel}
-                \usepackage{indentfirst}
-                \usepackage{graphicx}
-                \usepackage{caption}
-                \usepackage{amsmath}
-                \usepackage{multicol}
-                \usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
-                \usepackage{cals, ragged2e, lmodern}
-                \usepackage{pdflscape}
-                \usepackage{float}
-                \usepackage{breqn}
+        doc.preamble.append(NoEscape(header.PDFsettings))
 
-                \title{Cálculos da Seção Transversal}
-                \author{}
-                """))
+        tpdf = translate_PDF_cross_section(language)
 
-        doc.append(NoEscape(r"""
-                \maketitle
-                """))
+        doc.append(NoEscape(header.makeCover(tpdf.title, language)))
 
-        with doc.create(Section(r'Subdividir a geometria da seção transversal em formas geométricas (subáreas) de '
-                                r'propriedades conhecidas')):
+        with doc.create(Section(tpdf.step_split)):
             with doc.create(Figure(position='H')) as fig_sectransv:
                 fig_sectransv.add_image("figs\\sectransv", width='500px')
-                fig_sectransv.add_caption(NoEscape(r'\label{fig:estrutura} Estrutura com subáreas contornadas de preto'))
+                fig_sectransv.add_caption(NoEscape(tpdf.figure_label))
 
-        with doc.create(Section('Calcular os momentos estáticos em relação ao eixo de interesse')):
+        with doc.create(Section(tpdf.step_static_moment)):
             if self.sub_areas_cir:
-                doc.append(NoEscape(r'Centroide da semi-circunferência:'))
+                doc.append(NoEscape(tpdf.centroid))
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'\frac{4 * R}{3 \cdot \pi}'))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
-            with doc.create(Subsection('Cálculo do momento estático em relação ao eixo X:')):
+            with doc.create(Subsection(tpdf.step_static_moment_x)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'Ms_{x_{total}} = \sum{Ms_x} \\'))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
-                doc.append(NoEscape(r'Ms_x = Area_{(sub-área)} \cdot \overline{Y} \\'))
+                doc.append(NoEscape(tpdf.msx_operation))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'Ms_{{x_{{total}}}} = {}'.format(self.Mx)))
@@ -285,12 +267,12 @@ class sigma():
                 doc.append(NoEscape(r'Ms_{{x_{{total}}}} = {:.2f}$ $m^3'.format(parse_expr(self.Mx))))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
-            with doc.create(Subsection('Cálculo do momento estático em relação ao eixo Y:')):
+            with doc.create(Subsection(tpdf.step_static_moment_y)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'Ms_{y_{total}} = \sum{Ms_y} \\'))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
-                doc.append(NoEscape(r'Ms_y = Area_{(sub-área)} \cdot \overline{X} \\'))
+                doc.append(NoEscape(tpdf.msy_operation))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'Ms_{{y_{{total}}}} = {}'.format(self.My)))
@@ -299,8 +281,8 @@ class sigma():
                 doc.append(NoEscape(r'Ms_{{y_{{total}}}} = {:.2f}$ $m^3'.format(parse_expr(self.My))))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
-        with doc.create(Section('Calcular os centroides em relação ao eixo de interesse')):
-            with doc.create(Subsection('Cálculo do centroide em relação ao eixo X:')):
+        with doc.create(Section(tpdf.step_centroid)):
+            with doc.create(Subsection(tpdf.centroid_x)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'X_{cg} = \frac{Ms_y}{A_{total}}'))
                 doc.append(NoEscape(r'\end{dmath*}'))
@@ -311,7 +293,7 @@ class sigma():
                 doc.append(NoEscape(r'X_{{cg}} = {:.2f}$ $m'.format(self.xg)))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
-            with doc.create(Subsection('Cálculo do centroide em relação ao eixo Y:')):
+            with doc.create(Subsection(tpdf.centroid_y)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'Y_{cg} = \frac{Ms_x}{A_{total}}'))
                 doc.append(NoEscape(r'\end{dmath*}'))
@@ -322,21 +304,21 @@ class sigma():
                 doc.append(NoEscape(r'Y_{{cg}} = {:.2f}$ $m'.format(self.yg)))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
-        with doc.create(Section('Calcular os momentos de inércia em relação aos eixos de interesse')):
-            doc.append(NoEscape(r'Quando necessário (ou, na dúvida, sempre), aplicar o teorema dos eixos paralelos \\'))
-            doc.append(NoEscape(r"Teorema dos eixos paralelos: I' = I + A * d² \\"))
+        with doc.create(Section(tpdf.step_moment_inercia)):
+            doc.append(NoEscape(tpdf.moment_inercia_tip))
+            doc.append(NoEscape(tpdf.theorem_formula))
 
-            with doc.create(Subsection(r'Cálculo do Momento de Inércia em relação a X:')):
+            with doc.create(Subsection(tpdf.moment_inercia_x)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'I_{x_{total}} = \sum{I_x}'))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 if self.sub_areas_rect:
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'I_{x_{(retângulos)}} = \frac{base \cdot altura^3}{12}'))
+                    doc.append(NoEscape(tpdf.moment_inercia_x_rect_formula))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 if self.sub_areas_cir:
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'I_{x_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}'))
+                    doc.append(NoEscape(tpdf.moment_inercia_x_circ_formula))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'I_{{x_{{total}}}} = {}'.format(self.Ixs)))
@@ -345,17 +327,17 @@ class sigma():
                 doc.append(NoEscape(r'I_{{x_{{total}}}} = {:.2f}$ $m^4'.format(parse_expr(self.Ix))))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
-            with doc.create(Subsection(r'Cálculo do Momento de Inércia em relação a Y:')):
+            with doc.create(Subsection(tpdf.moment_inercia_y)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'I_{y_{total}} = \sum{Iy}'))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 if self.sub_areas_rect:
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'I_{y_{(retângulos)}} = \frac{base^3 \cdot altura}{12}'))
+                    doc.append(NoEscape(tpdf.moment_inercia_y_rect_formula))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 if self.sub_areas_cir:
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'I_{y_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}'))
+                    doc.append(NoEscape(tpdf.moment_inercia_y_circ_formula))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(r'I_{{y_{{total}}}} = {}'.format(self.Iys)))
@@ -365,30 +347,29 @@ class sigma():
                 doc.append(NoEscape(r'\end{dmath*}'))
 
         if self.T_string:
-            with doc.create(Section('Calcular a Tensão Normal e Linha Neutra')):
-                with doc.create(Subsection('Fórmula da Tensão Normal')):
+            with doc.create(Section(tpdf.step_normal_stress_neutral_line)):
+                with doc.create(Subsection(tpdf.normal_stress_formula)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'T_{normal} = \frac{N}{A} - \frac{My}{Iy} \cdot z - \frac{Mz}{Iz} \cdot y'))
+                    doc.append(NoEscape(tpdf.normal_stress_var + r' \frac{N}{A} - \frac{My}{Iy} \cdot z - \frac{Mz}{Iz} \cdot y'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection('Fórmula da Linha Neutra')):
-                    doc.append(NoEscape(r'A linha neutra se encontra onde a Tensão Normal é 0, portanto para encontrar'
-                                        r' a posição da linha neutra (y) substituímos T por 0.'))
+                with doc.create(Subsection(tpdf.neutral_line_formula)):
+                    doc.append(NoEscape(tpdf.neutral_line_tip))
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(r'0 = \frac{N}{A} - \frac{My}{Iy} \cdot z - \frac{Mz}{Iz} \cdot y'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 for i in range(len(self.T_string)):
-                    with doc.create(Subsection(f'Cálculo para N = {self.points_values[i][0]} N, '
+                    with doc.create(Subsection(f'{tpdf.calculating_for} N = {self.points_values[i][0]} N, '
                                                f'My = {self.points_values[i][1]} Nm, Mz = {self.points_values[i][2]} Nm, '
                                                f'y = {self.points_values[i][3]} m, '
                                                f'z = {self.points_values[i][4]} m')):
-                        with doc.create(Subsubsection('Cálculo da Tensão Normal')):
+                        with doc.create(Subsubsection(tpdf.step_normal_stress)):
                             doc.append(NoEscape(r'\begin{dmath*}'))
-                            doc.append(NoEscape(r'T_{normal} =' + f'{self.T_string[i]}'))
+                            doc.append(NoEscape(tpdf.normal_stress_var + f'{self.T_string[i]}'))
                             doc.append(NoEscape(r'\end{dmath*}'))
                             doc.append(NoEscape(r'\begin{dmath*}'))
-                            doc.append(NoEscape(r'T_{normal} =' + f'{self.round_expr(parse_expr(self.T_numeric[i]), 2)}$ $Pa'))
+                            doc.append(NoEscape(tpdf.normal_stress_var + f'{self.round_expr(parse_expr(self.T_numeric[i]), 2)}$ $Pa'))
                             doc.append(NoEscape(r'\end{dmath*}'))
-                        with doc.create(Subsubsection('Cálculo da Linha Neutra')):
+                        with doc.create(Subsubsection(tpdf.step_neutral_line)):
                             doc.append(NoEscape(r'\begin{dmath*}'))
                             doc.append(NoEscape(f'{self.nl_string[i]}'))
                             doc.append(NoEscape(r'\end{dmath*}'))
@@ -397,66 +378,64 @@ class sigma():
                             doc.append(NoEscape(r'\end{dmath*}'))
 
         if self.flux_string or self.shear_string:
-            with doc.create(Section('Calcular o Momento Estático no corte')):
+            with doc.create(Section(tpdf.step_static_moment_cut)):
 
-                with doc.create(Subsection('Fórmula do Momento Estático para corte sobre a subárea')):
+                with doc.create(Subsection(tpdf.static_moment_cut_formula_above_str)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'M_{estático_{corte}} = Área_{subárea} \cdot (centroide_{subárea} - centroide_{figura})'))
+                    doc.append(NoEscape(tpdf.static_moment_cut_formula_above))
                     doc.append(NoEscape(r'\end{dmath*}'))
 
-                with doc.create(Subsection('Fórmula do Momento Estático para corte acima ou abaixo da subárea')):
+                with doc.create(Subsection(tpdf.static_moment_cut_formula_not_above_str)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'M_{estático_{corte}} = (\frac{altura}{2} + centroide_{subárea} - corte_y) \cdot'
-                                        r' base \cdot ((\frac{altura}{2} + centroide_{subárea} - corte_y) \cdot 0.5 + '
-                                        r'corte_y - centroide_{figura})'))
+                    doc.append(NoEscape(tpdf.static_moment_cut_formula_not_above))
                     doc.append(NoEscape(r'\end{dmath*}'))
 
             for i in range(len(self.Qc_string)):
-                    with doc.create(Subsection('Calcular o Momento Estático no corte')):
+                    with doc.create(Subsection(tpdf.step_static_moment_cut)):
                         doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'M_{estático_{corte}} =' + f'{self.Qc_string[i]}'))
+                        doc.append(NoEscape(tpdf.static_moment_var + f'{self.Qc_string[i]}'))
                         doc.append(NoEscape(r'\end{dmath*}'))
                         doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'M_{estático_{corte}} =' + f'{round(self.Qc_numeric[i], 2)}$ $m^3'))
+                        doc.append(NoEscape(tpdf.static_moment_var + f'{round(self.Qc_numeric[i], 2)}$ $m^3'))
                         doc.append(NoEscape(r'\end{dmath*}'))
 
         if self.flux_string:
-            with doc.create(Section('Calcular o Fluxo de Cisalhamento')):
-                with doc.create(Subsection('Fórmula do Fluxo de Cisalhamento')):
+            with doc.create(Section(tpdf.step_shear_flux)):
+                with doc.create(Subsection(tpdf.shear_flux_formula)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'f_{cisalhamento} = \frac{V \cdot Q}{I_x}'))
+                    doc.append(NoEscape(tpdf.shear_flux_var + r' \frac{V \cdot Q}{I_x}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 for i in range(len(self.flux_string)):
-                    with doc.create(Subsection(NoEscape(f'Cálculo para V = {self.points_values_flux[i][0]} N, '
+                    with doc.create(Subsection(NoEscape(f'{tpdf.calculating_for} V = {self.points_values_flux[i][0]} N, '
                                                f'Q = {self.points_values_flux[i][1]} m' + r'\textsuperscript{3}, '
                                                r'I\textsubscript{x}' + f' = {self.points_values_flux[i][2]} m' + r'\textsuperscript{4}'))):
                         doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'f_{cisalhamento} =' + f'{self.flux_string[i]}'))
+                        doc.append(NoEscape(tpdf.shear_flux_var + f'{self.flux_string[i]}'))
                         doc.append(NoEscape(r'\end{dmath*}'))
                         doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'f_{cisalhamento} =' + f'{self.round_expr(parse_expr(self.flux_numeric[i]), 2)}' + r'$ $\frac{N}{m}'))
+                        doc.append(NoEscape(tpdf.shear_flux_var + f'{self.round_expr(parse_expr(self.flux_numeric[i]), 2)}' + r'$ $\frac{N}{m}'))
                         doc.append(NoEscape(r'\end{dmath*}'))
 
         if self.shear_string:
-            with doc.create(Section('Calcular a Tensão de Cisalhamento')):
-                with doc.create(Subsection('Fórmula da Tensão de Cisalhamento')):
+            with doc.create(Section(tpdf.step_shear_stress)):
+                with doc.create(Subsection(tpdf.shear_stress_formula_str)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'T_{cisalhamento} = \frac{V \cdot Q}{I_x \cdot t}'))
+                    doc.append(NoEscape(tpdf.shear_stress_var + r' \frac{V \cdot Q}{I_x \cdot t}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                 for i in range(len(self.shear_string)):
-                    with doc.create(Subsection(NoEscape(f'Cálculo para V = {self.points_values_shear[i][0]} N, '
+                    with doc.create(Subsection(NoEscape(f'{tpdf.calculating_for} V = {self.points_values_shear[i][0]} N, '
                                                f'Q = {self.points_values_shear[i][1]} m' + r'\textsuperscript{3}, '
                                                r'I\textsubscript{x}' + f' = {self.points_values_shear[i][2]} m' + r'\textsuperscript{4}, '
                                                f't = {self.points_values_shear[i][3]} m'))):
                         doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'T_{cisalhamento} =' + f'{self.shear_string[i]}'))
+                        doc.append(NoEscape(tpdf.shear_stress_var + f'{self.shear_string[i]}'))
                         doc.append(NoEscape(r'\end{dmath*}'))
                         doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'T_{cisalhamento} =' + f'{self.round_expr(parse_expr(self.shear_numeric[i]), 2)}'+ r'$ $Pa'))
+                        doc.append(NoEscape(tpdf.shear_stress_var + f'{self.round_expr(parse_expr(self.shear_numeric[i]), 2)}'+ r'$ $Pa'))
                         doc.append(NoEscape(r'\end{dmath*}'))
 
         doc.generate_pdf('tmp\\resolucaorm',
-                         compiler = 'pdflatex',
+                         compiler='pdflatex',
                          win_no_console=True,
                          compiler_args=["-enable-installer"])
         #doc.generate_tex('tmp\\resolucaorm')

@@ -4,9 +4,10 @@ from solutions import functions
 from pylatex import Document, Section, Subsection, Figure, NoEscape
 from sympy import Symbol, latex, simplify
 from solutions import header
+from solutions.translations.mohr_strings import translate_PDF_Mohr
 
 
-class mohr_circle():
+class mohr_circle:
 
     bbox_setting = dict(boxstyle="round,pad=0.1", fc="grey", ec="black", lw=1)
     mode = None
@@ -338,89 +339,96 @@ class mohr_circle():
         else:
             return fig
 
-    def solver(self):
+    def solver(self, language):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
         doc.preamble.append(NoEscape(header.PDFsettings))
 
+        tpdf = translate_PDF_Mohr(language)
+
         if not self.sigma3:
-            doc.append(NoEscape(header.makeCover("Estado Duplo de Tensões")))
-            with doc.create(Section('Calculo do raio ou tensão de cisalhamento máxima')):
-                with doc.create(Subsection(r'Fórmula do raio/tensão de cisalhamento máxima')):
+            doc.append(NoEscape(header.makeCover(tpdf.title_2d, language)))
+            with doc.create(Section(tpdf.radius_and_max_shear)):
+                with doc.create(Subsection(tpdf.radius_and_max_shear_formula)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'T_{max} = \sqrt{(\frac{sx-sy}{2})^2 + txy ^ 2)}'))
+                    doc.append(NoEscape(tpdf.radius_var + r' \sqrt{(\frac{sx-sy}{2})^2 + txy ^ 2)}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection(r'Realizando a conta')):
+                with doc.create(Subsection(tpdf.radius_and_max_shear_solving)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'T_{max} = \sqrt{(\frac{'+f'{self.sx}'+f'-{self.sy}'+'}{2})^2 +'+f'{self.txy}'+'^ 2)}'))
+                    doc.append(NoEscape(
+                        tpdf.radius_var + r' \sqrt{(\frac{' + f'{self.sx}' + f'-{self.sy}' + '}{2})^2 +' + f'{self.txy}' + '^ 2)}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'T_{max} ='+f'{self.Tmax:.2f}'))
+                    doc.append(NoEscape(tpdf.radius_var + f'{self.Tmax:.2f}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-            with doc.create(Section('Calculo das tensões principais')):
-                with doc.create(Subsection(r'Fórmula para cálculo das tensões principais')):
+            with doc.create(Section(tpdf.main_stress_calculation)):
+                with doc.create(Subsection(tpdf.main_stress_formula)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'sigma_{1,2} = \sqrt{\frac{s_x + s_y}{2} \pm (\frac{s_x - s_y}{2}) ^ 2 + {t_{xy}} ^ 2}'))
+                    doc.append(NoEscape(
+                        r'sigma_{1,2} = \sqrt{\frac{s_x + s_y}{2} \pm (\frac{s_x - s_y}{2}) ^ 2 + {t_{xy}} ^ 2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection('Calculo de sigma 1')):
+                with doc.create(Subsection(tpdf.sigma_1_solving)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'sigma_1 = \sqrt{\frac{'+f'{self.sx}'+f'+ {self.sy}'+r'}{2} + (\frac{'+f'{self.sx}'+' - '+f'{self.sy}'+'}{2}) ^ 2 + '+f'{self.txy}'+' ^ 2}'))
+                    doc.append(NoEscape(
+                        r'sigma_1 = \sqrt{\frac{' + f'{self.sx}' + f'+ {self.sy}' + r'}{2} + (\frac{' + f'{self.sx}' + ' - ' + f'{self.sy}' + '}{2}) ^ 2 + ' + f'{self.txy}' + ' ^ 2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(f'sigma_1 = {self.sigma1:.2f}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection('Calculo de sigma 2')):
+                with doc.create(Subsection(tpdf.sigma_2_solving)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'sigma_2 = \sqrt{\frac{' + f'{self.sx}' + f'+ {self.sy}' + r'}{2} - (\frac{' + f'{self.sx}' + ' - ' + f'{self.sy}' + '}{2}) ^ 2 + ' + f'{self.txy}' + ' ^ 2}'))
+                    doc.append(NoEscape(
+                        r'sigma_2 = \sqrt{\frac{' + f'{self.sx}' + f'+ {self.sy}' + r'}{2} - (\frac{' + f'{self.sx}' + ' - ' + f'{self.sy}' + '}{2}) ^ 2 + ' + f'{self.txy}' + ' ^ 2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(f'sigma_2 = {self.sigma2:.2f}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-            with doc.create(Section('Calculo do centro')):
-                with doc.create(Subsection('Fórmula do centro')):
+            with doc.create(Section(tpdf.center_solving)):
+                with doc.create(Subsection(tpdf.center_formula)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'centro = \frac{sx + sy}{2}'))
+                    doc.append(NoEscape(tpdf.center + r' = \frac{sx + sy}{2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection('Calculo do centro')):
+                with doc.create(Subsection(tpdf.center_solving)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'centro = \frac{'+f'{self.sx} +'+f'{self.sy}'+'}{2}'))
+                    doc.append(NoEscape(tpdf.center + r' = \frac{' + f'{self.sx} +' + f'{self.sy}' + '}{2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(f'centro = {(self.sx + self.sy) / 2:.2f}'))
+                    doc.append(NoEscape(f'{tpdf.center} = {(self.sx + self.sy) / 2:.2f}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-            with doc.create(Section('Calculo do ângulo')):
-                with doc.create(Subsection('Fórmula do ângulo')):
+            with doc.create(Section(tpdf.angle_solving)):
+                with doc.create(Subsection(tpdf.angle_formula)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(r'\theta = \frac{arctan(\frac{txy}{sx - centro})}{2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection('Realizando a conta')):
+                with doc.create(Subsection(tpdf.doing_math)):
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'\theta = \frac{arctan(\frac{'+f'{self.txy}'+'}{'+f'{self.sx}'+f' - {(self.sx + self.sy) / 2}'+'}'+')}{2}'))
+                    doc.append(NoEscape(
+                        r'\theta = \frac{arctan(\frac{' + f'{self.txy}' + '}{' + f'{self.sx}' + f' - {(self.sx + self.sy) / 2}' + '}' + ')}{2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(f'\\theta = {abs(self.angle * 180/numpy.pi):.2f}'))
+                    doc.append(NoEscape(f'\\theta = {abs(self.angle * 180 / numpy.pi):.2f}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                    doc.append(NoEscape(r'Deve-se dividir o ângulo encontrado no círculo de Mohr por 2 para encontrar o ângulo real, portanto:'))
+                    doc.append(NoEscape(tpdf.angle_tip))
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(f'\\theta = {abs(self.angle * 90 / numpy.pi):.2f}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
-            with doc.create(Section('Desenhando o estado de tensões e círculo de Mohr')):
+            with doc.create(Section(tpdf.drawing_circle_2d)):
                 with doc.create(Figure(position='H')) as fig_mohrleft:
                     fig_mohrleft.add_image("figs\\mohrfig", width='500px')
-                    fig_mohrleft.add_caption(NoEscape(r'\label{fig:estrutura} Estado Plano de Tensões e círculo de Mohr'))
+                    fig_mohrleft.add_caption(NoEscape(tpdf.circle_label))
 
         elif self.sigma3:
-            doc.append(NoEscape(header.makeCover("Estado Triplo de Tensões")))
-            with doc.create(Section("Fórmulas para os cálculos")):
-                with doc.create(Subsection(r'Fórmula para cálculo das tensões principais')):
-                    doc.append(NoEscape(r"O cálculo das tensões principais pode ser realizado por meio do cálculo dos "
-                                        r"autovalores da matriz de tensões do elemento, como mostrado na equação 1."))
+            doc.append(NoEscape(header.makeCover(tpdf.title_3d, language)))
+            with doc.create(Section(tpdf.formula_for_math)):
+                with doc.create(Subsection(tpdf.main_stress_formula)):
+                    doc.append(NoEscape(tpdf.main_stress_tip))
                     doc.append(NoEscape(r'\begin{dmath}'))
                     doc.append(NoEscape(r'det(M - I\lambda) = 0'))
                     doc.append(NoEscape(r'\end{dmath}'))
 
                     doc.append(NoEscape(r'\[det('))
                     doc.append(NoEscape(r'\begin{bmatrix}'))
-                    doc.append(NoEscape(r'\sigma_x & \tau_{xy} & \tau_{xz}\\ \tau_{xy} & \sigma_y & \tau_{yz}\\ \tau_{xz} & \tau_{yz} & \sigma_z'))
+                    doc.append(NoEscape(
+                        r'\sigma_x & \tau_{xy} & \tau_{xz}\\ \tau_{xy} & \sigma_y & \tau_{yz}\\ \tau_{xz} & \tau_{yz} & \sigma_z'))
                     doc.append(NoEscape(r'\end{bmatrix}'))
                     doc.append(NoEscape(r' - '))
                     doc.append(NoEscape(r'\begin{bmatrix}'))
@@ -433,35 +441,33 @@ class mohr_circle():
                     doc.append(NoEscape(r'\end{vmatrix}'))
                     doc.append(NoEscape(r' = 0\]'))
 
-                with doc.create(Subsection(r'Fórmula para cálculo da tensão de cisalhamento máxima')):
-                    doc.append(NoEscape(r'O cáculo da tensão máxima de cisalhamento pode ser realizado por meio da '
-                                        r'análise geométrica do círculo de Mohr. Dado que:'))
+                with doc.create(Subsection(tpdf.max_shear_formula)):
+                    doc.append(NoEscape(tpdf.max_shear_tip_head))
                     doc.append(NoEscape(r'\begin{enumerate}'))
-                    doc.append(NoEscape(r'\item{A distância vertical da tensão máxima de cisalhamento até a origem é '
-                                        r'sempre igual ao raio do círculo de Mohr};'))
-                    doc.append(NoEscape(r'\item{$\sigma_1$ e $\sigma_3$ são diametralmente opostos, ou seja, $\sigma_1$ - $\sigma_3$ = 2 $\cdot$ raio}.'))
+                    doc.append(NoEscape(tpdf.max_shear_tip_body_1))
+                    doc.append(NoEscape(tpdf.max_shear_tip_body_2))
                     doc.append(NoEscape(r'\end{enumerate}'))
                     doc.append(NoEscape(r'\begin{dmath}'))
-                    doc.append(NoEscape(r'T_{max} = \frac{\sigma_1 - \sigma_3}{2}'))
+                    doc.append(NoEscape(tpdf.radius_var + r' \frac{\sigma_1 - \sigma_3}{2}'))
                     doc.append(NoEscape(r'\end{dmath}'))
                     doc.append(NoEscape(r'\newpage'))
 
-            with doc.create(Section(r'Cálculo')):
-                with doc.create(Subsection(r'Substituindo na matriz')):
+            with doc.create(Section(tpdf.calculation)):
+                with doc.create(Subsection(tpdf.matrix_subs)):
                     doc.append(NoEscape(r'\['))
                     doc.append(NoEscape(r'\begin{vmatrix}'))
                     doc.append(NoEscape(f'{self.sx} -' + r'\lambda' + f'& {self.txy} & {self.txz}' r'\\'
-                                        f'{self.txy} & {self.sy}' + r' - \lambda' + f'& {self.tyz}' r'\\'
-                                        f'{self.txz} & {self.tyz} & {self.sz}' + r' - \lambda'))
+                                                                      f'{self.txy} & {self.sy}' + r' - \lambda' + f'& {self.tyz}' r'\\'
+                                                                                                                  f'{self.txz} & {self.tyz} & {self.sz}' + r' - \lambda'))
                     doc.append(NoEscape(r'\end{vmatrix}'))
                     doc.append(NoEscape(r' =0\]'))
 
-                    with doc.create(Subsection(r'Calculo da determinante')):
+                    with doc.create(Subsection(tpdf.determinant_calculation)):
                         string = f"({self.sx} -" + r'\lambda' + f") \\cdot ({self.sy} -" + r'\lambda' + f") \\cdot ({self.sz} -" + r'\lambda' + \
-                            f") + {self.txy} \\cdot {self.tyz} \\cdot {self.txz} + {self.txz} \\cdot {self.txy} \\cdot {self.tyz} " \
-                            f"- {self.txz} \\cdot ({self.sy} -" + r'\lambda' + f") \\cdot {self.txz} " \
-                            f"- {self.tyz} \\cdot {self.tyz} \\cdot ({self.sx} -" + r'\lambda' + \
-                            f") - ({self.sz} -" + r'\lambda' + f") \\cdot {self.txy} \\cdot {self.txy}"
+                                 f") + {self.txy} \\cdot {self.tyz} \\cdot {self.txz} + {self.txz} \\cdot {self.txy} \\cdot {self.tyz} " \
+                                 f"- {self.txz} \\cdot ({self.sy} -" + r'\lambda' + f") \\cdot {self.txz} " \
+                                                                                    f"- {self.tyz} \\cdot {self.tyz} \\cdot ({self.sx} -" + r'\lambda' + \
+                                 f") - ({self.sz} -" + r'\lambda' + f") \\cdot {self.txy} \\cdot {self.txy}"
 
                         lam = Symbol(r'\lambda')
                         numeric = (self.sx - lam) * (self.sy - lam) * (self.sz - lam) + self.txy * self.tyz * self.txz + \
@@ -477,16 +483,14 @@ class mohr_circle():
                         doc.append(NoEscape(r'\begin{dmath}'))
                         doc.append(NoEscape('det = ' + latex(simplify(numeric))))
                         doc.append(NoEscape(r'\end{dmath}'))
-                        doc.append(NoEscape(r'Substituindo a equação 3 na equação 1, temos:'))
+                        doc.append(NoEscape(tpdf.subs_3_in_1))
                         doc.append(NoEscape(r'\begin{dmath}'))
                         doc.append(NoEscape(latex(simplify(numeric)) + r'=0'))
                         doc.append(NoEscape(r'\end{dmath}'))
 
-            with doc.create(Section(r'Resultados')):
-                with doc.create(Subsection(r'Tensões Principais')):
-                    doc.append(NoEscape(r"Encontrando as raízes da equação 4 descobrimos as tensões principais, "
-                                        r"lembrando que $\sigma_1$ é sempre a maior tensão principal (o maior autovalor) "
-                                        r"e $\sigma_3$ é sempre a menor tensão principal (o menor autovalor):"))
+            with doc.create(Section(tpdf.results)):
+                with doc.create(Subsection(tpdf.main_stress)):
+                    doc.append(NoEscape(tpdf.main_stress_roots_tip))
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(r"\sigma_1 = " + f"{round(self.sigma1, 2)}"))
                     doc.append(NoEscape(r'\end{dmath*}'))
@@ -496,24 +500,25 @@ class mohr_circle():
                     doc.append(NoEscape(r'\begin{dmath*}'))
                     doc.append(NoEscape(r"\sigma_3 = " + f"{round(self.sigma3, 2)}"))
                     doc.append(NoEscape(r'\end{dmath*}'))
-                with doc.create(Subsection(r'Tensão de Cisalhamento Máxima')):
-                    doc.append(NoEscape(r'Substituindo $\sigma_1$ e $\sigma_3$ na equação 2 obtemos $\tau_{max}$:'))
+                with doc.create(Subsection(tpdf.max_shear)):
+                    doc.append(NoEscape(tpdf.subs_1_in_3))
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r'T_{max} = \frac{' + f'{round(self.sigma1, 2)} - {round(self.sigma3, 2)}' + r'}{2}'))
+                    doc.append(
+                        NoEscape(tpdf.radius_var + r' \frac{' + f'{round(self.sigma1, 2)} - {round(self.sigma3, 2)}' + r'}{2}'))
                     doc.append(NoEscape(r'\end{dmath*}'))
                     doc.append(NoEscape(r'\begin{dmath*}'))
-                    doc.append(NoEscape(r"T_{max} = " + f"{round(self.Tmax, 2)}"))
+                    doc.append(NoEscape(tpdf.radius_var + f" {round(self.Tmax, 2)}"))
                     doc.append(NoEscape(r'\end{dmath*}'))
 
             doc.append(NoEscape(r'\newpage'))
-            with doc.create(Section(r'Desenhando o círculo de Mohr')):
+            with doc.create(Section(tpdf.drawing_circle_3d)):
                 with doc.create(Figure(position='H')) as fig_mohrleft:
                     fig_mohrleft.add_image("figs\\mohrfig", width='500px')
-                    fig_mohrleft.add_caption(
-                        NoEscape(r'\label{fig:estrutura} Estado Triplo de Tensões e círculo de Mohr'))
+                    fig_mohrleft.add_caption(NoEscape(tpdf.drawing_circle_3d_label))
 
         doc.generate_tex('tmp\\resolucaomohrt')
         doc.generate_pdf('tmp\\resolucaomohr',
                          compiler='pdflatex',
                          win_no_console=True,
                          compiler_args=["-enable-installer"])
+

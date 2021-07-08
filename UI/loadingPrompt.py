@@ -1,8 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtCore import QThread
-import time
 
 
 class Ui_loading_prompt(QWidget):
@@ -74,27 +72,3 @@ class Ui_loading_prompt(QWidget):
     def cancelEvent(self):
         self.Dialog.close()
         self.userTerminated = True
-
-
-class PDFGeneratorThread(QThread):
-
-    def __init__(self, loadingScreen, fig_grabber, PDF_generator, ss=None, file=None):
-        QThread.__init__(self)
-        self.loadingScreen = loadingScreen
-        self.fig_grabber = fig_grabber
-        self.PDF_generator = PDF_generator
-        self.ss = ss
-        self.file = file
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        self.fig_grabber()
-        if self.ss is None and self.file is None:
-            self.PDF_generator()
-        else:
-            self.PDF_generator(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
-                               self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
-                               self.ss.loads_qi, self.ss.node_map, self.file)
-        self.loadingScreen.close()

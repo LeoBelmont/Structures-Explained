@@ -26,6 +26,7 @@ from UI import loadingPrompt, loadFilePrompt, resources
 from solutions.sm_solution import Teacher
 from solutions.mohr import mohr_circle
 from solutions.sigma import sigma
+from util.generator_thread import PDFGeneratorThread
 
 
 class Ui_tenshi(QWidget):
@@ -1873,10 +1874,16 @@ class Ui_tenshi(QWidget):
         tenshi.setTabOrder(self.toolButton_10, self.show_mohr)
 
     def configUI(self, tenshi):
-        if "pt" in locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]:
-            self.retranslateUi()
+        if platform.system() == "Windows":
+            if "pt" in locale.windows_locale[ctypes.windll.kernel32.GetUserDefaultUILanguage()]:
+                self.retranslateUi()
+            else:
+                self.retranslateUiEN()
         else:
-            self.retranslateUiEN()
+            if "pt" in os.getenv('LANG'):
+                self.retranslateUi()
+            else:
+                self.retranslateUiEN()
 
         tenshi.setWindowIcon(QtGui.QIcon(r':/Figures/LogoSX.ico'))
         tenshi.setWindowTitle("Structures Explained")
@@ -2887,11 +2894,12 @@ class Ui_tenshi(QWidget):
                             functions.eq.clear()
                             functions.n.clear()
                             self.setupLoading()
-                            thread = loadingPrompt.PDFGeneratorThread(self.loadingScreen,
-                                                                      self.structure_savefig,
-                                                                      self.teach.solver,
-                                                                      self.ss,
-                                                                      file)
+                            thread = PDFGeneratorThread(self.loadingScreen,
+                                                        self.structure_savefig,
+                                                        self.teach.solver,
+                                                        self.language,
+                                                        self.ss,
+                                                        file)
                             thread.start()
                             self.loadingScreen.exec_()
                             if not self.loadingUi.userTerminated:
@@ -2916,9 +2924,10 @@ class Ui_tenshi(QWidget):
                         self.toolBox.setCurrentIndex(2)
                         self.MplWidget.fix_plot_scale()
                         self.setupLoading()
-                        thread = loadingPrompt.PDFGeneratorThread(self.loadingScreen,
-                                                                  self.mohr_savefig,
-                                                                  self.mohr.solver)
+                        thread = PDFGeneratorThread(self.loadingScreen,
+                                                    self.mohr_savefig,
+                                                    self.mohr.solver,
+                                                    self.language)
                         thread.start()
                         self.loadingScreen.exec_()
                         if not self.loadingUi.userTerminated:
@@ -2940,9 +2949,10 @@ class Ui_tenshi(QWidget):
                     try:
                         self.toolBox.setCurrentIndex(1)
                         self.setupLoading()
-                        thread = loadingPrompt.PDFGeneratorThread(self.loadingScreen,
-                                                                  self.rm_savefig,
-                                                                  self.sig.solver)
+                        thread = PDFGeneratorThread(self.loadingScreen,
+                                                    self.rm_savefig,
+                                                    self.sig.solver,
+                                                    self.language)
                         thread.start()
                         self.loadingScreen.exec_()
                         if not self.loadingUi.userTerminated:
