@@ -1,9 +1,9 @@
 import os
 import inspect
 import locale
+import platform
 import ctypes
 import sys
-import time
 import webbrowser
 import shutil
 import pickle
