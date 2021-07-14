@@ -8,7 +8,7 @@ from solutions import functions
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
 import numpy as np
 from solutions import header
-from solutions.translations.cross_sec_strings import translate_PDF_cross_section
+from pdfconfig.translations.cross_sec_strings import translate_PDF_cross_section
 
 
 class sigma():

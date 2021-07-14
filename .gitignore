@@ -2,6 +2,6 @@
 .gitignore
 UI/__pycache__/
 solutions/__pycache__/
-solutions/translations/__pycache__/
-util/__pycache__/
+pdfconfig/translations/__pycache__/
+pdfconfig/__pycache__/
 main.py

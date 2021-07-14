@@ -26,7 +26,7 @@ from UI import loadingPrompt, loadFilePrompt, resources
 from solutions.sm_solution import Teacher
 from solutions.mohr import mohr_circle
 from solutions.sigma import sigma
-from util.generator_thread import PDFGeneratorThread
+from pdfconfig.generator_thread import PDFGeneratorThread
 
 
 class Ui_tenshi(QWidget):

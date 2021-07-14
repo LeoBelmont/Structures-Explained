@@ -3,7 +3,6 @@ import numpy
 from solutions import functions
 import re
 import pickle
-from solutions import header
 from matplotlib import pyplot as plt
 from matplotlib.pyplot import savefig
 from sympy import symbols, Number
@@ -13,7 +12,7 @@ from anastruct import SystemElements
 from pylatex import Document, Section, Subsection, Figure, Alignat, NoEscape, Subsubsection, \
     LineBreak
 from solutions import header
-from solutions.translations.structure_strings import translate_PDF_structure
+from pdfconfig.translations.structure_strings import translate_PDF_structure
 
 
 class Teacher():
