@@ -16,7 +16,7 @@ PDFsettings = r"""
 \pagestyle{fancy}
 \fancyhf{}
 \rhead{\includegraphics[width=0.05\textwidth]{figs/logo.png}}
-\lhead{Laboratório AeroTech}
+\lhead{Structures Explained}
 \cfoot{\thepage}
 \renewcommand{\footrulewidth}{0.4pt}
 \usepackage[scaled=1]{helvet}

@@ -1,0 +1,7 @@
+pyqt5
+anastruct
+matplotlib
+numpy
+qdarkstyle
+sympy
+pylatex

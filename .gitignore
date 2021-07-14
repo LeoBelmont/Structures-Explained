@@ -1,0 +1,7 @@
+.idea/
+.gitignore
+UI/__pycache__/
+solutions/__pycache__/
+solutions/translations/__pycache__/
+util/__pycache__/
+main.py
