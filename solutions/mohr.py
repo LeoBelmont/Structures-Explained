@@ -3,7 +3,7 @@ import numpy
 from solutions import functions
 from pylatex import Document, Section, Subsection, Figure, NoEscape
 from sympy import Symbol, latex, simplify
-from solutions import header
+from pdfconfig import header
 from pdfconfig.translations.mohr_strings import translate_PDF_Mohr
 
 

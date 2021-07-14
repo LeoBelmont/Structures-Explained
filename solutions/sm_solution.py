@@ -11,7 +11,7 @@ from sympy.parsing.sympy_parser import parse_expr
 from anastruct import SystemElements
 from pylatex import Document, Section, Subsection, Figure, Alignat, NoEscape, Subsubsection, \
     LineBreak
-from solutions import header
+from pdfconfig import header
 from pdfconfig.translations.structure_strings import translate_PDF_structure
 
 

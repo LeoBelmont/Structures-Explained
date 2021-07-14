@@ -7,7 +7,7 @@ from matplotlib.patches import Rectangle, Wedge
 from solutions import functions
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
 import numpy as np
-from solutions import header
+from pdfconfig import header
 from pdfconfig.translations.cross_sec_strings import translate_PDF_cross_section
 
 
