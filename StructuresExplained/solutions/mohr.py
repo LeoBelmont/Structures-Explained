@@ -1,10 +1,10 @@
 from matplotlib.patches import Wedge, Rectangle
 import numpy
-from solutions import functions
+from StructuresExplained.solutions import functions
 from pylatex import Document, Section, Subsection, Figure, NoEscape
 from sympy import Symbol, latex, simplify
-from pdfconfig import header
-from pdfconfig.translations.mohr_strings import translate_PDF_Mohr
+from StructuresExplained.pdfconfig import header
+from StructuresExplained.pdfconfig.translations.mohr_strings import translate_PDF_Mohr
 
 
 class mohr_circle:

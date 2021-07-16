@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QThread
-import pdfconfig.logo
+import StructuresExplained.pdfconfig.logo
 
 
 class PDFGeneratorThread(QThread):
@@ -18,7 +18,7 @@ class PDFGeneratorThread(QThread):
 
     def run(self):
         self.fig_grabber()
-        pdfconfig.logo.generate_logo()
+        StructuresExplained.pdfconfig.logo.generate_logo()
         if self.ss is None and self.file is None:
             self.PDF_generator(self.language)
         else:

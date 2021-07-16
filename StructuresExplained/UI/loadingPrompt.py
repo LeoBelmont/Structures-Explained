@@ -30,7 +30,7 @@ class Ui_loading_prompt(QWidget):
         self.label = QtWidgets.QLabel(self.Dialog)
         self.label.setFixedSize(QtCore.QSize(160, 90))
         self.label.setText("")
-        self.loadingGIF = QtGui.QMovie("../../Novapasta/load.gif")
+        self.loadingGIF = QtGui.QMovie("../../../Novapasta/load.gif")
         self.label.setMovie(self.loadingGIF)
         self.loadingGIF.start()
         self.label.setScaledContents(True)

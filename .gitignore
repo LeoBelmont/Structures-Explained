@@ -1,7 +1,7 @@
 .idea/
 .gitignore
-UI/__pycache__/
-solutions/__pycache__/
-pdfconfig/translations/__pycache__/
-pdfconfig/__pycache__/
+StructuresExplained/UI/__pycache__/
+StructuresExplained/solutions/__pycache__/
+StructuresExplained/pdfconfig/translations/__pycache__/
+StructuresExplained/pdfconfig/__pycache__/
 main.py

@@ -4,11 +4,11 @@ from sympy import Number
 from sympy.parsing.sympy_parser import parse_expr
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Wedge
-from solutions import functions
+from StructuresExplained.solutions import functions
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
 import numpy as np
-from pdfconfig import header
-from pdfconfig.translations.cross_sec_strings import translate_PDF_cross_section
+from StructuresExplained.pdfconfig import header
+from StructuresExplained.pdfconfig.translations.cross_sec_strings import translate_PDF_cross_section
 
 
 class sigma():

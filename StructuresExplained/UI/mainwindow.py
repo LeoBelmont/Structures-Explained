@@ -20,13 +20,13 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
 # SX files
-from solutions import functions
-from UI.mplwidget import MplWidget
-from UI import loadingPrompt, loadFilePrompt, resources
-from solutions.sm_solution import Teacher
-from solutions.mohr import mohr_circle
-from solutions.sigma import sigma
-from pdfconfig.generator_thread import PDFGeneratorThread
+from StructuresExplained.solutions import functions
+from StructuresExplained.UI.mplwidget import MplWidget
+from StructuresExplained.UI import loadingPrompt, loadFilePrompt
+from StructuresExplained.solutions.sm_solution import Teacher
+from StructuresExplained.solutions.mohr import mohr_circle
+from StructuresExplained.solutions.sigma import sigma
+from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
 
 
 class Ui_tenshi(QWidget):
