@@ -23,6 +23,7 @@ from PyQt5.QtWidgets import *
 from StructuresExplained.solutions import functions
 from StructuresExplained.UI.mplwidget import MplWidget
 from StructuresExplained.UI import loadingPrompt, loadFilePrompt
+from StructuresExplained.UI import resources
 from StructuresExplained.solutions.sm_solution import Teacher
 from StructuresExplained.solutions.mohr import mohr_circle
 from StructuresExplained.solutions.sigma import sigma
