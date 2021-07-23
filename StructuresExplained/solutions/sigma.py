@@ -374,7 +374,7 @@ class sigma():
                             doc.append(NoEscape(f'{self.nl_string[i]}'))
                             doc.append(NoEscape(r'\end{dmath*}'))
                             doc.append(NoEscape(r'\begin{dmath*}'))
-                            doc.append(NoEscape(r'y =' + f'{self.round_expr(self.nl_numeric[i], 2)}'))
+                            doc.append(NoEscape(f'{self.nl_numeric[i]}'))
                             doc.append(NoEscape(r'\end{dmath*}'))
 
         if self.flux_string or self.shear_string:

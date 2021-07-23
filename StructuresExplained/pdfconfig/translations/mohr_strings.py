@@ -7,14 +7,14 @@ class translate_PDF_Mohr:
 
     def translatePT(self):
         self.title_2d = r"Resolução do Estado Duplo de Tensões"
-        self.radius_and_max_shear = r"Calculo do raio ou tensão de cisalhamento máxima"
+        self.radius_and_max_shear = r"Cálculo do raio ou tensão de cisalhamento máxima"
         self.radius_and_max_shear_formula = r"Fórmula do raio/tensão de cisalhamento máxima"
         self.radius_and_max_shear_solving = r"Realizando a conta"
-        self.main_stress_calculation = r"Calculo das tensões principais"
+        self.main_stress_calculation = r"Cálculo das tensões principais"
         self.main_stress_formula = r"Fórmula para cálculo das tensões principais"
-        self.sigma_1_solving = r"Calculo de sigma 1"
-        self.sigma_2_solving = r"Calculo de sigma 2"
-        self.center_solving = r"Calculo do centro"
+        self.sigma_1_solving = r"Cálculo de sigma 1"
+        self.sigma_2_solving = r"Cálculo de sigma 2"
+        self.center_solving = r"Cálculo do centro"
         self.center_formula = r"Fórmula do centro"
         self.center = r"centro"
         self.angle_solving = 'rCalculo do ângulo'
@@ -37,7 +37,7 @@ class translate_PDF_Mohr:
                                     r" - $\sigma_3$ = 2 $\cdot$ raio}."
         self.calculation = r"Cálculo"
         self.matrix_subs = r"Substituindo na matriz"
-        self.determinant_calculation = r"Calculo da determinante"
+        self.determinant_calculation = r"Cálculo da determinante"
         self.subs_3_in_1 = r"Substituindo a equação 3 na equação 1, temos:"
         self.results = r"Resultados"
         self.main_stress = r'Tensões Principais'
@@ -52,17 +52,17 @@ class translate_PDF_Mohr:
 
     def translateEN(self):
         self.title_2d = r"Estado Duplo de Tensões"
-        self.radius_and_max_shear = r"Calculo do raio ou tensão de cisalhamento máxima"
+        self.radius_and_max_shear = r"Cálculo do raio ou tensão de cisalhamento máxima"
         self.radius_and_max_shear_formula = r"Fórmula do raio/tensão de cisalhamento máxima"
         self.radius_and_max_shear_solving = r"Realizando a conta"
-        self.main_stress_calculation = r"Calculo das tensões principais"
+        self.main_stress_calculation = r"Cálculo das tensões principais"
         self.main_stress_formula = r"Fórmula para cálculo das tensões principais"
-        self.sigma_1_solving = r"Calculo de sigma 1"
-        self.sigma_2_solving = r"Calculo de sigma 2"
-        self.center_solving = r"Calculo do centro"
+        self.sigma_1_solving = r"Cálculo de sigma 1"
+        self.sigma_2_solving = r"Cálculo de sigma 2"
+        self.center_solving = r"Cálculo do centro"
         self.center_formula = r"Fórmula do centro"
         self.center = r"centro"
-        self.angle_solving = 'rCalculo do ângulo'
+        self.angle_solving = r'Calculo do ângulo'
         self.angle_formula = r'Fórmula do ângulo'
         self.doing_math = r'Realizando a conta'
         self.angle_tip = r'Deve-se dividir o ângulo encontrado no círculo de Mohr por 2 para encontrar o ângulo real, portanto:'
@@ -80,7 +80,7 @@ class translate_PDF_Mohr:
         self.max_shear_tip_body_2 = r"\item{$\sigma_1$ e $\sigma_3$ são diametralmente opostos, ou seja, $\sigma_1$ - $\sigma_3$ = 2 $\cdot$ raio}."
         self.calculation = r"Cálculo"
         self.matrix_subs = r"Substituindo na matriz"
-        self.determinant_calculation = r"Calculo da determinante"
+        self.determinant_calculation = r"Cálculo da determinante"
         self.subs_3_in_1 = r"Substituindo a equação 3 na equação 1, temos:"
         self.results = r"Resultados"
         self.main_stress = r'Tensões Principais'

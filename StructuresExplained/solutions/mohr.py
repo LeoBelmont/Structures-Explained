@@ -126,6 +126,8 @@ class mohr_circle:
             self.one_fig.text(self.s3, 0, f'σ3 = {self.s3:.2f}', size=functions.size, ha='left', va='bottom', bbox=self.bbox_setting)
 
     def plot_T(self, Tmax):
+        if Tmax < 0:
+            Tmax *= -1
         # Tmax
         self.one_fig.plot(self.center, Tmax, 'ro')
         self.one_fig.text(self.center, Tmax, f'τmax = {Tmax:.2f}', size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
