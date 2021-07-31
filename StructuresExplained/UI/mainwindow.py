@@ -2944,7 +2944,7 @@ class Ui_tenshi(QWidget):
 
     def rm_solver(self):
         if find_executable('latex'):
-            if self.sig.sub_areas_cir or self.sig.sub_areas_rect:
+            if self.sig.subareas_circle or self.sig.subareas_rectangle:
                 file, ok = QFileDialog.getSaveFileName(self, self.pdf_title, self.pdf_text, "PDF (*.pdf)")
                 if ok:
                     try:
@@ -3059,12 +3059,12 @@ class Ui_tenshi(QWidget):
     def load_cross_section_aux(self, file):
         with open(f'{file}', 'rb') as f:
             _, self.sig, _ = pickle.load(f)
-        if self.sig.sub_areas_cir or self.sig.sub_areas_rect:
+        if self.sig.subareas_circle or self.sig.subareas_rectangle:
             self.rect_list.clear()
             self.circle_list.clear()
-            for c in range(len(self.sig.sub_areas_rect)):
+            for c in range(len(self.sig.subareas_rectangle)):
                 self.add_rect_item()
-            for c in range(len(self.sig.sub_areas_cir)):
+            for c in range(len(self.sig.subareas_circle)):
                 self.add_cir_item()
             self.sig.det_values()
             if self.figureResultsButton.isChecked():
@@ -3202,12 +3202,12 @@ class Ui_tenshi(QWidget):
 
     def set_sigma(self):
         self.frame_16.setDisabled(True)
-        if len(self.sig.sub_areas_rect) != 0 or len(self.sig.sub_areas_cir) != 0:
-            self.msx.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.My))))}")
-            self.msy.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.Mx))))}")
-            self.mix.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.Ix))))}")
-            self.miy.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.Iy))))}")
-            self.at.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.At))))}")
+        if len(self.sig.subareas_rectangle) != 0 or len(self.sig.subareas_circle) != 0:
+            self.msx.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.moment_y))))}")
+            self.msy.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.moment_x))))}")
+            self.mix.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.moment_inertia_x))))}")
+            self.miy.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.moment_inertia_y))))}")
+            self.at.setText(f"{self.scientific_format(Decimal(str(parse_expr(self.sig.total_area))))}")
 
     def insert_sigma(self):
         self.frame_16.setDisabled(False)
@@ -3226,14 +3226,14 @@ class Ui_tenshi(QWidget):
                 y = self.filter(self.cs_y.text())
             if self.specify_z.isChecked():
                 z = self.filter(self.cs_z.text())
-            results = self.sig.det_normal_tension(N, At, My, Mx, Ix, Iy, self.checkBox.isChecked(), y, z)
+            results = self.sig.det_normal_stress(N, At, My, Mx, Ix, Iy, self.checkBox.isChecked(), y, z)
             self.tnresult.setText(f'{results[0]}')
             self.tneutral.setText(f"{results[1]}")
         else:
             self.warning()
 
     def get_cis(self):
-        if not self.sig.sub_areas_cir and len(self.sig.sub_areas_rect) >= 1 and self.figureResultsButton.isChecked():
+        if not self.sig.subareas_circle and len(self.sig.subareas_rectangle) >= 1 and self.figureResultsButton.isChecked():
             try:
                 V = self.filter(self.tshear.text())
                 if self.cut_y.text() == '':
@@ -3244,7 +3244,7 @@ class Ui_tenshi(QWidget):
                     self.twidth.setText('0')
                 t = self.filter(self.twidth.text())
                 Ix = self.filter(self.mix.text())
-                results = self.sig.det_cis(V, Q, t, Ix, self.checkBox_2.isChecked())
+                results = self.sig.det_shear_tension(V, Q, t, Ix, self.checkBox_2.isChecked())
                 self.tfresult.setText(self.scientific_format(Decimal(results[0])))
                 self.tsresult.setText(self.scientific_format(Decimal(results[1])))
             except:
@@ -3258,11 +3258,11 @@ class Ui_tenshi(QWidget):
 
     def change_table_rect(self):
         c = self.rect_list.currentIndex()
-        if self.sig.sub_areas_rect.get(c) is not None:
-            self.rect_x1.setText(f"{self.sig.sub_areas_rect[c][0]}")
-            self.rect_y1.setText(f"{self.sig.sub_areas_rect[c][1]}")
-            self.rect_x2.setText(f"{self.sig.sub_areas_rect[c][2]}")
-            self.rect_y2.setText(f"{self.sig.sub_areas_rect[c][3]}")
+        if self.sig.subareas_rectangle.get(c) is not None:
+            self.rect_x1.setText(f"{self.sig.subareas_rectangle[c][0]}")
+            self.rect_y1.setText(f"{self.sig.subareas_rectangle[c][1]}")
+            self.rect_x2.setText(f"{self.sig.subareas_rectangle[c][2]}")
+            self.rect_y2.setText(f"{self.sig.subareas_rectangle[c][3]}")
         else:
             self.clear_rect_text()
         if self.rect_visualize.isChecked():
@@ -3270,11 +3270,11 @@ class Ui_tenshi(QWidget):
 
     def change_table_circ(self):
         c = self.circle_list.currentIndex()
-        if self.sig.sub_areas_cir.get(c) is not None:
-            self.circle_x.setText(f"{self.sig.sub_areas_cir[c][0]}")
-            self.circle_y.setText(f"{self.sig.sub_areas_cir[c][1]}")
-            self.circle_r.setText(f"{self.sig.sub_areas_cir[c][2]}")
-            self.circle_ai.setText(f"{self.sig.sub_areas_cir[c][3]}")
+        if self.sig.subareas_circle.get(c) is not None:
+            self.circle_x.setText(f"{self.sig.subareas_circle[c][0]}")
+            self.circle_y.setText(f"{self.sig.subareas_circle[c][1]}")
+            self.circle_r.setText(f"{self.sig.subareas_circle[c][2]}")
+            self.circle_ai.setText(f"{self.sig.subareas_circle[c][3]}")
             # self.circle_af.setText(f"{self.sig.sub_areas_cir[c][4]}")
         else:
             self.clear_cir_text()
@@ -3287,7 +3287,7 @@ class Ui_tenshi(QWidget):
             p = self.rect_list.currentIndex()
         if self.circle_visualize.isChecked():
             d = self.circle_list.currentIndex()
-        if self.sig.sub_areas_cir or self.sig.sub_areas_rect:
+        if self.sig.subareas_circle or self.sig.subareas_rectangle:
             fig = self.sig.plot(p, d, self.MplWidget.canvas.figure)
             self.MplWidget.setGrid(self.gridBox.isChecked())
             self.MplWidget.plot(fig)
@@ -3308,7 +3308,7 @@ class Ui_tenshi(QWidget):
         return choice
 
     def add_rect(self):
-        if self.sig.flux_numeric or self.sig.T_numeric:
+        if self.sig.shear_flux_numeric or self.sig.normal_stress_numeric:
             if self.geometry_change_prompt() == QMessageBox.Yes:
                 self.update_ret()
         else:
@@ -3323,7 +3323,7 @@ class Ui_tenshi(QWidget):
             y2 = self.filter(self.rect_y2.text())
             if float(y1) > float(y2) and float(x2) > float(x1):
                 c = self.rect_list.currentIndex()
-                self.sig.sub_areas_rect.update({c: [float(x1), float(y1),
+                self.sig.subareas_rectangle.update({c: [float(x1), float(y1),
                                                     float(x2), float(y2)]})
                 self.finish_applying()
             else:
@@ -3355,7 +3355,7 @@ class Ui_tenshi(QWidget):
             r = self.filter(self.circle_r.text())
             ai = self.filter(self.circle_ai.text())
             c = self.circle_list.currentIndex()
-            self.sig.sub_areas_cir.update({c: [float(x), float(y),
+            self.sig.subareas_circle.update({c: [float(x), float(y),
                                                float(r), float(ai)]})
             # self.circle_af.text()]})
             self.finish_applying()
@@ -3376,7 +3376,7 @@ class Ui_tenshi(QWidget):
     def remove_rectangle(self):
         c = self.rect_list.currentIndex()
         try:
-            self.sig.sub_areas_rect.pop(c, None)
+            self.sig.subareas_rectangle.pop(c, None)
             self.sig.det_values()
             if self.figureResultsButton.isChecked():
                 self.set_sigma()
@@ -3388,7 +3388,7 @@ class Ui_tenshi(QWidget):
     def remove_circle(self):
         c = self.circle_list.currentIndex()
         try:
-            self.sig.sub_areas_cir.pop(c, None)
+            self.sig.subareas_circle.pop(c, None)
             self.sig.det_values()
             if self.figureResultsButton.isChecked():
                 self.set_sigma()
@@ -3398,8 +3398,8 @@ class Ui_tenshi(QWidget):
             self.transv_reset()
 
     def transv_reset(self):
-        self.sig.sub_areas_rect.clear()
-        self.sig.sub_areas_cir.clear()
+        self.sig.subareas_rectangle.clear()
+        self.sig.subareas_circle.clear()
         self.clear_rect_text()
         self.clear_cir_text()
         self.at.clear()
