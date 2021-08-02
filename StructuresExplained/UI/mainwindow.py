@@ -3341,7 +3341,7 @@ class Ui_tenshi(QWidget):
         self.rect_list.setCurrentIndex(c)
 
     def add_cir(self):
-        if self.sig.flux_numeric or self.sig.T_numeric:
+        if self.sig.shear_flux_numeric or self.sig.normal_stress_numeric:
             if self.geometry_change_prompt() == QMessageBox.Yes:
                 self.update_cir()
         else:
@@ -3356,7 +3356,7 @@ class Ui_tenshi(QWidget):
             ai = self.filter(self.circle_ai.text())
             c = self.circle_list.currentIndex()
             self.sig.subareas_circle.update({c: [float(x), float(y),
-                                               float(r), float(ai)]})
+                                                 float(r), float(ai)]})
             # self.circle_af.text()]})
             self.finish_applying()
         else:
