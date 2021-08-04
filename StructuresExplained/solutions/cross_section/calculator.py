@@ -117,6 +117,10 @@ class calculator:
                                           cut_height: float
                                           ):
         # calculate static moment on the cut given by the user. only for rectangle subareas currently
+        if self.subareas_circle:
+            raise ValueError(
+                "Calculating static moment for shear stress and flux for semicircular subareas isn't available yet"
+            )
 
         static_moment_cut_string = ''
         static_moment_cut = 0
@@ -221,7 +225,7 @@ class calculator:
 
         neutral_line_latex = NoEscape(r'0 = \frac{' + str(normal_force) + r'}{' + str(self.total_area) + r'} - \frac{'
                                       + str(self.moment_y) + r'}{' + str(self.moment_inertia_y_latex) + r'} \cdot '
-                                      + str(z) + r' - \frac{' + str(self.moment_x) + r'}{' 
+                                      + str(z) + r' - \frac{' + str(self.moment_x) + r'}{'
                                       + str(self.moment_inertia_x_latex) + r'} \cdot ' + str(y))
 
         return self.neutral_line, neutral_line_latex, self.moment_y, self.moment_x
