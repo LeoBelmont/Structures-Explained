@@ -28,7 +28,8 @@ class translate_PDF_cross_section:
         self.moment_inercia_y = r"Cálculo do Momento de Inércia em relação a Y:"
         self.moment_inercia_y_rect_formula = r"I_{y_{(retângulos)}} = \frac{base^3 \cdot altura}{12}"
         self.moment_inercia_y_circ_formula = r"I_{y_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}"
-        self.step_normal_stress_neutral_line = r"Calcular a Tensão Normal e Linha Neutra"
+        self.step_normal_stress = r"Calcular a Tensão Normal"
+        self.step_neutral_line = r"Calcular a Linha Neutra"
         self.normal_stress_formula = r"Fórmula da Tensão Normal"
         self.neutral_line_formula = r"Fórmula da Linha Neutra"
         self.neutral_line_tip = r"A linha neutra se encontra onde a Tensão Normal é 0, portanto para encontrar" \

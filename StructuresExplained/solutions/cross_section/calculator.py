@@ -10,7 +10,8 @@ from typing import (
     Union,
     List,
     Dict,
-    Any
+    Any,
+    Optional
 )
 
 
@@ -39,7 +40,8 @@ class calculator:
 
     def det_static_moment_rectangle(self):
         # calculate static moment for rectangular subareas. this function only appends
-        # values to a string so they can be displayed step by step in the pdf later
+        # values to a string so they can be displayed step by step in the pdf later.
+        # the result is later calculated using the parse_expr function from sympy
 
         for key, (x1, y1, x2, y2) in self.subareas_rectangle.items():
             _, _, partial_cg_y, partial_cg_x, partial_area, _ = self.get_rectangle_values(x1, y1, x2, y2)
@@ -51,6 +53,7 @@ class calculator:
     def det_static_moment_circle(self):
         # calculate static moment for semi-circular subareas. this function only appends
         # values to a string so they can be displayed step by step in the pdf later
+        # the result is later calculated using the parse_expr function from sympy
 
         for key, (x, y, radius, angle) in self.subareas_circle.items():
             partial_area, partial_cg_y, partial_cg_x = self.get_circle_values(angle, radius)
@@ -60,6 +63,8 @@ class calculator:
             self.moment_y += f'+ {partial_area} * ({x} + {partial_cg_x})'
 
     def det_center_of_gravity(self):
+        # calculates the center of gravity to be displayed in the generated figure
+
         self.total_cg_y = float(parse_expr(f'({self.moment_x}) / ({self.total_area})'))
         self.total_cg_x = float(parse_expr(f'({self.moment_y}) / ({self.total_area})'))
 
@@ -133,7 +138,7 @@ class calculator:
                 static_moment_cut_string += r'+ (\frac{' + str(height) + r'}{2} + ' + str(partial_cg_y) + \
                                             f'- {cut_height}) \\cdot {base}' + r' \cdot (((\frac{' + str(height) + \
                                             r'}{2} + ' + str(partial_cg_y) + f' - {cut_height}) \\cdot 0.5 + ' \
-                                            f'{cut_height}) - {self.total_cg_y}) '
+                                                                             f'{cut_height}) - {self.total_cg_y}) '
 
         return self.static_moment_for_shear
 
@@ -176,28 +181,50 @@ class calculator:
     def det_normal_stress(self,
                           normal_force: float,
                           y: str,
-                          z: str
+                          z: str,
+                          latex_format: Optional[bool] = True
                           ):
+        # calculates normal stress and neutral line.
+        # two strings are necessary, one in LaTeX format to be displayed in the PDF solution and the other in the UI.
+
         normal_stress = f'({normal_force}/{self.total_area}) - (({self.moment_y}/{self.moment_inertia_y}) * {z}) - ' \
                         f'(({self.moment_x}/{self.moment_inertia_x}) * {y})'
-        normal_stress_latex = NoEscape(r'\frac{' + f'{normal_force}' + r'}{' + f'{self.total_area}' + r'} - \frac{' +
-                                       f'{self.moment_y}' + r'}{' + f'{self.moment_inertia_y_latex}' + r'} \cdot' + f' {z} -' +
-                                       r'\frac{' + f'{self.moment_x}' + r'}{' + f'{self.moment_inertia_x_latex}' + r'} \cdot' + f' {y}'
-                                       )
+
+        if latex_format:
+            normal_stress_latex = NoEscape(
+                r'\frac{' + f'{normal_force}' + r'}{' + f'{self.total_area}' + r'} - \frac{' +
+                f'{self.moment_y}' + r'}{' + f'{self.moment_inertia_y_latex}' + r'} \cdot' +
+                f' {z} -' + r'\frac{' + f'{self.moment_x}' + r'}{' +
+                f'{self.moment_inertia_x_latex}' + r'} \cdot' + f' {y}'
+                )
+
+            return normal_stress, normal_stress_latex, self.moment_y, self.moment_x
+        else:
+            return normal_stress
+
+    def det_neutral_line(self,
+                         normal_force: float,
+                         y: str,
+                         z: str
+                         ):
+
+        normal_stress = self.det_normal_stress(normal_force, y, z, latex_format=False)
 
         if (self.moment_y != "0" and type(z) != str) and (type(y) == str or self.moment_x == "0"):
             self.neutral_line = f"z = {round_expr(sympy.solve(normal_stress, z)[0], 2)}"
+
         elif (self.moment_y == "0" and self.moment_x == "0") or (type(y) == str and type(z) == str):
             self.neutral_line = "Não há linha neutra"
+
         else:
             self.neutral_line = f"y = {round_expr(sympy.solve(normal_stress, y), 2)}"
 
         neutral_line_latex = NoEscape(r'0 = \frac{' + str(normal_force) + r'}{' + str(self.total_area) + r'} - \frac{'
-                                      + str(self.moment_y) + r'}{' + str(self.moment_inertia_y_latex) + r'} \cdot z -'
-                                      + r'\frac{' + str(self.moment_x) + r'}{' + str(self.moment_inertia_x_latex)
-                                      + r'} \cdot y')
+                                      + str(self.moment_y) + r'}{' + str(self.moment_inertia_y_latex) + r'} \cdot '
+                                      + str(z) + r' - \frac{' + str(self.moment_x) + r'}{' 
+                                      + str(self.moment_inertia_x_latex) + r'} \cdot ' + str(y))
 
-        return normal_stress, normal_stress_latex, self.neutral_line, neutral_line_latex, self.moment_y, self.moment_x
+        return self.neutral_line, neutral_line_latex, self.moment_y, self.moment_x
 
     def det_shear_flux(self,
                        shear_force: float
@@ -215,7 +242,7 @@ class calculator:
 
         if float(thickness) != 0:
             self.shear_stress = f'({shear_force} * {self.static_moment_for_shear}) / (({self.moment_inertia_x}) * {thickness})'
-            shear_stress_latex = r'\frac{' + f'{shear_force} \\cdot {self.static_moment_for_shear}' + r'}{' +\
+            shear_stress_latex = r'\frac{' + f'{shear_force} \\cdot {self.static_moment_for_shear}' + r'}{' + \
                                  f'{self.moment_inertia_x_latex} \\cdot {thickness}' + r'} '
         else:
             shear_stress_latex = None
