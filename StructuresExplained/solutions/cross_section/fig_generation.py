@@ -6,12 +6,18 @@ from typing import (
     Union,
     List,
     Dict,
-    Any
+    Any,
+    Optional
 )
 
 
 class fig_generator:
-    def __init__(self, subareas_rectangle, subareas_circle, total_cg_x, total_cg_y):
+    def __init__(self,
+                 subareas_rectangle: Dict[int, list],
+                 subareas_circle: Dict[int, List[Union[float, Any]]],
+                 total_cg_x: float,
+                 total_cg_y: float
+                 ):
         self.subareas_rectangle: Dict[int, list] = subareas_rectangle
         self.subareas_circle: Dict[int, List[Union[float, Any]]] = subareas_circle
         self.total_cg_x: float = total_cg_x
@@ -19,14 +25,19 @@ class fig_generator:
 
     bbox_setting = dict(boxstyle="round,pad=0.1", fc="grey", ec="black", lw=1)
 
-    def det_color(self, key, subarea_id):
+    def det_color(self,
+                  key: int,
+                  subarea_id: int
+                  ):
         if key == subarea_id:
             color = 'r'
         else:
             color = 'dodgerblue'
         return color
 
-    def plot_rect(self, rectangle_subarea_id):
+    def plot_rect(self,
+                  rectangle_subarea_id: int
+                  ):
         for key, (x1, y1, x2, y2) in self.subareas_rectangle.items():
             base = x2 - x1
             height = y1 - y2
@@ -45,7 +56,9 @@ class fig_generator:
                           facecolor=color,
                           alpha=1))
 
-    def plot_cir(self, circle_subarea_id):
+    def plot_cir(self,
+                 circle_subarea_id: int
+                 ):
         for key, (x, y, radius, angle) in self.subareas_circle.items():
             self.subplot.plot(x, y, 'ro')
             self.subplot.text(x, y, f'({x},{y})', size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
@@ -53,7 +66,12 @@ class fig_generator:
             self.subplot.add_patch(
                 Wedge((x, y), radius, -angle, -angle - 180, linewidth=5, edgecolor='black', facecolor=color))
 
-    def plot(self, rectangle_subarea_id=None, circle_subarea_id=None, fig=None):
+    def plot(self,
+             rectangle_subarea_id: Optional[int] = None,
+             circle_subarea_id: Optional[int] = None,
+             fig: Optional[plt.Figure] = None
+             ):
+
         if fig is None:
             fig = plt.figure()
         else:

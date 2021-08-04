@@ -7,12 +7,9 @@ from StructuresExplained.utils.util import round_expr
 from StructuresExplained.utils.util import simplify_signals
 
 from typing import (
-    Tuple,
     Union,
     List,
-    Optional,
     Dict,
-    AnyStr,
     Any
 )
 
@@ -22,16 +19,16 @@ class calculator:
 
         self.subareas_rectangle: Dict[int, list] = {}
         self.subareas_circle: Dict[int, List[Union[float, Any]]] = {}
-        self.total_area: AnyStr = ""
-        self.moment_x: AnyStr = ""
-        self.moment_y: AnyStr = ""
+        self.total_area: str = ""
+        self.moment_x: str = ""
+        self.moment_y: str = ""
         self.total_cg_x: float = 0
         self.total_cg_y: float = 0
-        self.moment_inertia_x: AnyStr = ""
-        self.moment_inertia_x_latex: AnyStr = ""
-        self.moment_inertia_y: AnyStr = ""
-        self.moment_inertia_y_latex: AnyStr = ""
-        self.static_moment_for_shear: AnyStr = ""
+        self.moment_inertia_x: str = ""
+        self.moment_inertia_x_latex: str = ""
+        self.moment_inertia_y: str = ""
+        self.moment_inertia_y_latex: str = ""
+        self.static_moment_for_shear: str = ""
 
     def det_values(self):
         self.static_moment_rectangle()
@@ -108,7 +105,9 @@ class calculator:
                 # appends parallel axis theorem if necessary
                 self.moment_inertia_y_latex += f'+ {area} \\cdot ({self.total_cg_x} - {x + partial_cg_x})^2'
 
-    def calculate_static_moment_for_shear(self, cut_height):
+    def calculate_static_moment_for_shear(self,
+                                          cut_height: float
+                                          ):
         # calculate static moment on the cut given by the user. only for rectangle subareas currently
 
         static_moment_cut_string = ''
@@ -142,7 +141,12 @@ class calculator:
         #     Ac = r**2 * np.arccos((cut_y-y)/r) - cut_y-y * (r**2 - d**2)**.5
         #     self.Qc += Ac * (y + cgy - self.yg)
 
-    def get_rectangle_values(self, x1, y1, x2, y2):
+    def get_rectangle_values(self,
+                             x1: float,
+                             y1: float,
+                             x2: float,
+                             y2: float
+                             ):
         # calculate values for rectangular subarea
 
         base = x2 - x1
@@ -154,7 +158,10 @@ class calculator:
 
         return base, height, partial_cg_y, partial_cg_x, area, dc
 
-    def get_circle_values(self, angle, radius):
+    def get_circle_values(self,
+                          angle: float,
+                          radius: float
+                          ):
         # calculate values for semi-circular subarea
 
         area = (math.pi * radius ** 2) / 2
@@ -163,7 +170,11 @@ class calculator:
 
         return area, partial_cg_y, partial_cg_x
 
-    def det_normal_stress(self, normal_force, y, z):
+    def det_normal_stress(self,
+                          normal_force: float,
+                          y: str,
+                          z: str
+                          ):
         normal_stress = f'({normal_force}/{self.total_area}) - (({self.moment_y}/{self.moment_inertia_y}) * {z}) - ' \
                         f'(({self.moment_x}/{self.moment_inertia_x}) * {y})'
         normal_stress_latex = NoEscape(r'\frac{' + f'{normal_force}' + r'}{' + f'{self.total_area}' + r'} - \frac{' +
@@ -185,14 +196,19 @@ class calculator:
 
         return normal_stress, normal_stress_latex, self.neutral_line, neutral_line_latex, self.moment_y, self.moment_x
 
-    def det_shear_flux(self, shear_force):
+    def det_shear_flux(self,
+                       shear_force: float
+                       ):
         self.shear_flux = f'({shear_force} * {self.static_moment_for_shear}) / ({self.moment_inertia_x})'
         shear_flux_latex = r'\frac{' + f'{shear_force} \\cdot {self.static_moment_for_shear}' + r'}{' + \
                            f'{self.moment_inertia_x_latex}' + r'}'
 
         return self.shear_flux, shear_flux_latex
 
-    def det_shear_stress(self, shear_force, thickness):
+    def det_shear_stress(self,
+                         shear_force: float,
+                         thickness: float
+                         ):
 
         if float(thickness) != 0:
             self.shear_stress = f'({shear_force} * {self.static_moment_for_shear}) / (({self.moment_inertia_x}) * {thickness})'
