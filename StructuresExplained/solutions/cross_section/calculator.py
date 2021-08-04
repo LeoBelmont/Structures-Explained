@@ -30,15 +30,14 @@ class calculator:
         self.moment_inertia_y_latex: str = ""
         self.static_moment_for_shear: str = ""
 
-    def det_values(self):
-        self.static_moment_rectangle()
-        self.static_moment_circle()
-        self.total_cg_y = float(parse_expr(f'({self.moment_x}) / ({self.total_area})'))
-        self.total_cg_x = float(parse_expr(f'({self.moment_y}) / ({self.total_area})'))
-        self.moment_inertia_rectangle()
-        self.moment_inertia_circle()
+    def calculate_values(self):
+        self.det_static_moment_rectangle()
+        self.det_static_moment_circle()
+        self.det_center_of_gravity()
+        self.det_moment_of_inertia_rectangle()
+        self.det_moment_of_inertia_circle()
 
-    def static_moment_rectangle(self):
+    def det_static_moment_rectangle(self):
         # calculate static moment for rectangular subareas. this function only appends
         # values to a string so they can be displayed step by step in the pdf later
 
@@ -49,7 +48,7 @@ class calculator:
             self.moment_x += f'+ {partial_area} * {partial_cg_y}'
             self.moment_y += f'+ {partial_area} * {partial_cg_x}'
 
-    def static_moment_circle(self):
+    def det_static_moment_circle(self):
         # calculate static moment for semi-circular subareas. this function only appends
         # values to a string so they can be displayed step by step in the pdf later
 
@@ -60,7 +59,11 @@ class calculator:
             self.moment_x += f'+ {partial_area} * ({y} + {partial_cg_y})'
             self.moment_y += f'+ {partial_area} * ({x} + {partial_cg_x})'
 
-    def moment_inertia_rectangle(self):
+    def det_center_of_gravity(self):
+        self.total_cg_y = float(parse_expr(f'({self.moment_x}) / ({self.total_area})'))
+        self.total_cg_x = float(parse_expr(f'({self.moment_y}) / ({self.total_area})'))
+
+    def det_moment_of_inertia_rectangle(self):
         # calculate moment of inertia for rectangle subareas.
         # this function makes two strings, one for the results and displaying in the UI
         # and the other for the step by step solution.
@@ -80,7 +83,7 @@ class calculator:
                 # appends parallel axis theorem if necessary
                 self.moment_inertia_y_latex += f'+ {area} \\cdot ({self.total_cg_x} - {partial_cg_x})^2'
 
-    def moment_inertia_circle(self):
+    def det_moment_of_inertia_circle(self):
         # calculate moment of inertia for semi-circular subareas.
         # this function makes two strings, one for the results and displaying in the UI
         # and the other for the step by step solution.

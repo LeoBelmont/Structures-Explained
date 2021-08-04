@@ -3066,7 +3066,7 @@ class Ui_tenshi(QWidget):
                 self.add_rect_item()
             for c in range(len(self.sig.subareas_circle)):
                 self.add_cir_item()
-            self.sig.det_values()
+            self.sig.calculate_values()
             if self.figureResultsButton.isChecked():
                 self.set_sigma()
             self.cross_loaded = True
@@ -3368,7 +3368,7 @@ class Ui_tenshi(QWidget):
         self.circle_list.setCurrentIndex(c)
 
     def finish_applying(self):
-        self.sig.det_values()
+        self.sig.calculate_values()
         if self.figureResultsButton.isChecked():
             self.set_sigma()
         self.plot_sec()
@@ -3377,7 +3377,7 @@ class Ui_tenshi(QWidget):
         c = self.rect_list.currentIndex()
         try:
             self.sig.subareas_rectangle.pop(c, None)
-            self.sig.det_values()
+            self.sig.calculate_values()
             if self.figureResultsButton.isChecked():
                 self.set_sigma()
             self.plot_sec()
@@ -3389,7 +3389,7 @@ class Ui_tenshi(QWidget):
         c = self.circle_list.currentIndex()
         try:
             self.sig.subareas_circle.pop(c, None)
-            self.sig.det_values()
+            self.sig.calculate_values()
             if self.figureResultsButton.isChecked():
                 self.set_sigma()
             self.plot_sec()

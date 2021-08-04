@@ -61,7 +61,7 @@ class manager:
 
         self.reset_strings()
 
-        self.calc.det_values()
+        self.calc.calculate_values()
 
         if print_results:
             self.print_geometrical_properties()
