@@ -29,19 +29,11 @@ class manager:
         self.rectangle_count: int = 0
         self.semicircle_count: int = 0
 
-        self.normal_stress_data_list: list = []
+        self.normal_stress_data_list: List[normal_stress_data] = []
 
-        self.shear_stress_data_list: list = []
+        self.shear_flux_data_list: List[shear_flux_data] = []
 
-        self.shear_stress_numeric: list = []
-        self.shear_stress_latex: list = []
-
-        self.shear_flux_numeric: list = []
-        self.shear_flux_latex: list = []
-
-        self.points_values: list = []
-        self.points_values_shear_flux: list = []
-        self.points_values_shear_stress: list = []
+        self.shear_stress_data_list: List[shear_stress_data] = []
 
         self.static_moment_for_shear_numeric: list = []
         self.static_moment_for_shear_latex: list = []
@@ -117,8 +109,9 @@ class manager:
 
         shear_flux, shear_flux_latex = self.calc.det_shear_flux(shear_force)
 
-        self.append_shear_stress(shear_flux, shear_flux_latex, shear_force, self.calc.static_moment_for_shear,
-                                 self.calc.moment_inertia_x)
+        if append_to_pdf:
+            self.append_shear_flux(shear_flux, shear_flux_latex, shear_force, self.calc.static_moment_for_shear,
+                                     self.static_moment_for_shear_string, self.calc.moment_inertia_x)
 
     def calculate_shear_stress(self, shear_force, thickness, cut_height, append_to_pdf=False):
         # calculates shear stress and appends the step by step solution to the PDF if append_to_pdf is True
@@ -128,8 +121,9 @@ class manager:
         shear_stress, shear_stress_latex = self.calc.det_shear_stress(shear_force, thickness)
 
         if append_to_pdf:
-            self.append_shear_stress(shear_force, self.calc.static_moment_for_shear, self.calc.moment_inertia_x,
-                                     shear_stress, shear_stress_latex, thickness)
+            self.append_shear_stress(shear_stress, shear_stress_latex, shear_stress, shear_force,
+                                     self.calc.static_moment_for_shear, self.static_moment_for_shear_string,
+                                     self.calc.moment_inertia_x, thickness)
 
     def append_normal_stress(self,
                              normal_stress,
@@ -144,15 +138,17 @@ class manager:
                              ):
 
         self.normal_stress_data_list.append(
-            normal_stress_data(normal_stress,
-                               normal_stress_latex,
-                               normal_force,
-                               moment_y,
-                               moment_x,
-                               y,
-                               z,
-                               neutral_line_numeric,
-                               neutral_line_latex)
+            normal_stress_data(
+                normal_stress,
+                normal_stress_latex,
+                normal_force,
+                moment_y,
+                moment_x,
+                y,
+                z,
+                neutral_line_numeric,
+                neutral_line_latex
+            )
         )
 
     def append_shear_flux(self,
@@ -160,16 +156,20 @@ class manager:
                           shear_flux_latex,
                           shear_force,
                           static_moment,
+                          static_moment_string,
                           moment_inertia_x
                           ):
 
-        if shear_force not in self.shear_flux_numeric:
-            # condition to prevent duplicates
-            self.shear_flux_numeric.append(shear_flux_numeric)
-            self.shear_flux_latex.append(shear_flux_latex)
-            self.points_values_shear_flux.append([shear_force, static_moment, moment_inertia_x])
-            self.static_moment_for_shear_numeric.append(self.calc.static_moment_for_shear)
-            self.static_moment_for_shear_latex.append(self.static_moment_for_shear_string)
+        self.shear_flux_data_list.append(
+            shear_flux_data(
+                shear_flux_numeric,
+                shear_flux_latex,
+                shear_force,
+                static_moment,
+                static_moment_string,
+                moment_inertia_x
+            )
+        )
 
     def append_shear_stress(self,
                             shear_stress_numeric,
@@ -177,16 +177,23 @@ class manager:
                             shear_stress,
                             shear_force,
                             static_moment,
-                            moment_inertia_x
+                            static_moment_latex,
+                            moment_inertia_x,
+                            thickness
                             ):
 
-        if shear_stress not in shear_stress_numeric:
-            # condition to prevent duplicates
-            self.shear_stress_numeric.append(shear_stress_numeric)
-            self.shear_stress_latex.append(shear_stress_latex)
-            self.points_values_shear_stress.append([shear_force, static_moment, moment_inertia_x, shear_stress])
-            self.static_moment_for_shear_numeric.append(self.calc.static_moment_for_shear)
-            self.static_moment_for_shear_latex.append(self.static_moment_for_shear_string)
+        self.shear_stress_data_list.append(
+            shear_stress_data(
+                shear_stress_numeric,
+                shear_stress_latex,
+                shear_stress,
+                shear_force,
+                static_moment,
+                static_moment_latex,
+                moment_inertia_x,
+                thickness
+            )
+        )
 
     def generate_pdf(self, language):
         # creates a folder to generate the figure and logo into
@@ -202,12 +209,8 @@ class manager:
 
     def reset_strings(self):
         self.normal_stress_data_list.clear()
-        self.shear_stress_numeric.clear()
-        self.shear_stress_latex.clear()
-        self.shear_flux_numeric.clear()
-        self.shear_flux_latex.clear()
-        self.points_values_shear_flux.clear()
-        self.points_values_shear_stress.clear()
+        self.shear_flux_data_list.clear()
+        self.shear_stress_data_list.clear()
         self.static_moment_for_shear_numeric.clear()
         self.static_moment_for_shear_latex.clear()
 
@@ -236,6 +239,48 @@ class normal_stress_data:
         self.neutral_line_latex = neutral_line_latex
 
 
+class shear_flux_data:
+    def __init__(self,
+                 shear_flux_numeric,
+                 shear_flux_latex,
+                 #shear_flux,
+                 shear_force,
+                 static_moment,
+                 static_moment_latex,
+                 moment_inertia_x
+                 ):
+
+        self.shear_flux_numeric = shear_flux_numeric
+        self.shear_flux_latex = shear_flux_latex
+        #self.shear_flux = shear_flux
+        self.shear_force = shear_force
+        self.static_moment = static_moment
+        self.static_moment_string = static_moment_latex
+        self.moment_inertia_x = moment_inertia_x
+
+
+class shear_stress_data:
+    def __init__(self,
+                 shear_stress_numeric,
+                 shear_stress_latex,
+                 shear_stress,
+                 shear_force,
+                 static_moment,
+                 static_moment_latex,
+                 moment_inertia_x,
+                 thickness
+                 ):
+
+        self.shear_stress_numeric = shear_stress_numeric
+        self.shear_stress_latex = shear_stress_latex
+        self.shear_stress = shear_stress
+        self.shear_force = shear_force
+        self.static_moment = static_moment
+        self.static_moment_latex = static_moment_latex
+        self.moment_inertia_x = moment_inertia_x
+        self.thickness = thickness
+
+
 if __name__ == "__main__":
     test = manager()
     test.add_rectangular_subarea(upper_left=(0, 10), down_right=(5, 0))
@@ -244,6 +289,6 @@ if __name__ == "__main__":
     test.get_geometrical_properties(print_results=False)
     test.calculate_normal_stress(normal_force=10, y="1", print_results=False,
                                  append_to_pdf=True)  # default for y and z are Symbols
-    # test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
+    test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
     # test.show_cross_section(show=True)
     test.generate_pdf("PT")

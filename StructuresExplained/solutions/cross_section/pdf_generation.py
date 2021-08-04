@@ -31,13 +31,13 @@ class pdf_generator:
         if self.mng.normal_stress_data_list:
             self.append_normal_stress(doc, tpdf)
 
-        if self.mng.shear_flux_latex or self.mng.shear_stress_latex:
+        if self.mng.shear_flux_data_list or self.mng.shear_stress_data_list:
             self.append_static_moment_for_shear_stress(doc, tpdf)
 
-        if self.mng.shear_flux_latex:
+        if self.mng.shear_flux_data_list:
             self.append_shear_flux(doc, tpdf)
 
-        if self.mng.shear_stress_latex:
+        if self.mng.shear_stress_data_list:
             self.append_shear_stress(doc, tpdf)
 
         doc.generate_pdf('tmp\\resolucaorm',
@@ -157,31 +157,44 @@ class pdf_generator:
 
     def append_shear_flux(self, doc, tpdf):
         with doc.create(Section(tpdf.step_shear_flux)):
+
             with doc.create(Subsection(tpdf.shear_flux_formula)):
                 self.pdf.add_equation(tpdf.shear_flux_var + r' \frac{V \cdot Q}{I_x}')
-            for i in range(len(self.mng.shear_flux_latex)):
+
+            for i in range(len(self.mng.shear_flux_data_list)):
                 with doc.create(
-                        Subsection(NoEscape(f'{tpdf.calculating_for} V = {self.mng.points_values_shear_flux[i][0]} N, '
-                                            f'Q = {self.mng.points_values_shear_flux[i][1]} m' + r'\textsuperscript{3}'
-                                            r', I\textsubscript{x}' +
-                                            f' = {parse_expr(self.mng.points_values_shear_flux[i][2])}' +
+                        Subsection(NoEscape(f'{tpdf.calculating_for} V = {self.mng.shear_flux_data_list[i].shear_force} N, '
+                                            f'Q = {self.mng.shear_flux_data_list[i].static_moment} m'
+                                            + r'\textsuperscript{3}, I\textsubscript{x}' +
+                                            f' = {parse_expr(self.mng.shear_flux_data_list[i].moment_inertia_x)}' +
                                             r' m\textsuperscript{4}'))):
 
-                    self.pdf.add_equation(tpdf.shear_flux_var + f'{self.mng.shear_flux_latex[i]}')
+                    self.pdf.add_equation(tpdf.shear_flux_var + f'{self.mng.shear_flux_data_list[i].shear_flux_latex}')
+
                     self.pdf.add_equation(
-                        tpdf.shear_flux_var + f'{round_expr(parse_expr(self.mng.shear_flux_numeric[i]), 2)}' + r'$ $\frac{N}{m}')
+                        tpdf.shear_flux_var +
+                        f'{round_expr(parse_expr(self.mng.shear_flux_data_list[i].shear_flux_numeric), 2)}' +
+                        r'$ $\frac{N}{m}')
 
     def append_shear_stress(self, doc, tpdf):
         with doc.create(Section(tpdf.step_shear_stress)):
+
             with doc.create(Subsection(tpdf.shear_stress_formula_str)):
                 self.pdf.add_equation(tpdf.shear_stress_var + r' \frac{V \cdot Q}{I_x \cdot t}')
-            for i in range(len(self.mng.shear_stress_latex)):
-                with doc.create(Subsection(
-                        NoEscape(f'{tpdf.calculating_for} V = {self.mng.points_values_shear_stress[i][0]} N, ' +
-                                 f'Q = {self.mng.points_values_shear_stress[i][1]} m' + r'\textsuperscript{3}, ' +
-                                 r'I\textsubscript{x}' + f' = {parse_expr(self.mng.points_values_shear_stress[i][2])} m'
-                                 + r'\textsuperscript{4}, ' + f't = {self.mng.points_values_shear_stress[i][3]} m'))):
 
-                    self.pdf.add_equation(tpdf.shear_stress_var + f'{self.mng.shear_stress_latex[i]}')
+            for i in range(len(self.mng.shear_stress_data_list)):
+                with doc.create(Subsection(
+                        NoEscape(f'{tpdf.calculating_for} V = {self.mng.shear_stress_data_list[i].shear_force} N, ' +
+                                 f'Q = {self.mng.shear_stress_data_list[i].static_moment} m'
+                                 + r'\textsuperscript{3}, I\textsubscript{x}' +
+                                 f' = {parse_expr(self.mng.shear_stress_data_list[i].moment_inertia_x)} m'
+                                 + r'\textsuperscript{4}, ' + f't = {self.mng.shear_stress_data_list[i].thickness} m'
+                                 ))):
+
+                    self.pdf.add_equation(tpdf.shear_stress_var +
+                                          f'{self.mng.shear_stress_data_list[i].shear_stress_latex}')
+
                     self.pdf.add_equation(
-                        tpdf.shear_stress_var + f'{round_expr(parse_expr(self.mng.shear_stress_numeric[i]), 2)}' + r'$ $Pa')
+                        tpdf.shear_stress_var +
+                        f'{round_expr(parse_expr(self.mng.shear_stress_data_list[i].shear_stress_numeric), 2)}' +
+                        r'$ $Pa')
