@@ -6,7 +6,6 @@ from StructuresExplained.solutions.cross_section.pdf_generation import pdf_gener
 from StructuresExplained.utils.util import round_expr, save_figure, make_temp_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 
-
 from typing import (
     Tuple,
     Union,
@@ -30,11 +29,9 @@ class manager:
         self.rectangle_count: int = 0
         self.semicircle_count: int = 0
 
-        self.normal_stress_latex: list = []
-        self.normal_stress_numeric: list = []
+        self.normal_stress_data_list: list = []
 
-        self.normal_line_numeric: list = []
-        self.normal_line_latex: list = []
+        self.shear_stress_data_list: list = []
 
         self.shear_stress_numeric: list = []
         self.shear_stress_latex: list = []
@@ -146,13 +143,17 @@ class manager:
                              neutral_line_latex
                              ):
 
-        if normal_stress not in self.normal_stress_numeric:
-            # condition to prevent duplicates
-            self.normal_stress_numeric.append(normal_stress)
-            self.normal_stress_latex.append(normal_stress_latex)
-            self.points_values.append([normal_force, moment_y, moment_x, y, z])
-            self.normal_line_numeric.append(neutral_line_numeric)
-            self.normal_line_latex.append(neutral_line_latex)
+        self.normal_stress_data_list.append(
+            normal_stress_data(normal_stress,
+                               normal_stress_latex,
+                               normal_force,
+                               moment_y,
+                               moment_x,
+                               y,
+                               z,
+                               neutral_line_numeric,
+                               neutral_line_latex)
+        )
 
     def append_shear_flux(self,
                           shear_flux_numeric,
@@ -200,11 +201,7 @@ class manager:
         self.pdfgen.generate_pdf(language)
 
     def reset_strings(self):
-        self.normal_stress_latex.clear()
-        self.normal_stress_numeric.clear()
-        self.points_values.clear()
-        self.normal_line_numeric.clear()
-        self.normal_line_latex.clear()
+        self.normal_stress_data_list.clear()
         self.shear_stress_numeric.clear()
         self.shear_stress_latex.clear()
         self.shear_flux_numeric.clear()
@@ -215,13 +212,38 @@ class manager:
         self.static_moment_for_shear_latex.clear()
 
 
+class normal_stress_data:
+    def __init__(self,
+                 normal_stress,
+                 normal_stress_latex,
+                 normal_force,
+                 moment_y,
+                 moment_x,
+                 y,
+                 z,
+                 neutral_line_numeric,
+                 neutral_line_latex
+                 ):
+
+        self.normal_stress = normal_stress
+        self.normal_stress_latex = normal_stress_latex
+        self.normal_force = normal_force
+        self.moment_y = moment_y
+        self.moment_x = moment_x
+        self.y = y
+        self.z = z
+        self.neutral_line_numeric = neutral_line_numeric
+        self.neutral_line_latex = neutral_line_latex
+
+
 if __name__ == "__main__":
     test = manager()
     test.add_rectangular_subarea(upper_left=(0, 10), down_right=(5, 0))
     test.add_rectangular_subarea(upper_left=(5, 10), down_right=(10, 0))
-    #test.add_semicircular_subarea(center=(10, 5), radius=5, angle=90)
+    # test.add_semicircular_subarea(center=(10, 5), radius=5, angle=90)
     test.get_geometrical_properties(print_results=False)
-    test.calculate_normal_stress(normal_force=10, y="1", print_results=False, append_to_pdf=True) # default for y and z are Symbols
-    test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
-    #test.show_cross_section(show=True)
+    test.calculate_normal_stress(normal_force=10, y="1", print_results=False,
+                                 append_to_pdf=True)  # default for y and z are Symbols
+    # test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
+    # test.show_cross_section(show=True)
     test.generate_pdf("PT")

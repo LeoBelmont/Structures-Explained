@@ -28,7 +28,7 @@ class pdf_generator:
 
         self.append_moment_inertia(doc, tpdf)
 
-        if self.mng.normal_stress_latex:
+        if self.mng.normal_stress_data_list:
             self.append_normal_stress(doc, tpdf)
 
         if self.mng.shear_flux_latex or self.mng.shear_stress_latex:
@@ -123,19 +123,24 @@ class pdf_generator:
             with doc.create(Subsection(tpdf.neutral_line_formula)):
                 doc.append(NoEscape(tpdf.neutral_line_tip))
                 self.pdf.add_equation(r'0 = \frac{N}{A} - \frac{My}{Iy} \cdot z - \frac{Mz}{Iz} \cdot y')
-            for i in range(len(self.mng.normal_stress_latex)):
-                with doc.create(Subsection(f'{tpdf.calculating_for} N = {self.mng.points_values[i][0]} N, '
-                                           f'My = {parse_expr(self.mng.points_values[i][1])} Nm, '
-                                           f'Mz = {parse_expr(self.mng.points_values[i][2])} Nm, '
-                                           f'y = {self.mng.points_values[i][3]} m, '
-                                           f'z = {self.mng.points_values[i][4]} m')):
+            for i in range(len(self.mng.normal_stress_data_list)):
+                with doc.create(Subsection(f'{tpdf.calculating_for} N = {self.mng.normal_stress_data_list[i].normal_force} N, '
+                                           f'My = {parse_expr(self.mng.normal_stress_data_list[i].moment_y)} Nm, '
+                                           f'Mz = {parse_expr(self.mng.normal_stress_data_list[i].moment_x)} Nm, '
+                                           f'y = {self.mng.normal_stress_data_list[i].y} m, '
+                                           f'z = {self.mng.normal_stress_data_list[i].z} m')):
+
                     with doc.create(Subsubsection(tpdf.step_normal_stress)):
-                        self.pdf.add_equation(tpdf.normal_stress_var + f'{self.mng.normal_stress_latex[i]}')
+                        self.pdf.add_equation(tpdf.normal_stress_var +
+                                              f'{self.mng.normal_stress_data_list[i].normal_stress_latex}')
+
                         self.pdf.add_equation(
-                            tpdf.normal_stress_var + f'{round_expr(parse_expr(self.mng.normal_stress_numeric[i]), 2)}$ $Pa')
+                            tpdf.normal_stress_var +
+                            f'{round_expr(parse_expr(self.mng.normal_stress_data_list[i].normal_stress), 2)}$ $Pa')
+
                     with doc.create(Subsubsection(tpdf.step_neutral_line)):
-                        self.pdf.add_equation(f'{self.mng.normal_line_latex[i]}')
-                        self.pdf.add_equation(f'{self.mng.normal_line_numeric[i]}')
+                        self.pdf.add_equation(f'{self.mng.normal_stress_data_list[i].neutral_line_latex}')
+                        self.pdf.add_equation(f'{self.mng.normal_stress_data_list[i].neutral_line_numeric}')
 
     def append_static_moment_for_shear_stress(self, doc, tpdf):
         with doc.create(Section(tpdf.step_static_moment_cut)):
