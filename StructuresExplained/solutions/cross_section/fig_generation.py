@@ -2,13 +2,20 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Wedge
 from StructuresExplained.solutions import functions
 
+from typing import (
+    Union,
+    List,
+    Dict,
+    Any
+)
+
 
 class fig_generator:
     def __init__(self, subareas_rectangle, subareas_circle, total_cg_x, total_cg_y):
-        self.subareas_rectangle = subareas_rectangle
-        self.subareas_circle = subareas_circle
-        self.total_cg_x = total_cg_x
-        self.total_cg_y = total_cg_y
+        self.subareas_rectangle: Dict[int, list] = subareas_rectangle
+        self.subareas_circle: Dict[int, List[Union[float, Any]]] = subareas_circle
+        self.total_cg_x: float = total_cg_x
+        self.total_cg_y: float = total_cg_y
 
     bbox_setting = dict(boxstyle="round,pad=0.1", fc="grey", ec="black", lw=1)
 
@@ -58,7 +65,7 @@ class fig_generator:
         self.plot_cir(circle_subarea_id)
 
         self.subplot.plot(self.total_cg_x, self.total_cg_y, 'ro')
-        self.subplot.text(self.total_cg_x, self.total_cg_y, f"CG ({self.total_cg_x:.1f},{self.total_cg_y:.1f})",
+        self.subplot.text(self.total_cg_x, self.total_cg_y, f"CG ({self.total_cg_x},{self.total_cg_y})",
                           size=functions.size, ha='center',
                           va='bottom', bbox=self.bbox_setting)
 

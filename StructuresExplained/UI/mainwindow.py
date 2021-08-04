@@ -2927,7 +2927,7 @@ class Ui_tenshi(QWidget):
                         self.setupLoading()
                         thread = PDFGeneratorThread(self.loadingScreen,
                                                     self.mohr_savefig,
-                                                    self.mohr.solver,
+                                                    self.mohr.generate_pdf,
                                                     self.language)
                         thread.start()
                         self.loadingScreen.exec_()
@@ -2952,7 +2952,7 @@ class Ui_tenshi(QWidget):
                         self.setupLoading()
                         thread = PDFGeneratorThread(self.loadingScreen,
                                                     self.rm_savefig,
-                                                    self.sig.solver,
+                                                    self.sig.generate_pdf,
                                                     self.language)
                         thread.start()
                         self.loadingScreen.exec_()
@@ -3238,7 +3238,7 @@ class Ui_tenshi(QWidget):
                 V = self.filter(self.tshear.text())
                 if self.cut_y.text() == '':
                     self.cut_y.setText("0")
-                Q = self.sig.full_sm(float(self.filter(self.cut_y.text())))
+                Q = self.sig.calculate_static_moment_for_shear(float(self.filter(self.cut_y.text())))
                 self.label_79.setText(self.scientific_format(Decimal(Q)))
                 if self.twidth.text() == '':
                     self.twidth.setText('0')

@@ -4,6 +4,7 @@ from sympy.parsing.sympy_parser import parse_expr
 from pylatex import NoEscape
 import numpy as np
 from StructuresExplained.utils.util import round_expr
+from StructuresExplained.utils.util import simplify_signals
 
 from typing import (
     Tuple,
@@ -30,7 +31,7 @@ class calculator:
         self.moment_inertia_x_latex: AnyStr = ""
         self.moment_inertia_y: AnyStr = ""
         self.moment_inertia_y_latex: AnyStr = ""
-        self.static_moment_cut: AnyStr = ""
+        self.static_moment_for_shear: AnyStr = ""
 
     def det_values(self):
         self.static_moment_rectangle()
@@ -59,20 +60,8 @@ class calculator:
             partial_area, partial_cg_y, partial_cg_x = self.get_circle_values(angle, radius)
 
             self.total_area += f'+ {partial_area}'
-
-            if float(f'{partial_cg_y}') > 0:
-                self.moment_x += f'+ {partial_area} * ({y} + {partial_cg_y})'
-            elif float(f'{partial_cg_y}') < 0:
-                self.moment_x += f'+ {partial_area} * ({y} {partial_cg_y})'
-            elif float(f'{partial_cg_y}') == 0:
-                self.moment_x += f'+ {partial_area} * {y}'
-
-            if float(f'{partial_cg_x}') > 0:
-                self.moment_y += f'+ {partial_area} * ({x} + {partial_cg_x})'
-            elif float(f'{partial_cg_x}') < 0:
-                self.moment_y += f'+ {partial_area} * ({x} {partial_cg_x})'
-            elif float(f'{partial_cg_x}') == 0:
-                self.moment_y += f'+ {partial_area} * {x}'
+            self.moment_x += f'+ {partial_area} * ({y} + {partial_cg_y})'
+            self.moment_y += f'+ {partial_area} * ({x} + {partial_cg_x})'
 
     def moment_inertia_rectangle(self):
         # calculate moment of inertia for rectangle subareas.
@@ -83,18 +72,16 @@ class calculator:
             base, height, partial_cg_y, partial_cg_x, area, _ = self.get_rectangle_values(x1, y1, x2, y2)
 
             self.moment_inertia_x += f'+(({base} * ({height} ** 3)) / 12) + ({area} * (({self.total_cg_y} - {partial_cg_y}) ** 2))'
-
-            self.moment_inertia_x_latex += r'+ \frac' + '{' + f'{base} * {height}^3' + '}' + r'{12}'
+            self.moment_inertia_x_latex += r'+ \frac' + '{' + f'{base} \\cdot {height}^3' + '}' + r'{12}'
             if area * (self.total_cg_y - partial_cg_y) ** 2 != 0:
                 # appends parallel axis theorem if necessary
-                self.moment_inertia_x_latex += f'+ {area} * ({self.total_cg_y} - {partial_cg_y})^2'
+                self.moment_inertia_x_latex += f'+ {area} \\cdot ({self.total_cg_y} - {partial_cg_y})^2'
 
             self.moment_inertia_y += f'+((({base} ** 3) * {height}) / 12) + ({area} * (({self.total_cg_x} - {partial_cg_x}) ** 2))'
-
-            self.moment_inertia_y_latex += r'+ \frac' + '{' + f'{base}^3 * {height}' + '}' + r'{12}'
+            self.moment_inertia_y_latex += r'+ \frac' + '{' + f'{base}^3 \\cdot {height}' + '}' + r'{12}'
             if area * (self.total_cg_x - partial_cg_x) ** 2 != 0:
                 # appends parallel axis theorem if necessary
-                self.moment_inertia_y_latex += f'+ {area} * ({self.total_cg_x} - {partial_cg_x})^2'
+                self.moment_inertia_y_latex += f'+ {area} \\cdot ({self.total_cg_x} - {partial_cg_x})^2'
 
     def moment_inertia_circle(self):
         # calculate moment of inertia for semi-circular subareas.
@@ -105,23 +92,23 @@ class calculator:
             area, partial_cg_y, partial_cg_x = self.get_circle_values(angle, radius)
 
             moment_inertia = f'+({math.pi} * {radius} ** 4) / 8'
-            moment_inertia_latex = r'+ \frac' + '{' + f'{math.pi} * {radius}^4' + '}' + r'{8}'
+            moment_inertia_latex = r'+ \frac' + '{' + f'{math.pi} \\cdot {radius}^4' + '}' + r'{8}'
 
             self.moment_inertia_x += f'{moment_inertia} + {area} * (({self.total_cg_y} - {y + partial_cg_y})**2)'
 
             self.moment_inertia_x_latex += moment_inertia_latex
             if area * ((partial_cg_y - y) ** 2) != 0:
                 # appends parallel axis theorem if necessary
-                self.moment_inertia_x_latex += f'+ {area} * ({self.total_cg_y} - {y + partial_cg_y})^2'
+                self.moment_inertia_x_latex += f'+ {area} \\cdot ({self.total_cg_y} - {y + partial_cg_y})^2'
 
             self.moment_inertia_y += f'{moment_inertia} + {area} * (({self.total_cg_x} - {x + partial_cg_x})**2)'
 
             self.moment_inertia_y_latex += moment_inertia_latex
             if area * ((self.total_cg_x - x) ** 2) != 0:
                 # appends parallel axis theorem if necessary
-                self.moment_inertia_y_latex += f'+ {area} * ({self.total_cg_x} - {x + partial_cg_x})^2'
+                self.moment_inertia_y_latex += f'+ {area} \\cdot ({self.total_cg_x} - {x + partial_cg_x})^2'
 
-    def full_sm(self, cut_height):
+    def calculate_static_moment_for_shear(self, cut_height):
         # calculate static moment on the cut given by the user. only for rectangle subareas currently
 
         static_moment_cut_string = ''
@@ -135,18 +122,18 @@ class calculator:
             if distance_from_cut <= -half_height:
                 static_moment_cut += area * (partial_cg_y - self.total_cg_y)
 
-                static_moment_cut_string += f'+ {area} \cdot ({partial_cg_y} - {self.total_cg_y}) '
+                static_moment_cut_string += f'+ {area} \\cdot ({partial_cg_y} - {self.total_cg_y}) '
 
             elif np.abs(distance_from_cut) <= half_height:
                 static_moment_cut += (height / 2 + partial_cg_y - cut_height) * base * \
                                      (((height / 2 + partial_cg_y - cut_height) * .5 + cut_height) - self.total_cg_y)
 
-                static_moment_cut_string += r'+ (' + r'\frac{' + f'{height}' + r'}{' + f'{2}' + r'} + ' + f'{partial_cg_y}' \
-                                                                                                          f' - {cut_height}) \cdot {base} \cdot ' + r'(((\frac{' + f'{height}' + r'}{' \
-                                            + f'{2}' + r'} + ' + f'{partial_cg_y} - {cut_height}) \cdot 0.5 +' \
-                                                                 f' {cut_height}) - {self.total_cg_y}) '
+                static_moment_cut_string += r'+ (\frac{' + str(height) + r'}{2} + ' + str(partial_cg_y) + \
+                                            f'- {cut_height}) \\cdot {base}' + r' \cdot (((\frac{' + str(height) + \
+                                            r'}{2} + ' + str(partial_cg_y) + f' - {cut_height}) \\cdot 0.5 + ' \
+                                            f'{cut_height}) - {self.total_cg_y}) '
 
-        return self.static_moment_cut
+        return self.static_moment_for_shear
 
         # values for circular sectors
         # for key, (x, y, r, a) in self.sub_areas_cir.items():
@@ -177,11 +164,11 @@ class calculator:
         return area, partial_cg_y, partial_cg_x
 
     def det_normal_stress(self, normal_force, y, z):
-        normal_stress = f'({normal_force}/{self.total_area}) - (({self.moment_y}/{self.moment_inertia_y}) * {z}) -' \
-                        f' (({self.moment_x}/{self.moment_inertia_x}) * {y})'
+        normal_stress = f'({normal_force}/{self.total_area}) - (({self.moment_y}/{self.moment_inertia_y}) * {z}) - ' \
+                        f'(({self.moment_x}/{self.moment_inertia_x}) * {y})'
         normal_stress_latex = NoEscape(r'\frac{' + f'{normal_force}' + r'}{' + f'{self.total_area}' + r'} - \frac{' +
-                                       f'{self.moment_y}' + r'}{' + f'{self.moment_inertia_y}' + r'} \cdot' + f' {z} -' +
-                                       r'\frac{' + f'{self.moment_x}' + r'}{' + f'{self.moment_inertia_x}' + r'} \cdot' + f' {y}'
+                                       f'{self.moment_y}' + r'}{' + f'{self.moment_inertia_y_latex}' + r'} \cdot' + f' {z} -' +
+                                       r'\frac{' + f'{self.moment_x}' + r'}{' + f'{self.moment_inertia_x_latex}' + r'} \cdot' + f' {y}'
                                        )
 
         if (self.moment_y != "0" and type(z) != str) and (type(y) == str or self.moment_x == "0"):
@@ -189,27 +176,35 @@ class calculator:
         elif (self.moment_y == "0" and self.moment_x == "0") or (type(y) == str and type(z) == str):
             self.neutral_line = "Não há linha neutra"
         else:
-            self.neutral_line = f"y = {round_expr(sympy.solve(normal_stress, y)[0], 2)}"
+            self.neutral_line = f"y = {round_expr(sympy.solve(normal_stress, y), 2)}"
 
-        neutral_line_latex = NoEscape(r'0 = \frac{' + f'{normal_force}' + r'}{' + f'{self.total_area}' + r'} - \frac{'
-                                      + f'{self.moment_y}' + r'}{' + f'{self.moment_inertia_y}' + r'} \cdot z -' + r'\frac{'
-                                      + f'{self.moment_x}' + r'}{' + f'{self.moment_inertia_x}' + r'} \cdot y')
+        neutral_line_latex = NoEscape(r'0 = \frac{' + str(normal_force) + r'}{' + str(self.total_area) + r'} - \frac{'
+                                      + str(self.moment_y) + r'}{' + str(self.moment_inertia_y_latex) + r'} \cdot z -'
+                                      + r'\frac{' + str(self.moment_x) + r'}{' + str(self.moment_inertia_x_latex)
+                                      + r'} \cdot y')
 
         return normal_stress, normal_stress_latex, self.neutral_line, neutral_line_latex, self.moment_y, self.moment_x
 
-    def det_shear_stress(self, shear_force, static_moment, normal_stress, moment_inertia_x):
-        self.shear_flux = f'{shear_force} * {static_moment} / {moment_inertia_x}'
-        shear_flux_latex = r'\frac{' + f'{shear_force} \cdot {static_moment}' + r'}{' + f'{moment_inertia_x}' + r'}'
-        if float(normal_stress) != 0:
-            self.shear_stress = f'({shear_force} * {static_moment}) / ({moment_inertia_x} * {normal_stress})'
-            shear_stress_latex = r'\frac{' + f'{shear_force} \cdot {static_moment}' + r'}{' + f'{moment_inertia_x} \cdot {normal_stress}' + r'}'
+    def det_shear_flux(self, shear_force):
+        self.shear_flux = f'({shear_force} * {self.static_moment_for_shear}) / ({self.moment_inertia_x})'
+        shear_flux_latex = r'\frac{' + f'{shear_force} \\cdot {self.static_moment_for_shear}' + r'}{' + \
+                           f'{self.moment_inertia_x_latex}' + r'}'
+
+        return self.shear_flux, shear_flux_latex
+
+    def det_shear_stress(self, shear_force, thickness):
+
+        if float(thickness) != 0:
+            self.shear_stress = f'({shear_force} * {self.static_moment_for_shear}) / (({self.moment_inertia_x}) * {thickness})'
+            shear_stress_latex = r'\frac{' + f'{shear_force} \\cdot {self.static_moment_for_shear}' + r'}{' +\
+                                 f'{self.moment_inertia_x_latex} \\cdot {thickness}' + r'} '
         else:
             shear_stress_latex = None
 
-        return self.shear_flux, self.shear_stress, shear_flux_latex, shear_stress_latex
+        return self.shear_stress, shear_stress_latex
 
     def reset_results(self):
         self.total_area = self.moment_x = self.moment_y = self.moment_inertia_y = self.moment_inertia_x = \
-            self.moment_inertia_y_latex = self.moment_inertia_x_latex = self.static_moment_cut = ''
+            self.moment_inertia_y_latex = self.moment_inertia_x_latex = self.static_moment_for_shear = ''
 
-        self.static_moment_cut = self.total_cg_y = self.total_cg_x = 0
+        self.static_moment_for_shear = self.total_cg_y = self.total_cg_x = 0
