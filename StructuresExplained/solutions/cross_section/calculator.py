@@ -184,8 +184,8 @@ class calculator:
 
     def det_normal_stress(self,
                           normal_force: float,
-                          y: str,
-                          z: str,
+                          y: float,
+                          z: float,
                           latex_format: Optional[bool] = True
                           ):
         # calculates normal stress and neutral line.
@@ -208,16 +208,16 @@ class calculator:
 
     def det_neutral_line(self,
                          normal_force: float,
-                         y: str,
-                         z: str
+                         y: float,
+                         z: float
                          ):
 
         normal_stress = self.det_normal_stress(normal_force, y, z, latex_format=False)
 
-        if (self.moment_y != "0" and type(z) != str) and (type(y) == str or self.moment_x == "0"):
+        if (self.moment_y != "0" and type(z) == sympy.Symbol) and (type(y) != sympy.Symbol or self.moment_x == "0"):
             self.neutral_line = f"z = {round_expr(sympy.solve(normal_stress, z)[0], 2)}"
 
-        elif (self.moment_y == "0" and self.moment_x == "0") or (type(y) == str and type(z) == str):
+        elif (self.moment_y == "0" and self.moment_x == "0") or (type(y) != sympy.Symbol and type(z) != sympy.Symbol):
             self.neutral_line = "Não há linha neutra"
 
         else:

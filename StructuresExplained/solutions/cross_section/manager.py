@@ -93,8 +93,8 @@ class manager:
 
     def calculate_normal_stress(self,
                                 normal_force: float,
-                                y: Optional[Union[str, Symbol]] = Symbol('y'),
-                                z: Optional[Union[str, Symbol]] = Symbol('z'),
+                                y: Optional[Union[float, Symbol]] = Symbol('y'),
+                                z: Optional[Union[float, Symbol]] = Symbol('z'),
                                 append_to_pdf: bool = False,
                                 print_results: bool = False
                                 ):
@@ -112,8 +112,8 @@ class manager:
 
     def calculate_neutral_line(self,
                                normal_force: float,
-                               y: Optional[Union[str, Symbol]] = Symbol('y'),
-                               z: Optional[Union[str, Symbol]] = Symbol('z'),
+                               y: Optional[Union[float, Symbol]] = Symbol('y'),
+                               z: Optional[Union[float, Symbol]] = Symbol('z'),
                                append_to_pdf: bool = False,
                                print_results: bool = False
                                ):
@@ -165,8 +165,8 @@ class manager:
                              normal_force: float,
                              moment_y: str,
                              moment_x: str,
-                             y: Union[str, Symbol],
-                             z: Union[str, Symbol]
+                             y: Union[float, Symbol],
+                             z: Union[float, Symbol]
                              ):
 
         self.normal_stress_data_list.append(
@@ -187,8 +187,8 @@ class manager:
                             normal_force: float,
                             moment_y: str,
                             moment_x: str,
-                            y: Union[str, Symbol],
-                            z: Union[str, Symbol]
+                            y: Union[float, Symbol],
+                            z: Union[float, Symbol]
                             ):
 
         self.neutral_line_data_list.append(
@@ -358,9 +358,9 @@ if __name__ == "__main__":
     test.add_rectangular_subarea(upper_left=(5, 10), down_right=(10, 0))
     # test.add_semicircular_subarea(center=(10, 5), radius=5, angle=90)
     test.get_geometrical_properties(print_results=False)
-    test.calculate_normal_stress(normal_force=10, y="1", print_results=False,
+    test.calculate_normal_stress(normal_force=10, y=1, print_results=False,
                                  append_to_pdf=True)  # default for y and z are Symbols
-    test.calculate_neutral_line(normal_force=10, y="1", append_to_pdf=True)
+    test.calculate_neutral_line(normal_force=10, y=1, append_to_pdf=True)
     test.calculate_shear_flux(10, 1, True)
     test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
     # test.show_cross_section(show=True)
