@@ -29,15 +29,19 @@ class fig_generator:
                   key: int,
                   subarea_id: int
                   ):
+        # function to determine if the subarea will be highlighted(red) or not(blue).
+        # verifies if the subarea ID given by the user to be highlighted is the same
+        # as the dict key
+
         if key == subarea_id:
             color = 'r'
         else:
             color = 'dodgerblue'
         return color
 
-    def plot_rect(self,
-                  rectangle_subarea_id: int
-                  ):
+    def plot_rectangle(self,
+                       rectangle_subarea_id: int
+                       ):
         for key, (x1, y1, x2, y2) in self.subareas_rectangle.items():
             base = x2 - x1
             height = y1 - y2
@@ -56,9 +60,9 @@ class fig_generator:
                           facecolor=color,
                           alpha=1))
 
-    def plot_cir(self,
-                 circle_subarea_id: int
-                 ):
+    def plot_circle(self,
+                    circle_subarea_id: int
+                    ):
         for key, (x, y, radius, angle) in self.subareas_circle.items():
             self.subplot.plot(x, y, 'ro')
             self.subplot.text(x, y, f'({x},{y})', size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
@@ -79,8 +83,8 @@ class fig_generator:
 
         self.subplot = fig.add_subplot(111)
 
-        self.plot_rect(rectangle_subarea_id)
-        self.plot_cir(circle_subarea_id)
+        self.plot_rectangle(rectangle_subarea_id)
+        self.plot_circle(circle_subarea_id)
 
         self.subplot.plot(self.total_cg_x, self.total_cg_y, 'ro')
         self.subplot.text(self.total_cg_x, self.total_cg_y, f"CG ({self.total_cg_x},{self.total_cg_y})",
