@@ -1,15 +1,20 @@
+import matplotlib.pyplot as plt
 from pylatex import NoEscape
 from sympy import Number
 from os import path, mkdir, makedirs
 from shutil import rmtree
 import re
 
+from typing import (
+    Optional,
+)
 
-def round_expr(expr, num_digits):
+
+def round_expr(expr, num_digits: int):
     return expr.xreplace({n: round(n, num_digits) for n in expr.atoms(Number)})
 
 
-def simplify_signals(equation):
+def simplify_signals(equation: str):
     equation = equation.replace('- -', '+')
     equation = equation.replace('--', '+')
     equation = equation.replace('+ -', '-')
@@ -22,20 +27,23 @@ def simplify_signals(equation):
     return equation
 
 
-def save_figure(figure, fig_path, transparent=True):
+def save_figure(figure: plt.Figure, fig_path: str, transparent: Optional[bool] = True):
     figure.savefig(fig_path, transparent=transparent)
 
 
-def make_temp_folder():
-    if not path.isdir("tmp"):
-        mkdir("tmp")
-    if not path.isdir("tmp\\figs"):
-        makedirs("tmp\\figs")
+def make_pdf_folder(pdf_path: str):
+    if not path.isdir(pdf_path):
+        mkdir(pdf_path)
 
 
-def delete_temp_folder():
-    if path.isdir("tmp"):
-        rmtree('tmp')
+def make_figure_folder(pdf_path: str):
+    if not path.isdir(pdf_path + r"\figs"):
+        makedirs(pdf_path + r"\figs")
+
+
+def delete_temp_folder(pdf_path: str):
+    if path.isdir(pdf_path):
+        rmtree(pdf_path)
 
 
 class add_to_pdf:

@@ -3,7 +3,7 @@ from sympy import Symbol
 from StructuresExplained.solutions.cross_section.calculator import calculator
 from StructuresExplained.solutions.cross_section.fig_generation import fig_generator
 from StructuresExplained.solutions.cross_section.pdf_generation import pdf_generator
-from StructuresExplained.utils.util import round_expr, save_figure, make_temp_folder
+from StructuresExplained.utils.util import round_expr, save_figure, make_pdf_folder, make_figure_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 
 from typing import (
@@ -248,18 +248,21 @@ class manager:
         )
 
     def generate_pdf(self,
-                     language: str
+                     language: str,
+                     pdf_path: Optional[str] = "tmp"
                      ):
         # creates a folder to generate the figure and logo into
-        make_temp_folder()
+
+        make_pdf_folder(pdf_path)
+        make_figure_folder(pdf_path)
 
         self.pdfgen = pdf_generator(self, self.calc)
         figure = self.show_cross_section()
 
-        save_figure(figure, "tmp\\figs\\sectransv")
-        generate_logo()
+        save_figure(figure, pdf_path + r"\figs\sectransv")
+        generate_logo(pdf_path)
 
-        self.pdfgen.generate_pdf(language)
+        self.pdfgen.generate_pdf(language, pdf_path)
 
     def reset_strings(self):
         self.normal_stress_data_list.clear()
@@ -364,4 +367,4 @@ if __name__ == "__main__":
     test.calculate_shear_flux(10, 1, True)
     test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
     # test.show_cross_section(show=True)
-    test.generate_pdf("PT")
+    test.generate_pdf("PT", "testpath")

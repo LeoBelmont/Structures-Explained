@@ -11,7 +11,7 @@ class pdf_generator:
         self.mng = manager
         self.calc = calculator
 
-    def generate_pdf(self, language):
+    def generate_pdf(self, language, pdf_path):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
         doc.preamble.append(NoEscape(header.PDFsettings))
 
@@ -43,7 +43,7 @@ class pdf_generator:
         if self.mng.shear_stress_data_list:
             self.append_shear_stress(doc, tpdf)
 
-        doc.generate_pdf('tmp\\resolucaorm',
+        doc.generate_pdf(pdf_path + r'\resolucaorm',
                          compiler='pdflatex',
                          win_no_console=True,
                          compiler_args=["-enable-installer"])

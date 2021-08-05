@@ -1,8 +1,8 @@
 import base64
 
 
-def generate_logo():
-    with open("tmp\\figs\\logo.png", "wb") as fh:
+def generate_logo(pdf_path):
+    with open(pdf_path + r"\figs\logo.png", "wb") as fh:
         fh.write(base64.decodebytes(logo_base64))
 
 
