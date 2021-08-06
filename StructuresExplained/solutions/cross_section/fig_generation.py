@@ -18,6 +18,7 @@ class fig_generator:
                  total_cg_x: float,
                  total_cg_y: float
                  ):
+
         self.subareas_rectangle: Dict[int, list] = subareas_rectangle
         self.subareas_circle: Dict[int, List[Union[float, Any]]] = subareas_circle
         self.total_cg_x: float = total_cg_x
@@ -57,18 +58,18 @@ class fig_generator:
 
             self.subplot.add_patch(
                 Rectangle((x1, y2), base, height, linewidth=5, edgecolor=(10 / 255, 60 / 255, 100 / 255),
-                          facecolor=color,
-                          alpha=1))
+                          facecolor=color))
 
-    def plot_circle(self,
-                    circle_subarea_id: int
-                    ):
+    def plot_semicircle(self,
+                        circle_subarea_id: int
+                        ):
         for key, (x, y, radius, angle) in self.subareas_circle.items():
             self.subplot.plot(x, y, 'ro')
             self.subplot.text(x, y, f'({x},{y})', size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
             color = self.det_color(key, circle_subarea_id)
             self.subplot.add_patch(
-                Wedge((x, y), radius, -angle, -angle - 180, linewidth=5, edgecolor='black', facecolor=color))
+                Wedge((x, y), radius, -angle, -angle - 180, linewidth=5, edgecolor=(10 / 255, 60 / 255, 100 / 255),
+                      facecolor=color))
 
     def plot(self,
              rectangle_subarea_id: Optional[int] = None,
@@ -84,7 +85,7 @@ class fig_generator:
         self.subplot = fig.add_subplot(111)
 
         self.plot_rectangle(rectangle_subarea_id)
-        self.plot_circle(circle_subarea_id)
+        self.plot_semicircle(circle_subarea_id)
 
         self.subplot.plot(self.total_cg_x, self.total_cg_y, 'ro')
         self.subplot.text(self.total_cg_x, self.total_cg_y, f"CG ({self.total_cg_x},{self.total_cg_y})",

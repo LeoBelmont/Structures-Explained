@@ -41,7 +41,7 @@ def make_figure_folder(pdf_path: str):
         makedirs(pdf_path + r"\figs")
 
 
-def delete_temp_folder(pdf_path: str):
+def delete_folder(pdf_path: str):
     if path.isdir(pdf_path):
         rmtree(pdf_path)
 
