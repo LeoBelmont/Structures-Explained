@@ -223,3 +223,71 @@ class pdf_generator:
                         tpdf.shear_stress_var +
                         f'{parse_expr(self.mng.shear_stress_data_list[i].shear_stress)}' +
                         r'$ $Pa')
+
+
+class normal_stress_data:
+    def __init__(self,
+                 normal_stress,
+                 normal_force,
+                 moment_y,
+                 moment_x,
+                 y,
+                 z
+                 ):
+
+        self.normal_stress = normal_stress
+        self.normal_force = normal_force
+        self.moment_y = moment_y
+        self.moment_x = moment_x
+        self.y = y
+        self.z = z
+
+
+class neutral_line_data:
+    def __init__(self,
+                 normal_stress,
+                 neutral_line,
+                 normal_force,
+                 moment_y,
+                 moment_x,
+                 y,
+                 z,
+                 ):
+
+        self.normal_stress = normal_stress
+        self.neutral_line = neutral_line
+        self.normal_force = normal_force
+        self.moment_y = moment_y
+        self.moment_x = moment_x
+        self.y = y
+        self.z = z
+
+
+class shear_flux_data:
+    def __init__(self,
+                 shear_flux,
+                 shear_force,
+                 static_moment,
+                 moment_inertia_x
+                 ):
+
+        self.shear_flux = shear_flux
+        self.shear_force = shear_force
+        self.static_moment = static_moment
+        self.moment_inertia_x = moment_inertia_x
+
+
+class shear_stress_data:
+    def __init__(self,
+                 shear_stress,
+                 shear_force,
+                 static_moment,
+                 moment_inertia_x,
+                 thickness
+                 ):
+
+        self.shear_stress = shear_stress
+        self.shear_force = shear_force
+        self.static_moment = static_moment
+        self.moment_inertia_x = moment_inertia_x
+        self.thickness = thickness

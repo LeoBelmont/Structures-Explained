@@ -1,9 +1,8 @@
-from sympy.parsing.sympy_parser import parse_expr
-from sympy import Symbol, sympify
+from sympy import Symbol
 from StructuresExplained.solutions.cross_section.calculator import calculator
 from StructuresExplained.solutions.cross_section.fig_generation import fig_generator
-from StructuresExplained.solutions.cross_section.pdf_generation import pdf_generator
-from StructuresExplained.utils.util import round_expr, save_figure, make_pdf_folder, make_figure_folder
+from StructuresExplained.solutions.cross_section.pdf_generation import *
+from StructuresExplained.utils.util import save_figure, make_pdf_folder, make_figure_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 
 from typing import (
@@ -251,74 +250,6 @@ class manager:
         self.neutral_line_data_list.clear()
         self.shear_flux_data_list.clear()
         self.shear_stress_data_list.clear()
-
-
-class normal_stress_data:
-    def __init__(self,
-                 normal_stress,
-                 normal_force,
-                 moment_y,
-                 moment_x,
-                 y,
-                 z
-                 ):
-
-        self.normal_stress = normal_stress
-        self.normal_force = normal_force
-        self.moment_y = moment_y
-        self.moment_x = moment_x
-        self.y = y
-        self.z = z
-
-
-class neutral_line_data:
-    def __init__(self,
-                 normal_stress,
-                 neutral_line,
-                 normal_force,
-                 moment_y,
-                 moment_x,
-                 y,
-                 z,
-                 ):
-
-        self.normal_stress = normal_stress
-        self.neutral_line = neutral_line
-        self.normal_force = normal_force
-        self.moment_y = moment_y
-        self.moment_x = moment_x
-        self.y = y
-        self.z = z
-
-
-class shear_flux_data:
-    def __init__(self,
-                 shear_flux,
-                 shear_force,
-                 static_moment,
-                 moment_inertia_x
-                 ):
-
-        self.shear_flux = shear_flux
-        self.shear_force = shear_force
-        self.static_moment = static_moment
-        self.moment_inertia_x = moment_inertia_x
-
-
-class shear_stress_data:
-    def __init__(self,
-                 shear_stress,
-                 shear_force,
-                 static_moment,
-                 moment_inertia_x,
-                 thickness
-                 ):
-
-        self.shear_stress = shear_stress
-        self.shear_force = shear_force
-        self.static_moment = static_moment
-        self.moment_inertia_x = moment_inertia_x
-        self.thickness = thickness
 
 
 if __name__ == "__main__":
