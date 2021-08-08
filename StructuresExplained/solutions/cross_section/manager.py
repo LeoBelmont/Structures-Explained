@@ -2,7 +2,7 @@ from sympy import Symbol, parse_expr
 from StructuresExplained.solutions.cross_section.calculator import calculator
 from StructuresExplained.solutions.cross_section.fig_generation import fig_generator
 from StructuresExplained.solutions.cross_section.pdf_generation import *
-from StructuresExplained.utils.util import save_figure, make_pdf_folder, make_figure_folder
+from StructuresExplained.utils.util import save_figure, make_pdf_folder, make_figure_folder, delete_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 
 from typing import (
@@ -230,9 +230,15 @@ class manager:
 
     def generate_pdf(self,
                      language: str,
-                     pdf_path: Optional[str] = "pdf"
+                     pdf_path: Optional[str] = "pdf",
+                     clear=True
                      ):
-        """creates a folder to generate the figure and logo into"""
+        """
+        creates a folder to generate the figure and logo into
+        language: "EN" for english or "PT" for brazilian portuguese
+        pdf_path: path where pdf will be generated
+        clear: delete figures generated for pdf after pdf is generated
+        """
 
         make_pdf_folder(pdf_path)
         make_figure_folder(pdf_path)
@@ -244,6 +250,9 @@ class manager:
         generate_logo(pdf_path)
 
         self.pdfgen.generate_pdf(language, pdf_path)
+
+        if clear:
+            delete_folder(pdf_path + r'\figs')
 
     def reset_pdf_data(self):
         self.normal_stress_data_list.clear()
