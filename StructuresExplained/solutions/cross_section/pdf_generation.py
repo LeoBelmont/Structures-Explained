@@ -1,9 +1,8 @@
-from sympy.parsing.sympy_parser import parse_expr
-from sympy import latex, sympify
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
+from sympy import latex, sympify, parse_expr
 from StructuresExplained.pdfconfig import header
 from StructuresExplained.pdfconfig.translations.cross_sec_strings import translate_PDF_cross_section
-from StructuresExplained.utils.util import round_expr, add_to_pdf
+from StructuresExplained.utils.util import add_to_pdf, round_expr
 
 
 class pdf_generator:
@@ -65,28 +64,26 @@ class pdf_generator:
             with doc.create(Subsection(tpdf.step_static_moment_x)):
                 self.pdf.add_equation(r'Ms_{x_{total}} = \sum{Ms_x} \\')
                 self.pdf.add_equation(tpdf.msx_operation)
-                self.pdf.add_equation(r'Ms_{{x_{{total}}}} = {}'.format(latex(sympify(self.calc.moment_x,
-                                                                                      evaluate=False))))
-                self.pdf.add_equation(r'Ms_{{x_{{total}}}} = {}$ $m^3'.format(parse_expr(self.calc.moment_x)))
+                self.pdf.add_equation(r'Ms_{{x_{{total}}}} = {}'.format(append_step(self.calc.moment_x)))
+                self.pdf.add_equation(r'Ms_{{x_{{total}}}} = {}$ $m^3'.format(append_result(self.calc.moment_x)))
 
             with doc.create(Subsection(tpdf.step_static_moment_y)):
                 self.pdf.add_equation(r'Ms_{y_{total}} = \sum{Ms_y} \\')
                 self.pdf.add_equation(tpdf.msy_operation)
-                self.pdf.add_equation(r'Ms_{{y_{{total}}}} = {}'.format(latex(sympify(self.calc.moment_y,
-                                                                                      evaluate=False))))
-                self.pdf.add_equation(r'Ms_{{y_{{total}}}} = {}$ $m^3'.format(parse_expr(self.calc.moment_y)))
+                self.pdf.add_equation(r'Ms_{{y_{{total}}}} = {}'.format(append_step(self.calc.moment_y)))
+                self.pdf.add_equation(r'Ms_{{y_{{total}}}} = {}$ $m^3'.format(append_result(self.calc.moment_y)))
 
     def append_centroid(self, doc, tpdf):
         with doc.create(Section(tpdf.step_centroid)):
             with doc.create(Subsection(tpdf.centroid_x)):
                 self.pdf.add_equation(r'X_{cg} = \frac{Ms_y}{A_{total}}')
-                self.pdf.add_equation(r'X_{{cg}} = {}$ $m'.format(latex(sympify(self.calc.total_cg_x, evaluate=False))))
-                self.pdf.add_equation(r'X_{{cg}} = {}$ $m'.format(parse_expr(self.calc.total_cg_x)))
+                self.pdf.add_equation(r'X_{{cg}} = {}$ $m'.format(append_step(self.calc.total_cg_x)))
+                self.pdf.add_equation(r'X_{{cg}} = {}$ $m'.format(append_result(self.calc.total_cg_x)))
 
             with doc.create(Subsection(tpdf.centroid_y)):
                 self.pdf.add_equation(r'Y_{cg} = \frac{Ms_x}{A_{total}}')
-                self.pdf.add_equation(r'Y_{{cg}} = {}$ $m'.format(latex(sympify(self.calc.total_cg_y, evaluate=False))))
-                self.pdf.add_equation(r'Y_{{cg}} = {}$ $m'.format(parse_expr(self.calc.total_cg_y)))
+                self.pdf.add_equation(r'Y_{{cg}} = {}$ $m'.format(append_step(self.calc.total_cg_y)))
+                self.pdf.add_equation(r'Y_{{cg}} = {}$ $m'.format(append_result(self.calc.total_cg_y)))
 
     def append_moment_inertia(self, doc, tpdf):
         with doc.create(Section(tpdf.step_moment_inertia)):
@@ -99,9 +96,8 @@ class pdf_generator:
                     self.pdf.add_equation(tpdf.moment_inercia_x_rect_formula)
                 if self.calc.subareas_circle:
                     self.pdf.add_equation(tpdf.moment_inercia_x_circ_formula)
-                self.pdf.add_equation(r'I_{{x_{{total}}}} = {}'.format(latex(sympify(self.calc.moment_inertia_x,
-                                                                                     evaluate=False))))
-                self.pdf.add_equation(r'I_{{x_{{total}}}} = {}$ $m^4'.format(parse_expr(self.calc.moment_inertia_x)))
+                self.pdf.add_equation(r'I_{{x_{{total}}}} = {}'.format(append_step(self.calc.moment_inertia_x)))
+                self.pdf.add_equation(r'I_{{x_{{total}}}} = {}$ $m^4'.format(append_result(self.calc.moment_inertia_x)))
 
             with doc.create(Subsection(tpdf.moment_inercia_y)):
                 doc.append(NoEscape(r'\begin{dmath*}'))
@@ -117,10 +113,10 @@ class pdf_generator:
                     doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
                 doc.append(NoEscape(
-                    r'I_{{y_{{total}}}} = {}'.format(latex(sympify(self.calc.moment_inertia_y, evaluate=False)))))
+                    r'I_{{y_{{total}}}} = {}'.format(append_step(self.calc.moment_inertia_y))))
                 doc.append(NoEscape(r'\end{dmath*}'))
                 doc.append(NoEscape(r'\begin{dmath*}'))
-                doc.append(NoEscape(r'I_{{y_{{total}}}} = {}$ $m^4'.format(parse_expr(self.calc.moment_inertia_y))))
+                doc.append(NoEscape(r'I_{{y_{{total}}}} = {}$ $m^4'.format(append_result(self.calc.moment_inertia_y))))
                 doc.append(NoEscape(r'\end{dmath*}'))
 
     def append_normal_stress(self, doc, tpdf):
@@ -131,18 +127,18 @@ class pdf_generator:
             for i in range(len(self.mng.normal_stress_data_list)):
                 with doc.create(
                         Subsection(f'{tpdf.calculating_for} N = {self.mng.normal_stress_data_list[i].normal_force} N, '
-                                   f'My = {parse_expr(self.mng.normal_stress_data_list[i].moment_y)} Nm, '
-                                   f'Mz = {parse_expr(self.mng.normal_stress_data_list[i].moment_x)} Nm, '
+                                   f'My = {append_result(self.mng.normal_stress_data_list[i].moment_y)} Nm, '
+                                   f'Mz = {append_result(self.mng.normal_stress_data_list[i].moment_x)} Nm, '
                                    f'y = {self.mng.normal_stress_data_list[i].y} m, '
                                    f'z = {self.mng.normal_stress_data_list[i].z} m')):
                     with doc.create(Subsubsection(tpdf.step_normal_stress)):
                         self.pdf.add_equation(
                             tpdf.normal_stress_var +
-                            f'{latex(sympify(self.mng.normal_stress_data_list[i].normal_stress, evaluate=False))}')
+                            f'{append_step(self.mng.normal_stress_data_list[i].normal_stress)}')
 
                         self.pdf.add_equation(
                             tpdf.normal_stress_var +
-                            f'{parse_expr(self.mng.normal_stress_data_list[i].normal_stress)}$ $Pa')
+                            f'{append_result(self.mng.normal_stress_data_list[i].normal_stress)}$ $Pa')
 
     def append_neutral_line(self, doc, tpdf):
         with doc.create(Section(tpdf.step_neutral_line)):
@@ -152,13 +148,14 @@ class pdf_generator:
             for i in range(len(self.mng.neutral_line_data_list)):
                 with doc.create(
                         Subsection(f'{tpdf.calculating_for} N = {self.mng.neutral_line_data_list[i].normal_force} N, '
-                                   f'My = {parse_expr(self.mng.neutral_line_data_list[i].moment_y)} Nm, '
-                                   f'Mz = {parse_expr(self.mng.neutral_line_data_list[i].moment_x)} Nm, '
+                                   f'My = {append_result(self.mng.neutral_line_data_list[i].moment_y)} Nm, '
+                                   f'Mz = {append_result(self.mng.neutral_line_data_list[i].moment_x)} Nm, '
                                    f'y = {self.mng.neutral_line_data_list[i].y} m, '
                                    f'z = {self.mng.neutral_line_data_list[i].z} m')):
                     with doc.create(Subsubsection(tpdf.step_neutral_line)):
                         self.pdf.add_equation(
-                            f'0 = {latex(sympify(self.mng.neutral_line_data_list[i].normal_stress, evaluate=False))}')
+                            f'0 = {append_step(self.mng.neutral_line_data_list[i].normal_stress)}')
+                        # neutral line specifically doesn't need/work with append_result function
                         self.pdf.add_equation(f'{self.mng.neutral_line_data_list[i].neutral_line}')
 
     def append_static_moment_for_shear_stress(self, doc, tpdf):
@@ -173,11 +170,11 @@ class pdf_generator:
             with doc.create(Subsection(tpdf.step_static_moment_cut)):
                 self.pdf.add_equation(
                     tpdf.static_moment_var +
-                    f'{latex(sympify(self.mng.shear_stress_data_list[i].static_moment, evaluate=False))}')
+                    f'{append_step(self.mng.shear_stress_data_list[i].static_moment)}')
 
                 self.pdf.add_equation(
                     tpdf.static_moment_var +
-                    f'{parse_expr(self.mng.shear_stress_data_list[i].static_moment)}$ $m^3')
+                    f'{append_result(self.mng.shear_stress_data_list[i].static_moment)}$ $m^3')
 
     def append_shear_flux(self, doc, tpdf):
         with doc.create(Section(tpdf.step_shear_flux)):
@@ -188,17 +185,17 @@ class pdf_generator:
                 with doc.create(
                         Subsection(
                             NoEscape(f'{tpdf.calculating_for} V = {self.mng.shear_flux_data_list[i].shear_force} N, '
-                                     f'Q = {parse_expr(self.mng.shear_flux_data_list[i].static_moment)} m'
+                                     f'Q = {append_result(self.mng.shear_flux_data_list[i].static_moment)} m'
                                      + r'\textsuperscript{3}, I\textsubscript{x}' +
-                                     f' = {parse_expr(self.mng.shear_flux_data_list[i].moment_inertia_x)}' +
+                                     f' = {append_result(self.mng.shear_flux_data_list[i].moment_inertia_x)}' +
                                      r' m\textsuperscript{4}'))):
                     self.pdf.add_equation(
                         tpdf.shear_flux_var +
-                        f'{latex(sympify(self.mng.shear_flux_data_list[i].shear_flux, evaluate=False))}')
+                        f'{append_step(self.mng.shear_flux_data_list[i].shear_flux)}')
 
                     self.pdf.add_equation(
                         tpdf.shear_flux_var +
-                        f'{parse_expr(self.mng.shear_flux_data_list[i].shear_flux)}' +
+                        f'{append_result(self.mng.shear_flux_data_list[i].shear_flux)}' +
                         r'$ $\frac{N}{m}')
 
     def append_shear_stress(self, doc, tpdf):
@@ -209,19 +206,19 @@ class pdf_generator:
             for i in range(len(self.mng.shear_stress_data_list)):
                 with doc.create(Subsection(
                         NoEscape(f'{tpdf.calculating_for} V = {self.mng.shear_stress_data_list[i].shear_force} N, ' +
-                                 f'Q = {parse_expr(self.mng.shear_stress_data_list[i].static_moment)} m'
+                                 f'Q = {append_result(self.mng.shear_stress_data_list[i].static_moment)} m'
                                  + r'\textsuperscript{3}, I\textsubscript{x}' +
-                                 f' = {parse_expr(self.mng.shear_stress_data_list[i].moment_inertia_x)} m'
+                                 f' = {append_result(self.mng.shear_stress_data_list[i].moment_inertia_x)} m'
                                  + r'\textsuperscript{4}, ' + f't = {self.mng.shear_stress_data_list[i].thickness} m'
                                  ))):
 
                     self.pdf.add_equation(
                         tpdf.shear_stress_var +
-                        f'{latex(sympify(self.mng.shear_stress_data_list[i].shear_stress, evaluate=False))}')
+                        f'{append_step(self.mng.shear_stress_data_list[i].shear_stress)}')
 
                     self.pdf.add_equation(
                         tpdf.shear_stress_var +
-                        f'{parse_expr(self.mng.shear_stress_data_list[i].shear_stress)}' +
+                        f'{append_result(self.mng.shear_stress_data_list[i].shear_stress)}' +
                         r'$ $Pa')
 
 
@@ -291,3 +288,11 @@ class shear_stress_data:
         self.static_moment = static_moment
         self.moment_inertia_x = moment_inertia_x
         self.thickness = thickness
+
+
+def append_step(equation: str):
+    return latex(sympify(round_expr(equation), evaluate=False))
+
+
+def append_result(equation: str):
+    return round_expr(parse_expr(equation))

@@ -1,4 +1,4 @@
-from sympy import Symbol
+from sympy import Symbol, parse_expr
 from StructuresExplained.solutions.cross_section.calculator import calculator
 from StructuresExplained.solutions.cross_section.fig_generation import fig_generator
 from StructuresExplained.solutions.cross_section.pdf_generation import *
@@ -258,10 +258,10 @@ if __name__ == "__main__":
     test.add_rectangular_subarea(upper_left=(5, 10), down_right=(10, 0))
     # test.add_semicircular_subarea(center=(10, 5), radius=5, angle=90)
     test.calculate_geometrical_properties()
-    test.calculate_normal_stress(normal_force=10, y=1, append_to_pdf=True)  # default for y and z are Symbols
-    test.calculate_neutral_line(normal_force=10, y=1, append_to_pdf=True)
-    test.calculate_shear_flux(10, 1, append_to_pdf=True)
-    test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
-    test.print_results()
+    # test.calculate_normal_stress(normal_force=10, y=1, append_to_pdf=True)  # default for y and z are Symbols
+    # test.calculate_neutral_line(normal_force=10, y=1, append_to_pdf=True)
+    # test.calculate_shear_flux(10, 1, append_to_pdf=True)
+    # test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
+    # test.print_results()
     # test.show_cross_section(show=True)
     test.generate_pdf("PT", "testpath")

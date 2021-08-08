@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from pylatex import NoEscape
-from sympy import Number
 from os import path, mkdir, makedirs
 from shutil import rmtree
 import re
@@ -10,21 +9,32 @@ from typing import (
 )
 
 
-def round_expr(expr, num_digits: int):
-    return expr.xreplace({n: round(n, num_digits) for n in expr.atoms(Number)})
+def round_expr(expr: str):
+    if not isinstance(expr, str):
+        expr = str(expr)
+
+    search = re.findall(r'(\d+.\d+)', expr)
+    for index in search:
+        expr = re.sub(index, determine_round_format(index), expr)
+    return expr
 
 
-def simplify_signals(equation: str):
-    equation = equation.replace('- -', '+')
-    equation = equation.replace('--', '+')
-    equation = equation.replace('+ -', '-')
-    equation = equation.replace('+-', '-')
-    # string = string.replace('+ 0.00', '')
-    # string = string.replace('- 0.00', '')
-    search = re.search(r'\\cdot -(\d+\.\d+)', equation)
-    if search:
-        equation = re.sub(r'\\cdot -(\d+\.\d+)', f'\\\\cdot (-{search.group(1)})', equation)
-    return equation
+def determine_round_format(number: str):
+    try:
+        number = float(number)
+    except ValueError:
+        print(number, "wasn't formatted")
+        return number
+
+    if number < 0.01 or number > 10000:
+        return scientific_notation_formatting(number)
+    else:
+        return str(round(number, 2))
+
+
+def scientific_notation_formatting(number):
+    a = '%E' % number
+    return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
 
 
 def save_figure(figure: plt.Figure, fig_path: str, transparent: Optional[bool] = True):

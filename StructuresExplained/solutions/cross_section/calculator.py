@@ -190,7 +190,7 @@ class calculator:
             self.neutral_line = f"z = {solve(normal_stress, z)[0]}"
 
         elif (self.moment_y == "0" and self.moment_x == "0") or (type(y) != Symbol and type(z) != Symbol):
-            self.neutral_line = "Não há linha neutra"
+            self.neutral_line = "No neutral line"
 
         else:
             self.neutral_line = f"y = {solve(normal_stress, y)}"

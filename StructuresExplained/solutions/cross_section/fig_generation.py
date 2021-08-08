@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Wedge
 from StructuresExplained.solutions import functions
+from StructuresExplained.utils.util import round_expr
 
 from typing import (
     Union,
@@ -88,7 +89,8 @@ class fig_generator:
         self.plot_semicircle(circle_subarea_id)
 
         self.subplot.plot(self.total_cg_x, self.total_cg_y, 'ro')
-        self.subplot.text(self.total_cg_x, self.total_cg_y, f"CG ({self.total_cg_x},{self.total_cg_y})",
+        self.subplot.text(self.total_cg_x, self.total_cg_y,
+                          f"CG ({round_expr(str(self.total_cg_x))},{round_expr(str(self.total_cg_y))})",
                           size=functions.size, ha='center',
                           va='bottom', bbox=self.bbox_setting)
 
