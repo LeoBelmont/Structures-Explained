@@ -155,8 +155,9 @@ class pdf_generator:
                     with doc.create(Subsubsection(tpdf.step_neutral_line)):
                         self.pdf.add_equation(
                             f'0 = {append_step(self.mng.neutral_line_data_list[i].normal_stress)}')
-                        # neutral line specifically doesn't need/work with append_result function
-                        self.pdf.add_equation(f'{self.mng.neutral_line_data_list[i].neutral_line}')
+                        """neutral line specifically doesn't need/work with append_result function
+                        so round_expr is called directly"""
+                        self.pdf.add_equation(f'{round_expr(self.mng.neutral_line_data_list[i].neutral_line)}')
 
     def append_static_moment_for_shear_stress(self, doc, tpdf):
         with doc.create(Section(tpdf.step_static_moment_cut)):
