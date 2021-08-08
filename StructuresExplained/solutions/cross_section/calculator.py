@@ -67,7 +67,7 @@ class calculator:
             self.moment_y += f'+ {partial_area} * ({x} + {partial_cg_x})'
 
     def det_center_of_gravity(self):
-        """calculates the center of gravity to be displayed in the generated figure"""
+        """calculates the center of gravity to be displayed in the generated figure and pdf solution"""
 
         self.total_cg_y = f'({self.moment_x}) / ({self.total_area})'
         self.total_cg_x = f'({self.moment_y}) / ({self.total_area})'

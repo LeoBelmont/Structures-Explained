@@ -31,9 +31,12 @@ class fig_generator:
                   key: int,
                   subarea_id: int
                   ):
-        # function to determine if the subarea will be highlighted(red) or not(blue).
-        # verifies if the subarea ID given by the user to be highlighted is the same
-        # as the dict key
+
+        """
+        function to determine if the subarea will be highlighted(red) or not(blue).
+        verifies if the subarea ID given by the user to be highlighted is the same
+        as the dict key
+        """
 
         if key == subarea_id:
             color = 'r'
@@ -44,14 +47,19 @@ class fig_generator:
     def plot_rectangle(self,
                        rectangle_subarea_id: int
                        ):
+        """
+        plots rectangles, adding vertex coordinates to the figure
+        """
         for key, (x1, y1, x2, y2) in self.subareas_rectangle.items():
             base = x2 - x1
             height = y1 - y2
-            self.subplot.text(x1, y1, f'({x1},{y1})', size=functions.size, ha='center', va='bottom',
+            self.subplot.text(x1, y1, f'({round_expr(x1)},{round_expr(y1)})',
+                              size=functions.size, ha='center', va='bottom',
                               bbox=self.bbox_setting)
             self.subplot.plot(x1, y1, 'ro')
 
-            self.subplot.text(x2, y2, f'({x2},{y2})', size=functions.size, ha='center', va='bottom',
+            self.subplot.text(x2, y2, f'({round_expr(x2)},{round_expr(y2)})',
+                              size=functions.size, ha='center', va='bottom',
                               bbox=self.bbox_setting)
             self.subplot.plot(x2, y2, 'ro')
 
@@ -66,7 +74,8 @@ class fig_generator:
                         ):
         for key, (x, y, radius, angle) in self.subareas_circle.items():
             self.subplot.plot(x, y, 'ro')
-            self.subplot.text(x, y, f'({x},{y})', size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
+            self.subplot.text(x, y, f'({round_expr(x)},{round_expr(y)})',
+                              size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
             color = self.det_color(key, circle_subarea_id)
             self.subplot.add_patch(
                 Wedge((x, y), radius, -angle, -angle - 180, linewidth=5, edgecolor=(10 / 255, 60 / 255, 100 / 255),
