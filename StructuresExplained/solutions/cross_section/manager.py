@@ -84,13 +84,13 @@ class manager:
         ones in the subarea dict
         """
 
-        self.fgen = fig_generator(self.calc.subareas_rectangle,
-                                  self.calc.subareas_circle,
-                                  parse_expr(self.calc.total_cg_x),
-                                  parse_expr(self.calc.total_cg_y),
-                                  )
+        fgen = fig_generator(self.calc.subareas_rectangle,
+                             self.calc.subareas_circle,
+                             parse_expr(self.calc.total_cg_x),
+                             parse_expr(self.calc.total_cg_y),
+                             )
 
-        fig = self.fgen.plot(rectangle_subarea_id, circle_subarea_id)
+        fig = fgen.plot(rectangle_subarea_id, circle_subarea_id)
 
         if show:
             fig.show()
@@ -231,6 +231,7 @@ class manager:
     def generate_pdf(self,
                      language: str,
                      pdf_path: Optional[str] = "pdf",
+                     filename: Optional[str] = "cross-section",
                      clear=True
                      ):
         """
@@ -249,7 +250,7 @@ class manager:
         save_figure(figure, pdf_path + r"\figs\sectransv")
         generate_logo(pdf_path)
 
-        self.pdfgen.generate_pdf(language, pdf_path)
+        self.pdfgen.generate_pdf(language, pdf_path, filename)
 
         if clear:
             delete_folder(pdf_path + r'\figs')

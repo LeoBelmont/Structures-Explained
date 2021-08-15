@@ -11,7 +11,7 @@ class pdf_generator:
         self.mng = manager
         self.calc = calculator
 
-    def generate_pdf(self, language, pdf_path):
+    def generate_pdf(self, language, pdf_path, filename):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
         doc.preamble.append(NoEscape(header.PDFsettings))
 
@@ -43,11 +43,10 @@ class pdf_generator:
         if self.mng.shear_stress_data_list:
             self.append_shear_stress(doc, tpdf)
 
-        doc.generate_pdf(pdf_path + r'\resolucaorm',
+        doc.generate_pdf(f'{pdf_path}\\{filename}',
                          compiler='pdflatex',
                          win_no_console=True,
                          compiler_args=["-enable-installer"])
-        # doc.generate_tex('tmp\\resolucaorm')
 
     def append_cross_section_figure(self, doc, tpdf):
         with doc.create(Section(tpdf.step_split)):
@@ -296,4 +295,4 @@ def append_step(equation: str):
 
 
 def append_result(equation: str):
-    return round_expr(parse_expr(equation))
+    return round_expr(parse_expr(equation).evalf())

@@ -13,7 +13,7 @@ def round_expr(expr: str):
     if not isinstance(expr, str):
         expr = str(expr)
 
-    search = re.findall(r'(\d+.\d+)', expr)
+    search = re.findall(r'(\d+[\.,]\d+)', expr)
     for index in search:
         expr = re.sub(index, determine_round_format(index), expr)
     return expr

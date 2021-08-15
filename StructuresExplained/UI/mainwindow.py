@@ -25,16 +25,16 @@ from StructuresExplained.UI.mplwidget import MplWidget
 from StructuresExplained.UI import loadingPrompt, loadFilePrompt
 from StructuresExplained.UI import resources
 from StructuresExplained.solutions.sm_solution import Teacher
-from StructuresExplained.solutions.mohr import mohr_circle
-from StructuresExplained.solutions.sigma import sigma
+from StructuresExplained.solutions.stress_states.manager import manager as ss_manager
+from StructuresExplained.solutions.cross_section.manager import manager as cs_manager
 from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
 
 
 class Ui_tenshi(QWidget):
-    sig = sigma()
+    sig = ss_manager()
     teach = Teacher()
     ss = SystemElements()
-    mohr = mohr_circle()
+    mohr = cs_manager()
     undocounter = -1
     solvetrue = False
     last_figure = None
@@ -3478,7 +3478,7 @@ class Ui_tenshi(QWidget):
             if sx != '' and sy != '' and txy != '':
                 self.mohr.triple = False
                 self.visualize_mohr(
-                    self.mohr.plain_state(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
+                    self.mohr.calculate(float(sx), float(sy), float(txy), self.MplWidget.canvas.figure))
             else:
                 self.warning()
 
@@ -3488,8 +3488,8 @@ class Ui_tenshi(QWidget):
             tyz = self.filter(self.tyz.text())
             if sx != '' and sy != '' and sz != '' and txy != '' and txz != '' and tyz != '':
                 self.mohr.triple = True
-                self.visualize_mohr(self.mohr.triple_state(float(sx), float(sy), float(sz), float(txy),
-                                                           float(txz), float(tyz), self.MplWidget.canvas.figure))
+                self.visualize_mohr(self.mohr.calculate(float(sx), float(sy), float(sz), float(txy),
+                                                        float(txz), float(tyz), self.MplWidget.canvas.figure))
             else:
                 self.warning()
 
@@ -3533,9 +3533,9 @@ class Ui_tenshi(QWidget):
             py = int(self.deadzone_y.text())
             if self.last_figure == self.show_mohr:
                 if 'RIGHT' in str(event.button) and self.mohr.sz is not None:
-                    self.visualize_mohr(self.mohr.triple_state(self.mohr.sx, self.mohr.sy, self.mohr.sz, self.mohr.txy,
-                                                               self.mohr.txz, self.mohr.tyz,
-                                                               self.MplWidget.canvas.figure))
+                    self.visualize_mohr(self.mohr.calculate(self.mohr.sx, self.mohr.sy, self.mohr.sz, self.mohr.txy,
+                                                            self.mohr.txz, self.mohr.tyz,
+                                                            self.MplWidget.canvas.figure))
             elif self.stackedWidget.currentIndex() == 0:
                 if 'LEFT' in str(event.button):
                     self.beam_x1.setText(str(round(event.xdata, px)))
