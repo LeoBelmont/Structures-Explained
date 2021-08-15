@@ -1,0 +1,28 @@
+\BOOKMARK [1][-]{section.1}{Subdividir a geometria da se\347\343o transversal em formas geom\351tricas \(sub\341reas\) de propriedades conhecidas}{}% 1
+\BOOKMARK [1][-]{section.2}{Calcular os momentos est\341ticos em rela\347\343o ao eixo de interesse}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{C\341lculo do momento est\341tico em rela\347\343o ao eixo X:}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{C\341lculo do momento est\341tico em rela\347\343o ao eixo Y:}{section.2}% 4
+\BOOKMARK [1][-]{section.3}{Calcular os centroides em rela\347\343o ao eixo de interesse}{}% 5
+\BOOKMARK [2][-]{subsection.3.1}{C\341lculo do centroide em rela\347\343o ao eixo X:}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.2}{C\341lculo do centroide em rela\347\343o ao eixo Y:}{section.3}% 7
+\BOOKMARK [1][-]{section.4}{Calcular os momentos de in\351rcia em rela\347\343o aos eixos de interesse}{}% 8
+\BOOKMARK [2][-]{subsection.4.1}{C\341lculo do Momento de In\351rcia em rela\347\343o a X:}{section.4}% 9
+\BOOKMARK [2][-]{subsection.4.2}{C\341lculo do Momento de In\351rcia em rela\347\343o a Y:}{section.4}% 10
+\BOOKMARK [1][-]{section.5}{C\341lculo da Tens\343o Normal}{}% 11
+\BOOKMARK [2][-]{subsection.5.1}{F\363rmula da Tens\343o Normal}{section.5}% 12
+\BOOKMARK [2][-]{subsection.5.2}{C\341lculo para N = 10 N, My = 500.0 Nm, Mz = 500.0 Nm, y = 1 m, z = z m}{section.5}% 13
+\BOOKMARK [3][-]{subsubsection.5.2.1}{C\341lculo da Tens\343o Normal}{subsection.5.2}% 14
+\BOOKMARK [1][-]{section.6}{C\341lculo da Linha Neutra}{}% 15
+\BOOKMARK [2][-]{subsection.6.1}{F\363rmula da Linha Neutra}{section.6}% 16
+\BOOKMARK [2][-]{subsection.6.2}{C\341lculo para N = 10 N, My = 500.0 Nm, Mz = 500.0 Nm, y = 1 m, z = z m}{section.6}% 17
+\BOOKMARK [3][-]{subsubsection.6.2.1}{C\341lculo da Linha Neutra}{subsection.6.2}% 18
+\BOOKMARK [1][-]{section.7}{Calcular o Momento Est\341tico no corte}{}% 19
+\BOOKMARK [2][-]{subsection.7.1}{F\363rmula do Momento Est\341tico para corte sobre a sub\341rea}{section.7}% 20
+\BOOKMARK [2][-]{subsection.7.2}{F\363rmula do Momento Est\341tico para corte acima ou abaixo da sub\341rea}{section.7}% 21
+\BOOKMARK [2][-]{subsection.7.3}{Calcular o Momento Est\341tico no corte}{section.7}% 22
+\BOOKMARK [1][-]{section.8}{Calcular o Fluxo de Cisalhamento}{}% 23
+\BOOKMARK [2][-]{subsection.8.1}{F\363rmula do Fluxo de Cisalhamento}{section.8}% 24
+\BOOKMARK [2][-]{subsection.8.2}{C\341lculo para V = 10 N, Q = 45.0 m3, Ix = 2500/3 m4}{section.8}% 25
+\BOOKMARK [1][-]{section.9}{Calcular a Tens\343o de Cisalhamento}{}% 26
+\BOOKMARK [2][-]{subsection.9.1}{F\363rmula da Tens\343o de Cisalhamento}{section.9}% 27
+\BOOKMARK [2][-]{subsection.9.2}{C\341lculo para V = 10 N, Q = 125.0 m3, Ix = 2500/3 m4, t = 10 m}{section.9}% 28
