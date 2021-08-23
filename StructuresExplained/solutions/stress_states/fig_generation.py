@@ -6,6 +6,7 @@ from StructuresExplained.utils.util import round_expr
 
 from typing import (
     Optional,
+    Union,
 )
 
 
@@ -19,8 +20,8 @@ class fig_generator:
 
         self.res = results
         self.color_scheme = color_scheme(background_scheme)
-        self.fig = None
-        self.subplot = None
+        self.fig: Union[plt.Figure, None] = None
+        self.subplot: Union[plt.axes, None] = None
 
     def plot_plain_state(self,
                          figure: Optional[plt.Figure] = None
@@ -30,9 +31,7 @@ class fig_generator:
 
         self.plain_state_specifics()
 
-        ax = self.fig.get_axes()
-        for i in range(len(ax)):
-            ax[i].patch.set_alpha(0)
+        self.make_transparent()
 
         return self.fig
 
@@ -44,13 +43,11 @@ class fig_generator:
 
         self.triple_state_specifics()
 
-        ax = self.fig.get_axes()
-        for i in range(len(ax)):
-            ax[i].patch.set_alpha(0)
+        self.make_transparent()
 
         return self.fig
 
-    def plot_basics(self, figure):
+    def plot_basics(self, figure: plt.Figure):
         if figure is None:
             figure = plt.figure()
         else:
@@ -126,26 +123,6 @@ class fig_generator:
                   linewidth=1, edgecolor=self.color_scheme.edgecolor, facecolor='grey', alpha=0.8))
 
         self.subplot.set_aspect('equal', 'datalim')
-
-    def modify_axes(self, sigma_list: list):
-        # condition to make sure axis doesnt get out of screen
-        if sigma_list[0] < 0 < sigma_list[-1]:
-            self.subplot.spines['left'].set_position('zero')
-            self.subplot.spines['right'].set_color('none')
-            self.subplot.set_xlabel('σ', fontsize=13, loc='right')
-
-        elif sigma_list[-1] < 0:
-            self.subplot.spines['left'].set_position(('axes', 1))
-            self.subplot.spines['left'].set_color('none')
-            self.subplot.set_xlabel('σ', fontsize=13, loc='left')
-
-        elif sigma_list[0] > 0:
-            self.subplot.spines['right'].set_color('none')
-            self.subplot.set_xlabel('σ', fontsize=13, loc='right')
-
-        self.subplot.set_ylabel('τ', rotation=0, fontsize=13, loc='top')
-        self.subplot.spines['top'].set_color('none')
-        self.subplot.spines['bottom'].set_position('zero')
 
     def plot_circles_angle(self):
         # plot angle value
@@ -270,6 +247,31 @@ class fig_generator:
         # Axes3D(fig).view_init(elev=self.elev, azim=self.azim)
 
         self.subplot.axis('off')
+
+    def modify_axes(self, sigma_list: list):
+        # condition to make sure axis doesnt get out of screen
+        if sigma_list[0] < 0 < sigma_list[-1]:
+            self.subplot.spines['left'].set_position('zero')
+            self.subplot.spines['right'].set_color('none')
+            self.subplot.set_xlabel('σ', fontsize=13, loc='right')
+
+        elif sigma_list[-1] < 0:
+            self.subplot.spines['left'].set_position(('axes', 1))
+            self.subplot.spines['left'].set_color('none')
+            self.subplot.set_xlabel('σ', fontsize=13, loc='left')
+
+        elif sigma_list[0] > 0:
+            self.subplot.spines['right'].set_color('none')
+            self.subplot.set_xlabel('σ', fontsize=13, loc='right')
+
+        self.subplot.set_ylabel('τ', rotation=0, fontsize=13, loc='top')
+        self.subplot.spines['top'].set_color('none')
+        self.subplot.spines['bottom'].set_position('zero')
+
+    def make_transparent(self):
+        ax = self.fig.get_axes()
+        for i in range(len(ax)):
+            ax[i].patch.set_alpha(0)
 
 
 class color_scheme:
