@@ -161,7 +161,7 @@ if __name__ == "__main__":
     test = manager()
     test.calculate_plain_state(10, 20, 30)
     test.print_results_plain_state()
-    test.plot_plain_state()
+    test.plot_plain_state(show=True)
     test.generate_pdf_plain_state("PT")
     # test.calculate_triple_state(10, 20, 30, 40, 50, 60)
     # test.plot_triple_state()

@@ -23,7 +23,7 @@ class fig_generator:
         self.subplot = None
 
     def plot_plain_state(self,
-                         figure: Optional[plt.Figure] = None
+                         figure: Optional[plt.Figure] = plt.figure(dpi=100)
                          ):
 
         self.plot_basics(figure)
@@ -37,7 +37,7 @@ class fig_generator:
         return self.fig
 
     def plot_triple_state(self,
-                          figure: Optional[plt.Figure] = None
+                          figure: Optional[plt.Figure] = plt.figure(dpi=100)
                           ):
 
         self.plot_basics(figure)

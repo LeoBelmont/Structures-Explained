@@ -46,15 +46,17 @@ class MplWidget(QWidget):
             ('Save', 'Save the figure', 'filesave', 'save_figure'),
         )
 
-    def plot(self, new_figure=None, hasGrid=True):
+    def plot(self, new_figure=None, has_grid=True):
 
         if not new_figure:
             self.canvas.figure.clear()
             self.canvas.figure.add_subplot(111)
             self.set_background_alpha()
-            self.setGrid(hasGrid)
+            self.setGrid(has_grid)
         else:
+            new_figure._original_dpi = 100
             self.canvas.figure = new_figure
+            self.set_background_alpha()
 
         plt.tight_layout()
         self.canvas.draw()
@@ -63,10 +65,8 @@ class MplWidget(QWidget):
         axes = self.canvas.figure.get_axes()
         axes.clear()
 
-    def set_background_alpha(self, alpha=0.2):
-        ax = self.canvas.figure.get_axes()
-        for i in range(len(ax)):
-            ax[i].patch.set_alpha(alpha)
+    def set_background_alpha(self, alpha=0.7):
+        self.canvas.figure.patch.set_alpha(alpha)
 
     def set_aspect_ratio_equal(self):
         ax = self.canvas.figure.get_axes()
