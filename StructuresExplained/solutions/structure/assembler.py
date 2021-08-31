@@ -1,261 +1,272 @@
-import math
-import numpy
-import re
-from sympy import Symbol
-from sympy import latex
-from sympy.parsing.sympy_parser import parse_expr
+from anastruct import SystemElements
+from anastruct.fem.elements import Element
+from collections import defaultdict
+from typing import Optional, Union, List, Tuple
 
-from typing import (
-    Union,
-    List,
-    Dict,
-)
+
+class branch:
+    def __init__(self, element_group: list, junction_node_id: int, main_path=False):
+        self.solved = False
+        self.origin_node_id = None
+        self.final_node_id = None
+        self.results = ''
+        self.element_group = element_group
+        self.junction_node_id = junction_node_id
+        self.main_path = main_path
+
+
+def get_connect_elements() -> List[Tuple[int, int]]:
+    connections = []
+    for first_node, elements in ss.node_element_map.items():
+        for element in elements:
+            if first_node in [element.node_id1, element.node_id2]:
+                if first_node == element.node_id1:
+                    last_node = element.node_id2
+                else:
+                    last_node = element.node_id1
+                connections.append((first_node, last_node))
+    return connections
+
+
+def is_branching(elements: Union[List[Element], Element]) -> bool:
+    if not isinstance(elements, list):
+        return False
+    elif len(elements) > 2:
+        return True
+    return False
+
+
+def is_in_path(element: Element,
+               path: List[int]
+               ) -> bool:
+    if element.node_id1 in path and element.node_id2 in path:
+        return True
+    return False
 
 
 class assembler:
-    def __init__(self):
-        self.list_load_y = None
-        self.list_load_x = None
-        self.eq_load = None
-        self.angle = None
-        self.shear_equation_y = None
-        self.shear_equation_x = None
-        self.eq = None
-        self.hinged_reaction_x = None
-        self.hinged_reaction_y = None
-        self.roll_dist_x = None
-        self.roll_reaction_y = None
-        self.roll_dist_y = None
-        self.roll_reaction_x = None
-        self.idr = None
-        self.fixed_reaction_x = None
-        self.total_q_load_x = None
-        self.total_point_load_x = None
-        self.fixed_reaction_y = None
-        self.total_q_load_y = None
-        self.total_point_load_y = None
-        self.fixed_reaction_moment = None
-        self.moment_sum_from_forces = None
-        self.moment_sum = None
-        self.hinged = None
-        self.roll = None
-        self.roll_direction = None
-        self.fixed = None
-        self.node_map = None
-        self.moment = None
-        self.q_load = None
-        self.node_map = None
-        self.point = None
-        self.relative_support_x = None
-        self.relative_support_y = None
-        self.element_list = None
-        self.el: Union[Element, None] = None
-        self.target_dir: str
-        self.language: str
-        self.element_counter = 0
+    def __init__(self,
+                 system: SystemElements
+                 ):
+        self.ss: SystemElements = system
+        self.graph: Graph = Graph()
+        self.solved_dict: dict = {e_id: False for e_id in self.ss.node_map}
+        self.tip_node_ids: list = []
+        self.main_path_list: list = []
+        self.other_paths_list: list = []
+        self.solve_order = []
 
-    def assemble_structure(self):
-        self.simplify_variables()
+    def assemble_graph(self) -> None:
+        connected_elements = get_connect_elements()
+        for node in connected_elements:
+            self.graph.add(node[0], node[1])
 
-        if self.fixed:
-            self.get_fixed_info()
-            self.relative_support_x = self.fixed.x
-            self.relative_support_y = self.fixed.y
+    def find_tips(self) -> None:
+        for element_node in self.ss.node_element_map.items():
+            if len(element_node[1]) == 1:
+                self.tip_node_ids.append(element_node[0])
 
-        if self.hinged:
-            self.get_hinged_info()
-            self.relative_support_x = self.hinged.x
-            self.relative_support_y = self.hinged.y
+    def get_branch(self,
+                   node1: int,
+                   node2: int
+                   ) -> Union[List[int], None]:
+        for nodes in self.other_paths_list:
+            if node1 in nodes and node2 in nodes:
+                return nodes[:-1]
+        return None
 
-        if self.roll:
-            self.get_roll_info()
+    def is_solved(self,
+                  branch: List[int]
+                  ) -> bool:
+        for node in branch:
+            if self.solved_dict[node]:
+                continue
+            else:
+                return False
+        return True
 
-        for self.element_counter in range(1, len(self.node_map) + 1):
+    def all_branches_solved(self,
+                            node: int
+                            ) -> bool:
+        elements = self.ss.node_element_map.get(node)
+        solved_branches_count = 0
+        for element in elements:
+            if self.solved_dict[element.node_id1] or self.solved_dict[element.node_id2]:
+                solved_branches_count += 1
+            else:
+                pass
+        if solved_branches_count == len(elements) - 1:
+            return True
+        return False
 
-            self.el = Element()
-
-            if self.node_map.get(self.element_counter + 1):
-                self.get_element_info()
-            
-            if self.element_counter in self.point.keys():
-                self.map_loads()
-
-            if self.element_counter in self.q_load.keys():
-                self.map_q_loads()
-
-            if self.element_counter in self.moment.keys():
-                self.map_moments()
-
-            self.shear_equation_y.append(self.total_point_load_y)
-            self.shear_equation_x.append(self.total_point_load_x)
-
-            if self.element_counter - 1 in self.q_load.keys():
-                if self.list_load_y.get(self.element_counter - 1) is not None:
-                    self.shear_equation_y[self.element_counter - 1] += self.list_load_y.get(self.element_counter - 1)
-                if self.list_load_x.get(self.element_counter - 1) is not None:
-                    self.shear_equation_x[self.element_counter - 1] += self.list_load_x.get(self.element_counter - 1)
-
-            if self.fixed:
-                if self.fixed[0].id == self.element_counter:
-                    if self.moment.get(self.element_counter) is not None:
-                        self.moment.update({self.element_counter: self.moment.get(self.element_counter) + float(self.fixed_reaction_moment)})
-                    else:
-                        self.moment.update({self.element_counter: float(self.fixed_reaction_moment)})
-
-    def simplify_variables(self):
-        self.hinged = self.hinged[0]
-        self.roll = self.roll[0]
-        self.fixed = self.fixed[0]
-
-    def get_hinged_info(self):
-        self.hinged_reaction_x = str(-self.hinged.Fx)
-        self.hinged_reaction_y = str(-self.hinged.Fy)
-
-    def get_roll_info(self, roll_direction=None):
-        for self.element_counter in range(len(self.roll)):
-            self.roll_reaction_x = str(-self.roll.x)
-            self.roll_reaction_y = str(-self.roll.y)
-            self.roll_dist_x = str(self.roll.x - self.hinged.x) + 'i'
-            self.roll_dist_y = str(self.roll.y - self.hinged.y) + 'j'
-
-    def get_fixed_info(self):
-        id_ = self.fixed[0].id
-        node = self.node_map.get(id_)
-        self.fixed_reaction_moment = str(-node.Ty)
-        self.fixed_reaction_y = str(-node.Fy)
-        self.fixed_reaction_x = str(-node.Fx)
-
-    def get_element_info(self):
-        xi = self.node_map.get(self.element_counter).x
-        yi = self.node_map.get(self.element_counter).y
-        xf = self.node_map.get(self.element_counter + 1).x
-        yf = self.node_map.get(self.element_counter + 1).y
-
-        if (xf - xi) != 0:
-            self.el.angle = numpy.arctan((yf - yi) / (xf - xi))
-        elif (xf - xi) == 0:
-            self.el.angle = numpy.arctan((yf - yi) / 1e-100)
-
-    def map_loads(self):
-        x = self.node_map.get(self.element_counter).x
-        y = self.node_map.get(self.element_counter).y
-        id_ = self.node_map.get(self.element_counter).id
-        fx = self.point[id_][0]
-        fy = -self.point[id_][1]
-
-        if fx != 0:
-            self.el.total_point_load_x = f'{self.element_list[:-1].total_point_load_x} + {fx}'
-
-        if (y - self.relative_support_y) != 0 and fx != 0:
-            self.moment_sum_from_forces += fr' + {fx}i \cdot {y - self.relative_support_y}j'
-
-        if fy != 0:
-            self.total_point_load_y += f' {fy}'
-
-        if (x - self.relative_support_x) != 0 and fy != 0:
-            self.moment_sum_from_forces += fr' + {fy}j \cdot {x - self.relative_support_x}i'
-
-    def get_q_load_values(self, q, qi, xi, xf, yi, yf):
-        pos = ((xf - xi) ** 2 + (yf - yi) ** 2) ** 0.5
-        point_load = ((-qi.get(self.element_counter) + -q.get(self.element_counter)) * pos) / 2
-
-        y_load = -(math.cos(self.angle[self.element_counter - 1] + math.pi) * point_load)
-        x_load = math.sin(self.angle[self.element_counter - 1] + math.pi) * point_load
-        cg = (pos / 3) * (float(qi.get(self.element_counter) + 2 * float(q.get(self.element_counter))) /
-                          (float(qi.get(self.element_counter)) + float(q.get(self.element_counter))))
-        height = math.sin(self.angle[self.element_counter - 1]) * cg
-        base = math.cos(self.angle[self.element_counter - 1]) * cg
-
-        return pos, point_load, y_load, x_load, cg, height, base
-
-    def map_q_loads(self):
-        qi = self.q_load.qi
-        q = self.q_load.q
-        xi = self.node_map.get(self.element_counter).x
-        yi = self.node_map.get(self.element_counter).y
-        xf = self.node_map.get(self.element_counter + 1).x
-        yf = self.node_map.get(self.element_counter + 1).y
-        x = Symbol('x')
-
-        pos, point_load, y_load, x_load, cg, height, base = \
-            self.get_q_load_values(q, qi, xi, xf, yi, yf)
-
-        if round(x_load, 2) != 0:
-            self.total_q_load_x += f' + {x_load}'
-            if float(f'{height + yi - self.relative_support_y}') != 0:
-                self.moment_sum += fr' + {x_load}i \cdot {height + yi - self.relative_support_y}j'
-
-        if round(y_load, 2) != 0:
-            self.total_q_load_y += f' + {y_load}'
-            if round(base + xi - self.relative_support_x, 2) != 0:
-                self.moment_sum += fr' + {y_load}j \cdot {base + xi - self.relative_support_x}i'
-
-        self.list_load_x.update({self.element_counter: self.total_q_load_x})
-        self.list_load_y.update({self.element_counter: self.total_q_load_y})
-
-        q_part = ((((qi.get(self.element_counter) - q.get(self.element_counter)) /
-                    (6 * pos)) * x ** 2) * 3 - ((qi.get(self.element_counter) / 2) * x) * 2)
-
-        self.eq_load.update({self.element_counter: str(latex(q_part, 2))})
-
-    def map_moments(self):
-        self.moment_sum += f' + {self.moment.get(self.element_counter)}k'
-
-    def get_signal(self, string):
-        if re.search(r'(-)', string):
-            return '-'
+    def assemble_main_path(self,
+                           random_longest_path: Optional[bool] = True
+                           ) -> None:
+        longest_paths = self.graph.find_longest_paths(self.tip_node_ids)
+        if random_longest_path:
+            import random
+            self.main_path_list = random.choice(longest_paths)
         else:
-            return '+'
+            self.main_path_list = longest_paths[0]
 
-    def get_signal_constant(self, moment, result, numeric_const=0):
-        if math.isclose(round(moment + numeric_const, 2), round(result, 2), rel_tol=1e-2):
-            return moment
+        for node in self.main_path_list:
+            self.solved_dict[node] = True
+
+    def assemble_other_paths(self) -> None:
+        target_node = self.main_path_list[-1]
+        for tip in self.tip_node_ids:
+            if tip in self.main_path_list:
+                continue
+
+            other_path = self.graph.find_path(tip, target_node,
+                                              solved_nodes=[k for k, v in self.solved_dict.items() if v])
+            for node in other_path:
+                self.solved_dict[node] = True
+
+            self.other_paths_list.append(other_path)
+
+    def assemble_solve_order(self) -> None:
+        self.solved_dict = {e_id: False for e_id in self.ss.node_map}
+        counter = 0
+        branch_queue = {}
+        current_branch = self.main_path_list
+        while not all(self.solved_dict.values()):
+            if self.is_solved(current_branch):
+                last_key = list(branch_queue.keys())[-1]
+                counter, current_branch = branch_queue.get(last_key)
+                del branch_queue[last_key]
+
+            current_node = current_branch[counter]
+            elements = self.ss.node_element_map.get(current_node)
+
+            if not is_branching(elements) or (is_branching(elements) and self.all_branches_solved(current_node)):
+                counter += 1
+                self.solve_order.append(current_node)
+                self.solved_dict[current_node] = True
+
+            else:
+                for element in elements:
+                    if not is_in_path(element, self.main_path_list) and not self.solved_dict[current_node]:
+                        new_branch = self.get_branch(element.node_id1, element.node_id2)
+                        if current_branch == new_branch or self.is_solved(new_branch):
+                            continue
+                        branch_queue[len(branch_queue)] = counter, current_branch
+                        counter = 0
+                        current_branch = new_branch
+                        break
+
+    def assemble_structure(self) -> None:
+        self.find_tips()
+        self.assemble_graph()
+        self.assemble_main_path()
+        self.assemble_other_paths()
+        self.assemble_solve_order()
+
+        print(f"main path: {self.main_path_list}, other paths: {self.other_paths_list}")
+        print(f"solve order: {self.solve_order}")
+
+
+class Graph(object):
+    """ Graph data structure, undirected by default. """
+
+    def __init__(self,
+                 directed: Optional[bool] = False
+                 ):
+        self._graph = defaultdict(set)
+        self._directed = directed
+
+    def add(self,
+            node1: int,
+            node2: int
+            ) -> None:
+        """ Add connection between node1 and node2 """
+
+        self._graph[node1].add(node2)
+        if not self._directed:
+            self._graph[node2].add(node1)
+
+    def find_path(self,
+                  node1: int,
+                  node2: int,
+                  path: Optional[list] = None,
+                  solved_nodes: Optional[list] = None
+                  ) -> Union[List[int], None]:
+        """ Find any path between node1 and node2 (may not be shortest) """
+
+        if solved_nodes is None:
+            solved_nodes = []
+        if path is None:
+            path = []
+
+        path = path + [node1]
+        if node1 == node2 or node1 in solved_nodes:
+            return path
+        if node1 not in self._graph:
+            return None
+        for node in self._graph[node1]:
+            if node not in path:
+                new_path = self.find_path(node, node2, path, solved_nodes)
+                if new_path:
+                    return new_path
+        return None
+
+    def find_all_paths(self,
+                       node: int,
+                       seen: Optional[list] = None,
+                       path: Optional[list] = None
+                       ) -> List[Tuple[int, ...]]:
+        """
+        finds all possible paths in graph
+        """
+        if seen is None:
+            seen = []
+        if path is None:
+            path = [node]
+
+        seen.append(node)
+
+        paths = []
+        for t in self._graph[node]:
+            if t not in seen:
+                t_path = path + [t]
+                paths.append(tuple(t_path))
+                paths.extend(self.find_all_paths(t, seen[:], t_path))
+        return paths
+
+    def find_longest_paths(self, tip_node_ids: Optional[List[int]] = None) -> List[Tuple[int, ...]]:
+        """find longest paths in the graph, pass tip nodes for optimal search"""
+        if tip_node_ids:
+            all_paths = [p for ps in [self.find_all_paths(n) for n in tip_node_ids] for p in ps]
         else:
-            return -moment
+            all_paths = [p for ps in [self.find_all_paths(n) for n in set(self._graph)] for p in ps]
+        max_len = max(len(p) for p in all_paths)
+        longest_paths = [p for p in all_paths if len(p) == max_len]
 
-    def get_signal_vectors(self, result, fx, fy, angle, op):
-        rel_value = 1e-2
-        result = round(result, 2)
-        fx = parse_expr(fx)
-        fy = parse_expr(fy)
-
-        if op == "sin":
-            fx = fx * math.sin(angle)
-            fy = fy * math.sin(numpy.radians(90) - angle)
-        elif op == "cos":
-            fx = fx * math.cos(angle)
-            fy = fy * math.cos(numpy.radians(90) - angle)
-
-        if math.isclose(round(-fx + fy, 2), result, rel_tol=rel_value):
-            return "-", "+"
-
-        elif math.isclose(round(fx - fy, 2), result, rel_tol=rel_value):
-            return "+", "-"
-
-        elif math.isclose(round(fx + fy, 2), result, rel_tol=rel_value):
-            return "+", "+"
-
-        else:
-            return "-", "-"
+        return longest_paths
 
 
-class Node:
-    def __init__(self):
-        self.hinged: Union[List, None] = None
-        self.roll: Union[List, None] = None
-        self.fixed: Union[List, None] = None
-        self.roll_direction: Union[float, None] = None
-        self.moment = None
-        self.point = None
-        self.total_point_load_x = None
-        self.total_point_load_y = None
-        self.moment_sum_from_forces = None
-
-
-class Element:
-    def __init__(self):
-        self.angle = None
-        self.q_load = None
-        self.load_x = None
-        self.load_y = None
-        self.eq_load = None
+if __name__ == "__main__":
+    ss = SystemElements()
+    ss.add_element([[-2, 2], [-1, 0]])
+    ss.add_element([[-2, 3], [-2, 2]])
+    ss.add_element([[-1, 4], [-2, 3]])
+    ss.add_element([[-3, 4], [-2, 3]])
+    ss.add_element([[-4, 4], [-3, 4]])
+    ss.add_element([[-3, 5], [-3, 4]])
+    ss.add_element([[-2, 0], [-1, 0]])
+    ss.add_element([[-2, 1], [-2, 0]])
+    ss.add_element([[-2, -1], [-2, 0]])
+    ss.add_element([[-3, 0], [-2, 0]])
+    ss.add_element([[-4, 1], [-3, 0]])
+    ss.add_element([[-5, 2], [-4, 1]])
+    ss.add_element([[-4, -1], [-3, 0]])
+    ss.add_element([[-5, -2], [-4, -1]])
+    ss.add_element([[-1, 0], [0, 0]])
+    ss.add_element([[0, 0], [1, 0]])
+    ss.add_element([[2, 0], [3, 0]])
+    ss.add_element([[1, 0], [2, 0]])
+    ss.add_element([[2, 0], [3, 1]])
+    ss.add_element([[1, 0], [-1, 1]])
+    ss.show_structure()
+    ass = assembler(ss)
+    ass.assemble_structure()
