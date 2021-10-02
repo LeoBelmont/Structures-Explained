@@ -11,3 +11,12 @@ Cross Section:
 
 Mohr's Circle:
 ![mohr](https://user-images.githubusercontent.com/58717653/110705023-8b985c00-81d4-11eb-80ba-0b388a1e2ec3.gif)
+
+How to Install:
+For now Structures Explained and it's dependencies must be installed manually.
+To do so clone the repository and install the following:
+matplotlib>=3.0, numpy>=1.15.4, pyqt5, qdarkstyle, pylatex, sympy
+You will also need my anaStruct fork, the current master utilizes the legacy branch, found at:
+https://github.com/LeoBelmont/anaStruct/tree/sx-legacy
+to install use:
+pip install git+git://github.com/LeoBelmont/anaStruct@sx-legacy
