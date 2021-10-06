@@ -5,13 +5,6 @@ from StructuresExplained.solutions.structure.fig_generation import fig_generator
 from StructuresExplained.utils.util import make_pdf_folder, make_figure_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 from anastruct import SystemElements
-from enum import Enum
-
-from typing import (
-    Union,
-    List,
-    Dict,
-)
 
 
 class manager:
