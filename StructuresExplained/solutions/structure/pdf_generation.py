@@ -1,346 +1,228 @@
 import math
-import numpy
-from StructuresExplained.solutions import functions
-from sympy import symbols
-from sympy.parsing.sympy_parser import parse_expr
-from pylatex import Document, Section, Subsection, Figure, Alignat, NoEscape, Subsubsection, \
-    LineBreak
+from sympy import symbols, solve
+from pylatex import Document, Section, Subsection, Figure, NoEscape, Subsubsection, LineBreak
 from StructuresExplained.pdfconfig import header
 from StructuresExplained.pdfconfig.translations.structure_strings import translate_PDF_structure
+from StructuresExplained.utils.util import add_to_pdf, append_step, append_result, get_value_from_points
+
+
+def get_signal_constant(moment, result, numeric_const=0):
+    if math.isclose(round(moment + numeric_const, 2), round(result, 2), rel_tol=1e-2):
+        return moment
+    else:
+        return -moment
+
+
+def get_signal(reaction):
+    if reaction < 0:
+        return '-'
+    else:
+        return '+'
 
 
 class pdf_generator:
-    def __init__(self):
-        self.language = None
-        self.target_dir = None
+    def __init__(self, support_results, internal_results, system_elements, language, target_dir):
+        self.sr = support_results
+        self.ir = internal_results
+        self.ss = system_elements
+        self.language = language
+        self.target_dir = target_dir
+        self.doc = Document(document_options="a4paper,12pt", documentclass="article")
+        self.pdf = add_to_pdf(self.doc)
 
     def generatePDF(self):
-        doc = Document(document_options="a4paper,12pt", documentclass="article")
-        doc.preamble.append(NoEscape(header.PDFsettings))
-    
+        self.doc.preamble.append(NoEscape(header.PDFsettings))
+
         tpdf = translate_PDF_structure(self.language)
-    
-        doc.append(NoEscape(header.makeCover(tpdf.title, self.language)))
-    
-        with doc.create(Section(tpdf.step_figure_image)):
-    
-            with doc.create(Figure(position='H')) as fig_estrutura:
+
+        self.doc.append(NoEscape(header.makeCover(tpdf.title, self.language)))
+
+        with self.doc.create(Section(tpdf.step_figure_image)):
+
+            with self.doc.create(Figure(position='H')) as fig_estrutura:
                 fig_estrutura.add_image("figs\\structure", width='500px')
                 fig_estrutura.add_caption(NoEscape(tpdf.step_figure_image_label))
-    
-        with doc.create(Section(tpdf.step_free_body_diagram_0)):
-            with doc.create(Figure(position='H')) as fig_corpolivre:
-                if self.hinged and self.roll:
+
+        with self.doc.create(Section(tpdf.step_free_body_diagram_0)):
+            with self.doc.create(Figure(position='H')) as fig_corpolivre:
+                if self.sr.hinged and self.sr.roll:
                     fig_corpolivre.add_image("figs\\diagram1", width='500px')
-                elif self.fixed:
+                elif self.sr.fixed:
                     fig_corpolivre.add_image("figs\\diagram2", width='500px')
                 fig_corpolivre.add_caption(NoEscape(tpdf.free_body_diagram_0_label))
-    
-        with doc.create(Section(tpdf.step_supports_reaction)):
-    
-            if self.fixed:
-                with doc.create(Subsection(tpdf.step_supports_fixed)):
-                    with doc.create(Alignat(numbering=False, escape=False)) as sum_M:
-                        sum_M.append(r'\sum{M} &= 0 \\')
-                        sum_M.append(r'M &= F \cdot d \\')
-                doc.append(NoEscape(r'\begin{dmath*}'))
-                doc.append(NoEscape(
-                    f'{self.moment_sum + self.moment_sum_from_forces} {self.get_signal(self.fixed_reaction_moment)} M = 0 \\\\'))
-                doc.append(NoEscape(r'\end{dmath*}'))
-                doc.append(NoEscape(r'\begin{dmath*}'))
-                doc.append(NoEscape(f'M = {abs(float(self.fixed_reaction_moment))}'))
-                doc.append(NoEscape(r'\end{dmath*}'))
-    
-                with doc.create(Subsection(tpdf.fixed_EFY)):
-                    with doc.create(Alignat(escape=False, numbering=False)) as sum_Fy:
-                        sum_Fy.append(r'\sum{Fy} = 0 \\')
-                        sum_Fy.append(
-                            f'{self.total_point_load_y + self.total_q_load_y} {self.get_signal(self.fixed_reaction_y)} Fy = 0' r'\\')
-                        sum_Fy.append(f'Fy = {abs(float(self.fixed_reaction_y))}')
-    
-                with doc.create(Subsection(tpdf.fixed_EFX)):
-                    with doc.create(Alignat(escape=False, numbering=False)) as sum_Fx:
-                        sum_Fx.append(r'\sum{Fx} = 0 \\')
-                        sum_Fx.append(
-                            f'{self.total_point_load_x + self.total_q_load_x} {self.get_signal(self.fixed_reaction_x)} Fx = 0' r'\\')
-                        sum_Fx.append(f'Fx = {abs(float(self.fixed_reaction_x))}')
-    
-            elif self.hinged and self.roll:
-                roll_angle = self.roll_direction.get(self.idr)
-                with doc.create(Subsection(tpdf.fixed_moment)):
-                    with doc.create(Alignat(numbering=False, escape=False)) as sum_M:
-                        sum_M.append(r'\sum{M} &= 0 \\')
-                        sum_M.append(r'M &= F \cdot d')
+
+        with self.doc.create(Section(tpdf.step_supports_reaction)):
+
+            if self.sr.fixed:
+                fixed_reactions = self.ss.reaction_forces.get(self.ss.supports_fixed[0].id)
+                with self.doc.create(Subsection(tpdf.step_supports_fixed)):
+                    self.pdf.add_equation(r'\sum{M} = 0 \\')
+                    self.pdf.add_equation(r'M = F \cdot d \\')
+                    self.pdf.add_equation(NoEscape(
+                        f'{append_step(self.sr.moments_sum)}'
+                        f' {get_signal(fixed_reactions.Ty)} M = 0 \\\\'))
+                    self.pdf.add_equation(NoEscape(f'M = {append_result(abs(fixed_reactions.Ty))}'))
+
+                with self.doc.create(Subsection(tpdf.fixed_EFY)):
+                    self.pdf.add_equation(r'\sum{Fy} = 0 \\')
+                    self.pdf.add_equation(
+                        f'{append_step(self.sr.point_sum_y)} {get_signal(fixed_reactions.Fz)} Fy = 0' r'\\')
+                    self.pdf.add_equation(f'Fy = {append_result(abs(fixed_reactions.Fz))}')
+
+                with self.doc.create(Subsection(tpdf.fixed_EFX)):
+                    self.pdf.add_equation(r'\sum{Fx} = 0 \\')
+                    self.pdf.add_equation(
+                        f'{append_step(self.sr.point_sum_x)} {get_signal(fixed_reactions.Fx)} Fx = 0' r'\\')
+                    self.pdf.add_equation(f'Fx = {append_result(abs(fixed_reactions.Fx))}')
+
+            elif self.sr.hinged and self.sr.roll:
+                hinged_reactions = self.ss.reaction_forces.get(self.ss.supports_hinged[0].id)
+                roll_reactions = self.ss.reaction_forces.get(self.ss.supports_roll[0].id)
+                roll_angle = self.sr.inclined_roll.get(self.sr.roll.id)
+                if roll_angle is None: roll_angle = 0
+                with self.doc.create(Subsection(tpdf.fixed_moment)):
+                    self.pdf.add_equation(r'\sum{M} = 0 \\')
+                    self.pdf.add_equation(r'M = F \cdot d')
+
                     if roll_angle == math.pi / 2:
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(self.symbol_filter(
-                            f'{self.moment_sum + self.moment_sum_from_forces} {self.get_signal(self.roll_reaction_x)} Bx \cdot {self.roll_dist_y} = 0 \\\\')))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'Bx = {abs(float(self.roll_reaction_x))}'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
+                        self.pdf.add_equation(NoEscape(
+                            f'{append_step(self.sr.moments_sum)} {get_signal(roll_reactions.Fx)} Bx'
+                            f' \cdot {append_step(self.sr.roll_dists["y"])} = 0 \\\\'))
+                        self.pdf.add_equation(NoEscape(f'Bx = {append_result(abs(roll_reactions.Fx))}N'))
+
                     elif roll_angle == 0:
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(self.symbol_filter(
-                            f'{self.moment_sum + self.moment_sum_from_forces} {self.get_signal(self.roll_reaction_y)} By \cdot {self.roll_dist_x} = 0 \\\\')))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'By = {abs(float(self.roll_reaction_y))}'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
+                        self.pdf.add_equation(NoEscape(
+                            f'{append_step(self.sr.moments_sum)} {get_signal(roll_reactions.Fz)} By'
+                            f' \cdot {append_step(self.sr.roll_dists["x"])} = 0 \\\\'))
+                        self.pdf.add_equation(NoEscape(f'By = {append_result(abs(roll_reactions.Fz))}N'))
+
                     else:
-                        rangle = round(self.roll_direction.get(self.idr) * 180 / math.pi, 2)
-                        Bangle = round(float(self.roll_reaction_x) / math.sin(rangle * math.pi / 180), 2)
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(self.symbol_filter(
-                            f'{self.moment_sum + self.moment_sum_from_forces} {self.get_signal(self.roll_reaction_y)} B_{{{rangle}\degree}} \cdot cos({rangle}\degree) \cdot {self.roll_dist_x} {self.get_signal(self.roll_reaction_x)} B_{{{rangle}\degree}} \cdot sen({rangle}\degree) \cdot {self.roll_dist_y} = 0 \\\\')))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'B_{{{rangle}\degree}} = {Bangle}'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'B_x = {Bangle} * sen({rangle}\degree)'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'B_x = {round(float(self.roll_reaction_x), 2)}'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'B_y = {Bangle} * cos({rangle}\degree)'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'B_y = {round(float(self.roll_reaction_y), 2)}'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-    
-                with doc.create(Section(tpdf.step_free_body_diagram_1)):
-                    with doc.create(Figure(position='H')) as fig_corpolivre:
+                        # degrees is dangerous, might need to use rad for solving
+                        roll_angle_deg = roll_angle * 180 / math.pi
+                        Bangle = roll_reactions.Fx / math.sin(roll_angle_deg * math.pi / 180)
+                        self.pdf.add_equation(NoEscape(
+                            f'{append_step(self.sr.moments_sum)} {get_signal(roll_reactions.Fz)}'
+                            f' B_{{{append_result(roll_angle_deg)}\degree}} \cdot '
+                            f'cos({append_result(roll_angle_deg)}\degree) \cdot {self.sr.roll_dists["x"]}'
+                            f' {get_signal(roll_reactions.Fx)} B_{{{append_result(roll_angle_deg)}\degree}}'
+                            f' \cdot sen({append_result(roll_angle_deg)}\degree) \cdot '
+                            f'{self.sr.roll_dists["y"]} = 0 \\\\'))
+
+                        self.pdf.add_equation(NoEscape(f'B_{{{append_result(roll_angle_deg)}\degree}} = {append_result(Bangle)}'))
+
+                        self.pdf.add_equation(NoEscape(
+                            f'B_x = {append_step(str(Bangle)  + "* sen(" + str(roll_angle_deg) + "*degree)")}'
+                        ))
+                        self.pdf.add_equation(NoEscape(f'B_x = {append_result(roll_reactions.Fx)}N'))
+                        self.pdf.add_equation(NoEscape(
+                            f'B_y = {append_step(str(Bangle) + "* cos(" + str(roll_angle_deg) + "*degree)")}'
+                        ))
+                        self.pdf.add_equation(NoEscape(f'B_y = {append_result(roll_reactions.Fz)}N'))
+
+                with self.doc.create(Section(tpdf.step_free_body_diagram_1)):
+                    with self.doc.create(Figure(position='H')) as fig_corpolivre:
                         fig_corpolivre.add_image("figs\\diagram2", width='500px')
                         fig_corpolivre.add_caption(NoEscape(tpdf.free_body_diagram_1_label))
-    
-                with doc.create(Subsection(tpdf.hinged_EFY)):
-                    with doc.create(Alignat(escape=False, numbering=False)) as sum_Fy:
-                        sum_Fy.append(r'\sum{Fy} = 0 \\')
-                        if round(float(self.roll_reaction_y), 2) != 0:
-                            sum_Fy.append(self.symbol_filter(
-                                f'{self.total_point_load_y}{self.total_q_load_y} + {float(self.roll_reaction_y):.2f} {self.get_signal(self.hinged_reaction_y)} Ay = 0' r'\\'))
-                        else:
-                            sum_Fy.append(self.symbol_filter(
-                                f'{self.total_point_load_y}{self.total_q_load_y} {self.get_signal(self.hinged_reaction_y)} Ay = 0' r'\\'))
-                        sum_Fy.append(f'Ay = {abs(float(self.hinged_reaction_y))}')
-    
-                with doc.create(Subsection(tpdf.hinged_EFX)):
-                    with doc.create(Alignat(escape=False, numbering=False)) as sum_Fx:
-                        sum_Fx.append(r'\sum{Fx} = 0 \\')
-                        if float(f'{float(self.roll_reaction_x):.2f}') != 0:
-                            sum_Fx.append(self.symbol_filter(
-                                f'{self.total_point_load_x}{self.total_q_load_x} + {float(self.roll_reaction_x):.2f} {self.get_signal(self.hinged_reaction_x)} Ax = 0' r'\\'))
-                        else:
-                            sum_Fx.append(self.symbol_filter(
-                                f'{self.total_point_load_x}{self.total_q_load_x} {self.get_signal(self.hinged_reaction_x)} Ax = 0' r'\\'))
-                        sum_Fx.append(f'Ax = {abs(float(self.hinged_reaction_x))}')
-    
-            with doc.create(Subsection(tpdf.step_drawing_reactions)):
-                with doc.create(Figure(position='H')) as fig_apoios:
+
+                with self.doc.create(Subsection(tpdf.hinged_EFY)):
+                    self.pdf.add_equation(r'\sum{Fy} = 0 \\')
+                    if round(roll_reactions.Fz, 13) != 0:
+                        self.pdf.add_equation(
+                            f'{append_step(self.sr.point_sum_y + "+" + str(-roll_reactions.Fz))}'
+                            f' {get_signal(roll_reactions.Fz)} Ay = 0' r'\\')
+                    else:
+                        self.pdf.add_equation(
+                            f'{append_step(self.sr.point_sum_y)} {get_signal(hinged_reactions.Fz)} Ay = 0' r'\\')
+                    self.pdf.add_equation(f'Ay = {append_result(abs(hinged_reactions.Fz))}$ $N')
+
+                with self.doc.create(Subsection(tpdf.hinged_EFX)):
+                    self.pdf.add_equation(r'\sum{Fx} = 0 \\')
+                    if round(roll_reactions.Fx, 13) != 0:
+                        self.pdf.add_equation(
+                            f'{append_step(self.sr.point_sum_x + "+" + str(roll_reactions.Fx))}'
+                            f' {get_signal(hinged_reactions.Fx)} Ax = 0' r'\\')
+                    else:
+                        self.pdf.add_equation(
+                            f'{append_step(self.sr.point_sum_x)} {get_signal(hinged_reactions.Fx)} Ax = 0' r'\\')
+                    self.pdf.add_equation(f'Ax = {append_result(abs(hinged_reactions.Fx))}$ $N')
+
+            with self.doc.create(Subsection(tpdf.step_drawing_reactions)):
+                with self.doc.create(Figure(position='H')) as fig_apoios:
                     fig_apoios.add_image("figs\\supports", width='500px')
                     fig_apoios.add_caption(NoEscape(tpdf.drawing_reactions_label))
-    
-        with doc.create(Section(tpdf.step_internal_stress)):
-    
-            doc.append(tpdf.bending_moment_tip)
-            doc.append(LineBreak())
-            doc.append(tpdf.constant_tip)
-            doc.append(LineBreak())
-    
-            eq = self.eq
-            x = symbols("x")
-            if self.hinged and self.roll:
-                self.idh = self.hinged[0].id
-                self.idr = self.roll[0].id
-            elif self.fixed:
-                self.idf = self.fixed[0].id
-    
-            for c in range(len(eq)):
-    
-                vx = ''
-                vy = ''
-                vx = self.symbol_filter(self.shear_equation_x[c])
-                vy = self.symbol_filter(self.shear_equation_y[c])
-                V = ''
-                M = ''
-                const = ''
-    
-                if self.hinged and self.roll:
-                    if c + 1 >= self.idh:
-                        _, _, _, fx, fy, _ = self.fetcher(self.node_map.get(self.idh))
-                        if float(fx) != 0:
-                            vx += f' + {-fx:.2f}'
-                        if float(fy) != 0:
-                            vy += f' + {-fy:.2f}'
-    
-                    if c + 1 >= self.idr:
-                        _, _, _, fx, fy, _ = self.fetcher(self.node_map.get(self.idr))
-                        if fx != 0:
-                            vx += f' + {-fx:.2f}'
-                        if fy != 0:
-                            vy += f' + {-fy:.2f}'
-    
-                elif self.fixed:
-                    if c + 1 >= float(self.idf):
-                        _, _, _, fx, fy, _ = self.fetcher(self.node_map.get(self.idf))
-                        if fx != 0:
-                            vx += f' + {-fx:.2f}'
-                        if fy != 0:
-                            vy += f' + {-fy:.2f}'
-    
-                if c != 0:
-                    _, xi, yi, _, _, _ = self.fetcher(self.node_map.get(c))
-                    _, xf, yf, _, _, _ = self.fetcher(self.node_map.get(c + 1))
-                    pos = ((xf - xi) ** 2 + (yf - yi) ** 2) ** 0.5
-    
-                vxc = vx
-                vyc = vy
-                if not vxc:
-                    vxc = "0"
-                if not vyc:
-                    vyc = "0"
-    
-                if (abs(self.angle[c]) != 0) and (abs(self.angle[c]) != (math.pi / 2)):
-                    # signals = self.get_signal_vectors(numpy.radians(90) - self.angle[c], vxc, vyc)
-                    signals = self.get_signal_vectors(functions.n[c], vxc, vyc, self.angle[c], "cos")
-                    vy = f'{signals[0]} ({vyc}) \cdot {tpdf.cos}({90 - (self.angle[c] * 180 / math.pi):.2f}\degree) {signals[1]} ({vxc}) \cdot {tpdf.cos}({self.angle[c] * 180 / math.pi:.2f}\degree)'
-                    signals = self.get_signal_vectors(functions.eq[c][2], vxc, vyc, self.angle[c], "sin")
-                    vx = f'{signals[0]} ({vyc}) \cdot {tpdf.sin}({90 - (self.angle[c] * 180 / math.pi):.2f}\degree) {signals[1]} ({vxc}) \cdot {tpdf.sin}({self.angle[c] * 180 / math.pi:.2f}\degree)'
-                    vxc = f'{signals[0]} (({vyc}) * {math.sin(numpy.radians(90) - self.angle[c])}) {signals[1]} (({vxc}) * {math.sin(self.angle[c])})'
-    
-                if vxc == '':
-                    vxc = '0'
-    
-                if round(float(parse_expr(self.symbol_filter(vxc))), 2) == -round(functions.n[c], 2):
-                    n = vx
-                    v = vy
-                else:
-                    n = vy
-                    v = vx
-    
-                if round(eq[c][0], 2) != 0:
-                    M += f'{-eq[c][0]:.2f}x^3'
-                    V += f'{-eq[c][0] * 3: .2f}x^2'
-    
-                if round(eq[c][1], 2) != 0:
-                    M += f'+{-eq[c][1]:.2f}x^2'
-                    V += f'+{-eq[c][1] * 2:.2f}x'
-    
-                if round(eq[c][2], 2) != 0:
-                    M += f'+{-eq[c][2]:.2f}x'
-                    V += f'+{-eq[c][2]:.2f}'
-    
-                if round(eq[c][3], 2) != 0:
-                    M += f'+{-eq[c][3]:.2f}'
-    
-                if V == '':
-                    V = '0'
-    
-                if M == '':
-                    M = '0'
-    
-                if c != 0:
-                    const += f"{-eq[c - 1][0]:.2f} \cdot {pos:.2f}^3"
-                    const += f" + {-eq[c - 1][1]:.2f} \cdot {pos:.2f}^2"
-                    const += f" + {-eq[c - 1][2]:.2f} \cdot {pos:.2f}"
-                    const += f" + {-eq[c - 1][3]:.2f}"
-                    numeric_const = (-eq[c - 1][0] * pos ** 3) + (-eq[c - 1][1] * pos ** 2) + (-eq[c - 1][2] * pos) + - \
-                        eq[c - 1][3]
-    
-                with doc.create(Subsection(f'{tpdf.step_cutting_section} {c + 1}')):
-                    with doc.create(Figure(position='H')) as fig_secoes:
-                        fig_secoes.add_image(f"figs\\structure{c + 1}", width='500px')
+
+        with self.doc.create(Section(tpdf.step_internal_stress)):
+
+            self.doc.append(tpdf.bending_moment_tip)
+            self.doc.append(LineBreak())
+            self.doc.append(tpdf.constant_tip)
+            self.doc.append(LineBreak())
+
+            x, s = symbols('x s')
+            for element, (axial_force, shear_force, bending_moment, constant_list) in self.ir.items():
+                ax = solve(str(axial_force).replace("*degree", "") + " + s", s)[0]
+                sh = solve(str(shear_force).replace("*degree", "") + " - s", s)[0]
+
+                with self.doc.create(Subsection(f'{tpdf.step_cutting_section} {element.id}')):
+                    with self.doc.create(Figure(position='H')) as fig_secoes:
+                        fig_secoes.add_image(f"figs\\structure{element.id}", width='500px')
                         fig_secoes.add_caption(NoEscape(tpdf.step_cutting_section_label_1 +
-                                                        f"{tpdf.step_cutting_section_label_2} {c + 1}"))
-    
-                    with doc.create(Subsubsection(tpdf.step_normal_stress)):
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'\sum{Fx} = 0 \\'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'{} + N = 0'.format(self.symbol_filter(n))))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'N = {:.2f}'.format(float(functions.n[c]))))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-    
-                    with doc.create(Subsubsection(tpdf.step_shear_stress)):
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'\sum{Fy} = 0 \\'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        if c + 1 in self.q_load.keys() and self.eq_load.get(c + 1) is not None:
-                            doc.append(
-                                NoEscape(r'{} - V = 0'.format(self.symbol_filter(f'{self.eq_load.get(c + 1)} {v}'))))
-                        else:
-                            doc.append(NoEscape(r'{} - V = 0'.format(self.symbol_filter(v))))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'V = {}'.format(self.symbol_filter(V))))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-    
-                    with doc.create(Subsubsection(tpdf.step_bending_stress)):
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(f'M = \\int{self.symbol_filter(V)}  dx'))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-                        doc.append(NoEscape(r'\begin{flushleft}'))
-                        doc.append(f'{tpdf.constant_at} {c + 1}:')
-                        doc.append(NoEscape(r'\end{flushleft}'))
-                        if c != 0:
-                            doc.append(NoEscape(r'\begin{dmath*}'))
-                            if f'{c + 1}: ' in str(self.moment):
-                                doc.append(NoEscape(self.symbol_filter(
-                                    f"c = {const} + {self.get_signal_constant(self.moment.get(c + 1), -eq[c][3], numeric_const):.2f}")))
-                            else:
-                                doc.append(NoEscape(self.symbol_filter(f"c = {const}")))
-                            doc.append(NoEscape(r'\end{dmath*}'))
-                        elif c == 0 and f'{c + 1}: ' in str(self.moment):
-                            doc.append(NoEscape(r'\begin{dmath*}'))
-                            doc.append(self.symbol_filter(
-                                NoEscape(f'c = {self.get_signal_constant(self.moment.get(c + 1), -eq[c][3]):.2f}')))
-                            doc.append(NoEscape(r'\end{dmath*}'))
-                        else:
-                            doc.append(NoEscape(r'\begin{center}'))
-                            doc.append(NoEscape(f'{tpdf.no_moment_at_1} {c + 1}, {tpdf.no_moment_at_2}'))
-                            doc.append(NoEscape(r'\end{center}'))
-                        doc.append(NoEscape(r'\begin{dmath*}'))
-                        doc.append(NoEscape(r'M = {}'.format(self.symbol_filter(M))))
-                        doc.append(NoEscape(r'\end{dmath*}'))
-    
-        with doc.create(Section(tpdf.step_internal_diagrams)):
-            with doc.create(Subsection(tpdf.step_internal_diagrams_normal)):
-                with doc.create(Figure(position='H')) as fig_normais:
+                                                        f"{tpdf.step_cutting_section_label_2} "
+                                                        f"{element.id}"))
+
+                    with self.doc.create(Subsubsection(tpdf.step_normal_stress)):
+                        self.pdf.add_equation(NoEscape(r'\sum{Fx} = 0 \\'))
+                        self.pdf.add_equation(NoEscape(r'{} + N = 0'.format(append_step(axial_force))))
+                        self.pdf.add_equation(NoEscape(r'N = {}$ $N'.format(append_result(
+                            ax if ax else 0
+                        ))))
+
+                    with self.doc.create(Subsubsection(tpdf.step_shear_stress)):
+                        self.pdf.add_equation(NoEscape(r'\sum{Fy} = 0 \\'))
+                        self.pdf.add_equation(NoEscape(fr'{append_step(shear_force)} - V = 0'))
+                        self.pdf.add_equation(NoEscape(r'V = {}$ $N'.format(append_result(
+                            sh if sh else 0
+                        ))))
+
+                    with self.doc.create(Subsubsection(tpdf.step_bending_stress)):
+                        self.pdf.add_equation(NoEscape(f'M = \\int{append_result(shear_force)} dx'))
+                        string = ""
+
+                        for integration_constant in constant_list:
+                            if integration_constant[0][0]:
+                                self.doc.append(NoEscape(
+                                    fr"Encontrando a constante para seção {integration_constant[0][2].id}"))
+                                self.pdf.add_equation(NoEscape(
+                                    f'{tpdf.integration_constant}(x) = {append_step(integration_constant[0][0])}'
+                                ))
+                                self.pdf.add_equation(NoEscape(f"{tpdf.integration_constant}"
+                                                               f"({append_result(integration_constant[0][2].l)})"
+                                                               f" = {append_result(integration_constant[0][1])}"))
+                                string += "+" + integration_constant[0][1]
+
+                        if constant_list[-1][1]:
+                            self.doc.append(NoEscape(f"{tpdf.need_sum_moment}"))
+                        self.pdf.add_equation(f"{tpdf.integration_constant} = "
+                                              f"{append_step((string if string else '0') + constant_list[-1][1])}")
+                        self.pdf.add_equation(NoEscape(r'M = {}$ $N \cdot m'.format(append_result(bending_moment))))
+
+        with self.doc.create(Section(tpdf.step_internal_diagrams)):
+            with self.doc.create(Subsection(tpdf.step_internal_diagrams_normal)):
+                with self.doc.create(Figure(position='H')) as fig_normais:
                     fig_normais.add_image("figs\\axial", width='500px')
                     fig_normais.add_caption(NoEscape(tpdf.internal_diagrams_normal_label))
-    
-            with doc.create(Subsection(tpdf.step_internal_diagrams_shear)):
-                with doc.create(Figure(position='H')) as fig_cortante:
+
+            with self.doc.create(Subsection(tpdf.step_internal_diagrams_shear)):
+                with self.doc.create(Figure(position='H')) as fig_cortante:
                     fig_cortante.add_image("figs\\shear", width='500px')
                     fig_cortante.add_caption(NoEscape(tpdf.internal_diagrams_shear_label))
-    
-            with doc.create(Subsection(tpdf.step_internal_diagrams_moment)):
-                with doc.create(Figure(position='H')) as fig_momentofletor:
+
+            with self.doc.create(Subsection(tpdf.step_internal_diagrams_moment)):
+                with self.doc.create(Figure(position='H')) as fig_momentofletor:
                     fig_momentofletor.add_image("figs\\moment", width='500px')
                     fig_momentofletor.add_caption(NoEscape(tpdf.internal_diagrams_moment_label))
-    
-        doc.generate_pdf(r'tmp\resolucao',
-                         compiler='pdflatex',
-                         win_no_console=True,
-                         compiler_args=["-enable-installer"])
 
-    def get_signal(self, fixed_reaction_moment):
-        pass
-
-    def symbol_filter(self, param):
-        pass
-
-    def fetcher(self, param):
-        pass
-
-    def get_signal_vectors(self, param, vxc, vyc, param1, param2):
-        pass
-
-    def get_signal_constant(self, param, param1):
-        pass
+        self.doc.generate_pdf(r'tmp\resolucao',
+                              compiler='pdflatex',
+                              win_no_console=True,
+                              compiler_args=["-enable-installer"])

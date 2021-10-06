@@ -2694,7 +2694,7 @@ class Ui_tenshi(QWidget):
 
     def node(self):
         try:
-            if int(self.node_id.text()) in self.ss.node_map.keys():
+            if int(self.node_id.text()) in self.ss.system.keys():
                 self.workaround()
                 self.ss.insert_node(element_id=int(self.node_id.text()), location=[self.filter(self.node_x.text()),
                                                                                    self.filter(self.node_y.text())])
@@ -2707,7 +2707,7 @@ class Ui_tenshi(QWidget):
 
     def support(self):
         try:
-            if int(self.support_pos.text()) in self.ss.node_map.keys():
+            if int(self.support_pos.text()) in self.ss.system.keys():
                 self.workaround()
                 if self.support_hinged.isChecked():
                     self.ss.add_support_hinged(node_id=int(self.support_pos.text()))
@@ -2759,7 +2759,7 @@ class Ui_tenshi(QWidget):
 
     def load(self):
         try:
-            if int(self.load_pos.text()) in self.ss.node_map.keys():
+            if int(self.load_pos.text()) in self.ss.system.keys():
                 self.workaround()
                 if self.load_moment.text() != '' and float(self.load_moment.text()) != 0:
                     self.ss.moment_load(node_id=int(self.load_pos.text()),
@@ -2782,7 +2782,7 @@ class Ui_tenshi(QWidget):
 
     def qload(self):
         try:
-            if int(self.qload_pos.text()) in self.ss.node_map.keys():
+            if int(self.qload_pos.text()) in self.ss.system.keys():
                 if float(self.qload_initial.text()) >= 0 and float(self.qload_final.text()) >= 0 or \
                         float(self.qload_initial.text()) <= 0 and float(self.qload_final.text()) <= 0:
                     self.workaround()
@@ -3549,8 +3549,8 @@ class Ui_tenshi(QWidget):
                 elif 'RIGHT' in str(event.button):
                     distance = 1e20
                     id = ""
-                    for keys, values in self.ss.node_map.items():
-                        id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
+                    for keys, values in self.ss.system.items():
+                        id_, x, y, _, _, _ = self.teach.fetcher(self.ss.system.get(keys))
                         xdistance = event.xdata - x
                         ydistance = event.ydata - y
                         new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
@@ -3561,8 +3561,8 @@ class Ui_tenshi(QWidget):
             elif self.stackedWidget.currentIndex() == 2:
                 distance = 1e20
                 id = ""
-                for keys, values in self.ss.node_map.items():
-                    id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
+                for keys, values in self.ss.system.items():
+                    id_, x, y, _, _, _ = self.teach.fetcher(self.ss.system.get(keys))
                     xdistance = event.xdata - x
                     ydistance = event.ydata - y
                     new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
@@ -3573,8 +3573,8 @@ class Ui_tenshi(QWidget):
             elif self.stackedWidget.currentIndex() == 3:
                 distance = 1e20
                 id = ""
-                for keys, values in self.ss.node_map.items():
-                    id_, x, y, _, _, _ = self.teach.fetcher(self.ss.node_map.get(keys))
+                for keys, values in self.ss.system.items():
+                    id_, x, y, _, _, _ = self.teach.fetcher(self.ss.system.get(keys))
                     xdistance = event.xdata - x
                     ydistance = event.ydata - y
                     new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
@@ -3595,16 +3595,16 @@ class Ui_tenshi(QWidget):
                 nearest = 1e20
                 for keys, values in self.ss.element_map.items():
                     _, xi, yi, _, _, _ = self.teach.fetcher(
-                        self.ss.node_map.get(self.ss.element_map.get(keys).node_id1))
+                        self.ss.system.get(self.ss.element_map.get(keys).node_id1))
                     id_, xf, yf, _, _, _ = self.teach.fetcher(
-                        self.ss.node_map.get(self.ss.element_map.get(keys).node_id2))
+                        self.ss.system.get(self.ss.element_map.get(keys).node_id2))
                     xarray = np.linspace(xi, xf, 11)
                     yarray = np.linspace(yi, yf, 11)
                     newNearest = find_nearest(xarray, yarray, event.xdata, event.ydata)
                     if newNearest < nearest:
                         nearest = newNearest
                         self.qload_pos.setText(str(self.ss.element_map.get(keys).id))
-                    if keys == len(self.ss.node_map) - 1:
+                    if keys == len(self.ss.system) - 1:
                         break
 
             elif self.stackedWidget.currentIndex() == 5:
