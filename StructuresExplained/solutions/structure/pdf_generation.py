@@ -1,9 +1,9 @@
 import math
-from sympy import symbols, solve
+from sympy import symbols, solve, sympify
 from pylatex import Document, Section, Subsection, Figure, NoEscape, Subsubsection, LineBreak
 from StructuresExplained.pdfconfig import header
 from StructuresExplained.pdfconfig.translations.structure_strings import translate_PDF_structure
-from StructuresExplained.utils.util import add_to_pdf, append_step, append_result, get_value_from_points
+from StructuresExplained.utils.util import add_to_pdf, append_step, append_result, degree_to_rad
 
 
 def get_signal_constant(moment, result, numeric_const=0):
@@ -160,8 +160,11 @@ class pdf_generator:
 
             x, s = symbols('x s')
             for element, (axial_force, shear_force, bending_moment, constant_list) in self.ir.items():
-                ax = solve(str(axial_force).replace("*degree", "") + " + s", s)[0]
-                sh = solve(str(shear_force).replace("*degree", "") + " - s", s)[0]
+
+                # transform degrees into rad to be able to solve and add variable s to string just to solve for it
+                # and easily find the equation with proper signals
+                ax = solve(sympify(degree_to_rad(str(axial_force)) + " + s").evalf(), s)[0]
+                sh = solve(sympify(degree_to_rad(str(shear_force)) + " + s").evalf(), s)[0]
 
                 with self.doc.create(Subsection(f'{tpdf.step_cutting_section} {element.id}')):
                     with self.doc.create(Figure(position='H')) as fig_secoes:
@@ -199,12 +202,12 @@ class pdf_generator:
                                                                f"({append_result(integration_constant[0][2].l)})"
                                                                f" = {append_result(integration_constant[0][1])}"))
                                 string += "+" + integration_constant[0][1]
-
-                        if constant_list[-1][1]:
-                            self.doc.append(NoEscape(f"{tpdf.need_sum_moment}"))
-                        self.pdf.add_equation(f"{tpdf.integration_constant} = "
-                                              f"{append_step((string if string else '0') + constant_list[-1][1])}")
-                        self.pdf.add_equation(NoEscape(r'M = {}$ $N \cdot m'.format(append_result(bending_moment))))
+                        if constant_list:
+                            if constant_list[-1][1]:
+                                self.doc.append(NoEscape(f"{tpdf.need_sum_moment}"))
+                            self.pdf.add_equation(f"{tpdf.integration_constant} = "
+                                                  f"{append_step((string if string else '0') + constant_list[-1][1])}")
+                            self.pdf.add_equation(NoEscape(r'M = {}$ $N \cdot m'.format(append_result(bending_moment))))
 
         with self.doc.create(Section(tpdf.step_internal_diagrams)):
             with self.doc.create(Subsection(tpdf.step_internal_diagrams_normal)):
@@ -222,7 +225,7 @@ class pdf_generator:
                     fig_momentofletor.add_image("figs\\moment", width='500px')
                     fig_momentofletor.add_caption(NoEscape(tpdf.internal_diagrams_moment_label))
 
-        self.doc.generate_pdf(r'tmp\resolucao',
+        self.doc.generate_pdf(fr'{self.target_dir}\resolucao',
                               compiler='pdflatex',
                               win_no_console=True,
                               compiler_args=["-enable-installer"])

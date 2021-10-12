@@ -8,7 +8,7 @@ from typing import Optional, Union, List, Tuple
 from sympy import sympify, integrate, Symbol
 import numpy as np
 from sympy.physics.units import degree
-
+import math
 from StructuresExplained.utils.util import get_value_from_points
 
 
@@ -50,6 +50,8 @@ class Stresses_Stack:
     def axes_forces(self):
         if self.is_angular:
             self.is_angular = False
+            # symbolic flag also set to false because angular strings will include symbolic strings
+            self.is_symbolic = False
             return [self.fx_angular, self.fy_angular]
         if self.is_symbolic:
             self.is_symbolic = False
@@ -86,19 +88,21 @@ class Stresses_Stack:
 
             if abs(element.angle) != 0 and abs(element.angle) != (np.pi / 2) and \
                     abs(element.angle) != np.pi and abs(element.angle) != (3 * np.pi) / 2:
-                subs = {Symbol("degrees"): degree}
+
+                if self.is_symbolic:
+                    fy = self.fy_symbolic
+                else:
+                    fy = self.fy
 
                 signals = get_signal_vectors(element.axial_force, self.fx, self.fy, element, "cos")
-                self.fy_angular = sympify(f'{signals[0]} ({self.fy if self.fy else "0"}) '
-                                          f'* cos({90 - (element.angle * 180 / np.pi)} * degrees) '
-                                          f'{signals[1]} ({self.fx if self.fx else "0"}) '
-                                          f'* cos({element.angle * 180 / np.pi} * degrees)', evaluate=False).subs(subs)
+                self.fy_angular = f'{signals[0]} ({fy if fy else "0"}) * cos({90 - (element.angle * 180 / np.pi)}' \
+                                  f' * {degree}) {signals[1]} ({self.fx if self.fx else "0"})' \
+                                  f' * cos({element.angle * 180 / np.pi} * {degree})'
 
                 signals = get_signal_vectors(element.shear_force, self.fx, self.fy, element, "sin")
-                self.fx_angular = sympify(f'{signals[0]} ({self.fy if self.fy else "0"}) '
-                                          f'* sin({90 - (element.angle * 180 / np.pi)} * degrees) '
-                                          f'{signals[1]} ({self.fx if self.fx else "0"}) '
-                                          f'* sin({element.angle * 180 / np.pi} * degrees)', evaluate=False).subs(subs)
+                self.fx_angular = f'{signals[0]} ({fy if fy else "0"}) * sin({90 - (element.angle * 180 / np.pi)}' \
+                                  f' * {degree}) {signals[1]} ({self.fx if self.fx else "0"})' \
+                                  f' * sin({element.angle * 180 / np.pi} * {degree})'
                 self.is_angular = True
 
     def extend_results(self, results):
@@ -121,15 +125,12 @@ class Internal_Stresses:
         self._moment_map = moment_map
 
     def define_normal_shear_axes(self, element: Element, strings):
-        copy = str(strings[0])
-        copy = re.sub(r"(\d+\.\d+)\*degree", r"rad(\1)", copy)
-        if abs(round(float(sympify(copy).evalf() if strings[0] else "0"), 13)) == \
-                abs(round(get_value_from_points(element.axial_force, element.l), 13)):
-            self.axial_force = strings[0]
-            self.shear_force = strings[1]
-        else:
+        if abs(element.angle) == 3*np.pi/2 or abs(element.angle) == np.pi/2:
             self.axial_force = strings[1]
             self.shear_force = strings[0]
+        else:
+            self.axial_force = strings[0]
+            self.shear_force = strings[1]
 
     def get_moment(self, node, previous_data):
         self.bending_moment = ""
@@ -138,7 +139,7 @@ class Internal_Stresses:
         moment = self._moment_map.get(node)
         if self.shear_force:
             copy = str(self.shear_force)
-            copy = re.sub(r"(\d+\.\d+)\*degree", r"rad(\1)", copy)
+            copy = re.sub(r"(\d+\.\d+) \* degree", r"rad(\1)", copy)
             self.bending_moment += f"{integrate(sympify(copy).evalf(), Symbol('x'))}"
         for data in previous_data:
             if data[0]:
@@ -175,7 +176,6 @@ def get_signal_vectors(result, fx_, fy_, element, op, rel_value=1e-12):
         fx *= np.cos(element.angle)
         fy *= np.cos(np.radians(90) - element.angle)
 
-    import math
     if math.isclose(round(-fx + fy, 13), result, rel_tol=rel_value):
         return "-", "+"
 
@@ -359,10 +359,12 @@ class Assembler:
              show=False,
              save_figure=False,
              plotting_start_node=None,
-             element_id=0) -> None:
+             element_id=0,
+             target_dir="tmp") -> None:
+
         if plotting_start_node is None:
             plotting_start_node = plot_order[0][0]
-        gen = fig_generator(self.ss, self.solve_order, plot_order)
+        gen = fig_generator(self.ss, self.solve_order, plot_order, target_dir=target_dir)
         gen.draw_structure(show=show,
                            save_figure=save_figure,
                            plotting_start_node=plotting_start_node,
@@ -404,24 +406,25 @@ class Assembler:
                 and [current_node, pending_node] not in self.plot_order:
             self.plot_order.append([pending_node, current_node])
 
-    def plot_solve_order(self, show=False, save_figure=True) -> None:
+    def plot_solve_order(self, show=False, save_figure=True, target_dir="tmp") -> None:
         self.solved_dict: dict = {e_id: False for e_id in self.ss.node_map}
         current_stack = None
         stacks = [self.plot_order[0][:]]
         self.plot([stacks[0]], show=show, save_figure=save_figure,
-                  element_id=find_element(self.plot_order[0], self.ss.node_element_map).id)
+                  element_id=find_element(self.plot_order[0], self.ss.node_element_map).id, target_dir=target_dir)
         for node1, node2 in self.plot_order[1:]:
             plotted = False
             element = find_element([node1, node2], self.ss.node_element_map)
 
             if [node1, node2] == self.plot_order[-1]:
                 self.plot(self.plot_order, show=show, save_figure=save_figure,
-                          plotting_start_node=self.plot_order[-1][-1], element_id=element.id)
+                          plotting_start_node=self.plot_order[-1][-1], element_id=element.id, target_dir=target_dir)
                 break
 
             if node1 in self.tip_node_ids or node2 in self.tip_node_ids:
                 current_stack = [node1, node2]
-                self.plot(node_pair_to_element(current_stack), show=show, save_figure=save_figure, element_id=element.id)
+                self.plot(node_pair_to_element(current_stack), show=show, save_figure=save_figure,
+                          element_id=element.id, target_dir=target_dir)
                 plotted = True
 
             if are_stacks_connected(node1, node2, stacks):
@@ -429,7 +432,7 @@ class Assembler:
                 current_stack = stacks[-1]
                 if not plotted:
                     self.plot(node_pair_to_element(current_stack), show=show, save_figure=save_figure,
-                              plotting_start_node=current_stack[-1], element_id=element.id)
+                              plotting_start_node=current_stack[-1], element_id=element.id, target_dir=target_dir)
 
                 if self.is_solved(current_stack):
                     del stacks[-1]
@@ -502,19 +505,20 @@ class Assembler:
         return [element for element in elements]
 
     def assemble_structure(self,
-                           main_path: Optional[Union[Setting, Tuple[int, ...]]] = Setting.longest
+                           main_path: Optional[Union[Setting, Tuple[int, ...]]] = Setting.longest,
+                           target_dir: Optional[str] = "tmp"
                            ) -> None:
         self.find_tips()
         self.assemble_graph()
         self.assemble_main_path(main_path)
         self.assemble_other_paths()
         self.assemble_solve_order()
-        self.plot_solve_order()
+        self.plot_solve_order(target_dir=target_dir)
         self.assemble_solve_strings()
         self.sort_shear_axial()
 
-        print(f"main path: {self.main_path_list}, other paths: {self.other_paths_list}")
-        print(f"solve order: {self.solve_order}")
+        # print(f"main path: {self.main_path_list}, other paths: {self.other_paths_list}")
+        # print(f"solve order: {self.solve_order}")
 
 
 class Graph(object):

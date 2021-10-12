@@ -47,6 +47,9 @@ class Assembler:
 
     @property
     def results(self):
+        if not self.res.moments_sum: self.res.moments_sum = "0"
+        if not self.res.point_sum_x: self.res.point_sum_x = "0"
+        if not self.res.point_sum_y: self.res.point_sum_y = "0"
         return self.res
 
     def assemble_structure(self):

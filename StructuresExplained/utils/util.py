@@ -48,13 +48,17 @@ def round_expr(expr: str):
     if not isinstance(expr, str):
         expr = str(expr)
 
-    search = re.findall(r'(\d+([.,]\d+)?(e[-+]\d+)?)', expr)
-    for index in search:
-        expr = re.sub(index[0], determine_round_format(index[0]), expr, count=1)
+    search = re.finditer(r'(\d+([.,]\d+)?(e[-+]\d+(\.\d+)?)?)', expr)
+    iter_list = [match for match in search]
+    for index in reversed(iter_list):
+        expr = expr[0:index.start()] + determine_round_format(index.group(1)) + expr[index.end():]
     return expr
 
 
 def determine_round_format(number: str):
+    if str(int(float(number))) == number:
+        return number
+
     try:
         number = float(number)
     except ValueError:
@@ -110,7 +114,7 @@ def append_step(equation):
         subs = {"degrees": degree}
         return latex(sympify(round_expr(equation), evaluate=False).subs(subs))
 
-    return latex(sympify(round_expr(equation), evaluate=False))
+    return latex(sympify(round_expr(sympify(equation, evaluate=False)), evaluate=False))
 
 
 def append_result(equation: str):
@@ -118,9 +122,14 @@ def append_result(equation: str):
         equation = str(equation)
 
     if "degree" in str(equation):
-        equation = re.sub(r"(\d+[.,]\d+)\*degree", r"rad(\1)", str(equation))
+        equation = degree_to_rad(equation)
 
-    return latex(sympify(round_expr(equation)).evalf())
+    return latex(sympify(round_expr(sympify(equation).evalf())))
+
+
+def degree_to_rad(equation):
+    equation = re.sub(r"(\d+[.,]\d+) \* degree", r"rad(\1)", str(equation))
+    return equation
 
 
 def get_value_from_points(result, element_length, mul_value=None, polynomial_degree=3):

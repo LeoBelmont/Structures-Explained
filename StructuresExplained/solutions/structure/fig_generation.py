@@ -73,11 +73,12 @@ def plot_moment(subplot, node, reaction_force, vector_data):
 class fig_generator:
     fig_counter = 0
 
-    def __init__(self, system_elements, node_order=None, assemble_order=None):
+    def __init__(self, system_elements, node_order=None, assemble_order=None, target_dir="tmp"):
         self.ss = system_elements
         self.branch_ss = SystemElements()
         self.assemble_order = assemble_order
         self.node_order = node_order
+        self.target_dir = target_dir
 
     def draw_structure(self, show=False, save_figure=True, plotting_start_node=0, element_id=0):
         plot_iterations = False
@@ -143,23 +144,23 @@ class fig_generator:
                 figure.show()
             if save_figure and plot_iterations:
                 fig = self.branch_ss.show_structure(show=False, subplot=(figure, subplot))
-                fig.savefig(fr'tmp\figs\structure{element_id}')
+                fig.savefig(fr'{self.target_dir}\figs\structure{element_id}')
 
-    def generate_figures_for_pdf(self, target_dir="tmp"):
+    def generate_figures_for_pdf(self):
         fig = self.ss.show_structure(show=False)
-        fig.savefig(fr'{target_dir}\figs\structure')
+        fig.savefig(fr'{self.target_dir}\figs\structure')
         fig = self.ss.show_structure(show=False, free_body_diagram=3)
-        fig.savefig(fr'{target_dir}\figs\diagram1')
+        fig.savefig(fr'{self.target_dir}\figs\diagram1')
         fig = self.ss.show_structure(show=False, free_body_diagram=2)
-        fig.savefig(fr'{target_dir}\figs\diagram2')
+        fig.savefig(fr'{self.target_dir}\figs\diagram2')
         fig = self.ss.show_reaction_force(show=False)
-        fig.savefig(fr'{target_dir}\figs\supports')
+        fig.savefig(fr'{self.target_dir}\figs\supports')
         fig = self.ss.show_axial_force(show=False)
-        fig.savefig(fr'{target_dir}\figs\axial')
+        fig.savefig(fr'{self.target_dir}\figs\axial')
         fig = self.ss.show_shear_force(show=False)
-        fig.savefig(fr'{target_dir}\figs\shear')
+        fig.savefig(fr'{self.target_dir}\figs\shear')
         fig = self.ss.show_bending_moment(show=False)
-        fig.savefig(fr'{target_dir}\figs\moment')
+        fig.savefig(fr'{self.target_dir}\figs\moment')
 
     def draw_support(self, node_id, subplot, roll_direction=None):
         support_node = self.ss.reaction_forces.get(node_id)
