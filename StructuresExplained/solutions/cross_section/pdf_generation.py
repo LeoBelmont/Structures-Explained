@@ -1,8 +1,7 @@
 from pylatex import Document, Section, Subsection, Subsubsection, Figure, NoEscape
-from sympy import latex, sympify, parse_expr
 from StructuresExplained.pdfconfig import header
 from StructuresExplained.pdfconfig.translations.cross_sec_strings import translate_PDF_cross_section
-from StructuresExplained.utils.util import add_to_pdf, round_expr
+from StructuresExplained.utils.util import add_to_pdf, round_expr, append_step, append_result
 
 
 class pdf_generator:
@@ -288,11 +287,3 @@ class shear_stress_data:
         self.static_moment = static_moment
         self.moment_inertia_x = moment_inertia_x
         self.thickness = thickness
-
-
-def append_step(equation: str):
-    return latex(sympify(round_expr(equation), evaluate=False))
-
-
-def append_result(equation: str):
-    return round_expr(parse_expr(equation).evalf())

@@ -8,4 +8,9 @@ main.py
 StructuresExplained/solutions/cross_section/__pycache__/
 StructuresExplained/utils/__pycache__/
 StructuresExplained/solutions/stress_states/__pycache__/
+StructuresExplained/solutions/structure/__pycache__/
+StructuresExplained/solutions/structure/fig_generation/__pycache__/
+StructuresExplained/solutions/structure/internal_stresses/__pycache__/
+StructuresExplained/solutions/structure/pdf_generation/__pycache__/
+StructuresExplained/solutions/structure/reactions/__pycache__/
 StructuresExplained/UI/connections/__pycache__/

@@ -83,6 +83,7 @@ class manager:
     def generate_pdf_plain_state(self,
                                  language: str,
                                  pdf_path: Optional[str] = "pdf",
+                                 filename: Optional[str] = "plain-state",
                                  clear=True
                                  ):
         """
@@ -101,7 +102,7 @@ class manager:
         save_figure(figure, pdf_path + r"\figs\mohrfig")
         generate_logo(pdf_path)
 
-        self.pdfgen.generate_pdf_plain_state(language, pdf_path)
+        self.pdfgen.generate_pdf_plain_state(language, pdf_path, filename)
 
         if clear:
             delete_folder(pdf_path + r'\figs')
@@ -109,6 +110,7 @@ class manager:
     def generate_pdf_triple_state(self,
                                   language: str,
                                   pdf_path: Optional[str] = "pdf",
+                                  filename: Optional[str] = "triple-state",
                                   clear=True
                                   ):
         """
@@ -127,7 +129,7 @@ class manager:
         save_figure(figure, pdf_path + r"\figs\mohrfig")
         generate_logo(pdf_path)
 
-        self.pdfgen.generate_pdf_triple_state(language, pdf_path)
+        self.pdfgen.generate_pdf_triple_state(language, pdf_path, filename)
 
         if clear:
             delete_folder(pdf_path + r'\figs')
@@ -162,7 +164,8 @@ if __name__ == "__main__":
     test.calculate_plain_state(10, 20, 30)
     test.print_results_plain_state()
     test.plot_plain_state(show=True)
-    test.generate_pdf_plain_state("PT")
-    # test.calculate_triple_state(10, 20, 30, 40, 50, 60)
-    # test.plot_triple_state()
+    # test.generate_pdf_plain_state("PT")
+    test.calculate_triple_state(10, 20, 30, 40, 50, 60)
+    test.print_results_triple_state()
+    test.plot_triple_state(show=True)
     # test.generate_pdf_triple_state("PT")

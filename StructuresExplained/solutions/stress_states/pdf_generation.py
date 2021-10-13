@@ -22,22 +22,22 @@ class pdf_generator:
 
         self.tpdf = translate_PDF_Mohr(self.language)
 
-    def generate_pdf_plain_state(self, language, pdf_path):
+    def generate_pdf_plain_state(self, language, pdf_path, filename):
         self.setup_pdf(language)
 
         append_plain_state(self, self.mng, self.res).append_all()
 
-        self.doc.generate_pdf(pdf_path + r'\resolucaomohr',
+        self.doc.generate_pdf(fr'{pdf_path}\{filename}',
                               compiler='pdflatex',
                               win_no_console=True,
                               compiler_args=["-enable-installer"])
 
-    def generate_pdf_triple_state(self, language, pdf_path):
+    def generate_pdf_triple_state(self, language, pdf_path, filename):
         self.setup_pdf(language)
 
         append_triple_state(self, self.mng, self.res).append_all()
 
-        self.doc.generate_pdf(pdf_path + r'\resolucaomohr',
+        self.doc.generate_pdf(fr'{pdf_path}\{filename}',
                               compiler='pdflatex',
                               win_no_console=True,
                               compiler_args=["-enable-installer"])
@@ -67,7 +67,7 @@ class append_plain_state:
                     self.gen.tpdf.radius_var + r' \sqrt{(\frac{\sigma_x-\sigma_y}{2})^2 + \tau_xy ^ 2)}')
             with self.gen.doc.create(Subsection(self.gen.tpdf.radius_and_max_shear_solving)):
                 self.gen.pdf.add_equation(
-                    self.gen.tpdf.radius_var + r' \sqrt{(\frac{' + f'{self.res.sigma_x}' + f'-{self.res.sigma_y}' +
+                    self.gen.tpdf.radius_var + r' \sqrt{(\frac{' + fr'{self.res.sigma_x}-{self.res.sigma_y}' +
                     '}{2})^2 +' + f'{self.res.tau_xy}' + '^ 2)}')
                 self.gen.pdf.add_equation(self.gen.tpdf.radius_var + f'{self.res.max_shear}')
 
@@ -209,7 +209,7 @@ class append_triple_state:
                     self.gen.pdf.add_equation(latex(simplify(numeric)) + r'=0')
 
     def append_results(self):
-        with self.gen.doc.create(Section(self.gen.tpdf.results)):
+        with self.gen.doc.create(Section(self.gen.tpdf.get_internal_results)):
             with self.gen.doc.create(Subsection(self.gen.tpdf.main_stress)):
                 self.gen.doc.append(NoEscape(self.gen.tpdf.main_stress_roots_tip))
                 self.gen.pdf.add_equation(r"\sigma_1 = " + f"{round(self.res.sigma_1, 2)}")

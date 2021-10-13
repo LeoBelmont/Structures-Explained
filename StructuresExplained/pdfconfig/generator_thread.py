@@ -23,5 +23,5 @@ class PDFGeneratorThread(QThread):
         else:
             self.PDF_generator(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
                                self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
-                               self.ss.loads_qi, self.ss.node_map, self.file, self.language)
+                               self.ss.loads_qi, self.ss.system, self.file, self.language)
         self.loadingScreen.close()
