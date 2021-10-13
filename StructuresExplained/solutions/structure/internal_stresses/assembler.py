@@ -1,15 +1,17 @@
+import re
+from enum import Enum
+from typing import List, Union, Optional, Tuple
+
+import numpy as np
 from anastruct import SystemElements
 from anastruct.fem.elements import Element
-from collections import defaultdict
-from StructuresExplained.solutions.structure.fig_generation import fig_generator
-from enum import Enum
-import re
-from typing import Optional, Union, List, Tuple
-from sympy import sympify, integrate, Symbol
-import numpy as np
-from sympy.physics.units import degree
-import math
-from StructuresExplained.utils.util import get_value_from_points
+from sympy import integrate, sympify, Symbol
+
+from StructuresExplained.solutions.structure.fig_generation.artist import Artist
+from StructuresExplained.solutions.structure.internal_stresses.graph import Graph
+from StructuresExplained.solutions.structure.internal_stresses.stack import Stresses_Stack
+from StructuresExplained.solutions.structure.internal_stresses.tools import assemble_element_connections, \
+    node_to_element, is_branching, is_in_path, find_element, node_pair_to_element, are_stacks_connected
 
 
 class Setting(Enum):
@@ -21,98 +23,6 @@ class Branch_data:
     def __init__(self, branch: List[int]):
         self.current_node_index = 0
         self.branch = branch
-
-
-class Stresses_Stack:
-    fx = ""
-    fy = ""
-    fy_symbolic = ""
-    fx_angular = ""
-    fy_angular = ""
-    is_symbolic = False
-    is_angular = False
-    _force_map = None
-    _distributed_force_map = None
-    _reactions_map = None
-
-    def __init__(self, node: int, element: [Element]):
-        self.node = node
-        self.determine_internal_forces(node, element)
-
-    @classmethod
-    def system(cls, system):
-        cls._force_map = system.loads_point
-        cls._moment_map = system.loads_moment
-        cls._distributed_force_map = system.loads_q
-        cls._reactions_map = system.reaction_forces
-
-    @property
-    def axes_forces(self):
-        if self.is_angular:
-            self.is_angular = False
-            # symbolic flag also set to false because angular strings will include symbolic strings
-            self.is_symbolic = False
-            return [self.fx_angular, self.fy_angular]
-        if self.is_symbolic:
-            self.is_symbolic = False
-            return [self.fx, self.fy_symbolic]
-        return [self.fx, self.fy]
-
-    def determine_internal_forces(self, node, element):
-        forces = self._force_map.get(node)
-        reactions = self._reactions_map.get(node)
-        if forces:
-            if round(forces[0], 13):
-                self.fx += f"+{forces[0]}"
-            if round(forces[1], 13):
-                self.fy += f"+{-forces[1]}"
-        if reactions:
-            if round(reactions.Fx, 13):
-                self.fx += f"+{reactions.Fx}"
-            if round(reactions.Fz, 13):
-                self.fy += f"+{-reactions.Fz}"
-        if element:
-            q_loads = self._distributed_force_map.get(element.id)
-            if q_loads:
-                if round(q_loads[0][0], 13) and round(q_loads[1][0], 13):
-                    x = Symbol('x')
-                    xi = element.vertex_1.x
-                    yi = element.vertex_1.y
-                    xf = element.vertex_2.x
-                    yf = element.vertex_2.y
-                    base = ((xf - xi) ** 2 + (yf - yi) ** 2) ** 0.5
-                    self.fy_symbolic = self.fy
-                    self.fy += f"+{((q_loads[0][0] + q_loads[1][0]) * base) / 2}"
-                    self.fy_symbolic += f"+{((((-q_loads[0][0] - -q_loads[1][0]) / (6 * base)) * x ** 2) * 3 - ((-q_loads[0][0] / 2) * x) * 2)}"
-                    self.is_symbolic = True
-
-            if abs(element.angle) != 0 and abs(element.angle) != (np.pi / 2) and \
-                    abs(element.angle) != np.pi and abs(element.angle) != (3 * np.pi) / 2:
-
-                if self.is_symbolic:
-                    fy = self.fy_symbolic
-                else:
-                    fy = self.fy
-
-                signals = get_signal_vectors(element.axial_force, self.fx, self.fy, element, "cos")
-                self.fy_angular = f'{signals[0]} ({fy if fy else "0"}) * cos({90 - (element.angle * 180 / np.pi)}' \
-                                  f' * {degree}) {signals[1]} ({self.fx if self.fx else "0"})' \
-                                  f' * cos({element.angle * 180 / np.pi} * {degree})'
-
-                signals = get_signal_vectors(element.shear_force, self.fx, self.fy, element, "sin")
-                self.fx_angular = f'{signals[0]} ({fy if fy else "0"}) * sin({90 - (element.angle * 180 / np.pi)}' \
-                                  f' * {degree}) {signals[1]} ({self.fx if self.fx else "0"})' \
-                                  f' * sin({element.angle * 180 / np.pi} * {degree})'
-                self.is_angular = True
-
-    def extend_results(self, results):
-        if results[0]:
-            self.fx += str(results[0])
-            self.fx_angular += str(results[0])
-        if results[1]:
-            self.fy += str(results[1])
-            self.fy_symbolic += str(results[1])
-            self.fy_angular += str(results[1])
 
 
 class Internal_Stresses:
@@ -162,92 +72,6 @@ class Internal_Stresses:
         self.define_normal_shear_axes(element, strings)
         self.get_moment(node, previous_data)
         return [self.axial_force, self.shear_force, self.bending_moment, self.constant_list]
-
-
-def get_signal_vectors(result, fx_, fy_, element, op, rel_value=1e-12):
-    result = round(get_value_from_points(result, element.l), 13)
-    fx = sympify(fx_ if fx_ else "0")
-    fy = sympify(fy_ if fy_ else "0")
-
-    if op == "sin":
-        fx *= np.sin(element.angle)
-        fy *= np.sin(np.radians(90) - element.angle)
-    elif op == "cos":
-        fx *= np.cos(element.angle)
-        fy *= np.cos(np.radians(90) - element.angle)
-
-    if math.isclose(round(-fx + fy, 13), result, rel_tol=rel_value):
-        return "-", "+"
-
-    elif math.isclose(round(fx - fy, 13), result, rel_tol=rel_value):
-        return "+", "-"
-
-    elif math.isclose(round(fx + fy, 13), result, rel_tol=rel_value):
-        return "+", "+"
-
-    else:
-        return "-", "-"
-
-
-def assemble_element_connections(system_elements) -> List[Tuple[int, int]]:
-    connections = []
-    for first_node, elements in system_elements.node_element_map.items():
-        for element in elements:
-            if first_node in [element.node_id1, element.node_id2]:
-                if first_node == element.node_id1:
-                    last_node = element.node_id2
-                else:
-                    last_node = element.node_id1
-                connections.append((first_node, last_node))
-    return connections
-
-
-def is_branching(elements: Union[List[Element], Element]) -> bool:
-    if not isinstance(elements, list):
-        return False
-    elif len(elements) > 2:
-        return True
-    return False
-
-
-def is_in_path(element: Element,
-               path: List[int]
-               ) -> bool:
-    if element.node_id1 in path and element.node_id2 in path:
-        return True
-    return False
-
-
-def node_to_element(node_list: Tuple[int, ...]) -> List[list]:
-    element_list = []
-    for index in range(len(node_list)):
-        if index == len(node_list) - 1:
-            break
-        element_list.append([node_list[index], node_list[index + 1]])
-    return element_list
-
-
-def node_pair_to_element(stack):
-    elements = []
-    for index in range(0, len(stack), 2):
-        elements.append([stack[index], stack[index + 1]])
-    return elements
-
-
-def are_stacks_connected(node1, node2, stacks):
-    if (node1 == stacks[-1][-1] or node2 == stacks[-1][-2]) or \
-            (node2 == stacks[-1][-1] or node1 == stacks[-1][-2]):
-        return True
-    return False
-
-
-def find_element(element_nodes, node_element_map):
-    node1_elements = node_element_map.get(element_nodes[0])
-    node2_elements = node_element_map.get(element_nodes[1])
-    for element in node1_elements:
-        if element in node2_elements:
-            return element
-    return node1_elements[0]
 
 
 class Assembler:
@@ -364,7 +188,7 @@ class Assembler:
 
         if plotting_start_node is None:
             plotting_start_node = plot_order[0][0]
-        gen = fig_generator(self.ss, self.solve_order, plot_order, target_dir=target_dir)
+        gen = Artist(self.ss, self.solve_order, plot_order, target_dir=target_dir)
         gen.draw_structure(show=show,
                            save_figure=save_figure,
                            plotting_start_node=plotting_start_node,
@@ -519,166 +343,3 @@ class Assembler:
 
         # print(f"main path: {self.main_path_list}, other paths: {self.other_paths_list}")
         # print(f"solve order: {self.solve_order}")
-
-
-class Graph(object):
-    """ Graph data structure, undirected by default. """
-    """inspired on code by mVChr available on 
-    https://stackoverflow.com/questions/19472530/representing-graphs-data-structure-in-python"""
-    """inspired on code by jedwards available on 
-    https://stackoverflow.com/questions/29320556/finding-longest-path-in-a-graph"""
-
-    def __init__(self,
-                 directed: Optional[bool] = False
-                 ):
-        self._graph = defaultdict(set)
-        self._directed = directed
-
-    def is_connected(self, node1, node2):
-        """ Is node1 directly connected to node2 """
-
-        return node1 in self._graph and node2 in self._graph[node1]
-
-    def add(self,
-            node1: int,
-            node2: int
-            ) -> None:
-        """ Add connection between node1 and node2 """
-
-        self._graph[node1].add(node2)
-        if not self._directed:
-            self._graph[node2].add(node1)
-
-    def find_path(self,
-                  node1: int,
-                  node2: int,
-                  path: Optional[list] = None,
-                  solved_nodes: Optional[list] = None
-                  ) -> Union[List[int], None]:
-        """ Find any path between node1 and node2 (may not be shortest) """
-
-        if solved_nodes is None:
-            solved_nodes = []
-        if path is None:
-            path = []
-
-        path = path + [node1]
-        if node1 == node2 or node1 in solved_nodes:
-            return path
-        if node1 not in self._graph:
-            return None
-        for node in self._graph[node1]:
-            if node not in path:
-                new_path = self.find_path(node, node2, path, solved_nodes)
-                if new_path:
-                    return new_path
-        return None
-
-    def find_all_paths(self,
-                       node: int,
-                       seen: Optional[list] = None,
-                       path: Optional[list] = None
-                       ) -> List[Tuple[int, ...]]:
-        """
-        finds all possible paths in graph
-        """
-        if seen is None:
-            seen = []
-        if path is None:
-            path = [node]
-
-        seen.append(node)
-
-        paths = []
-        for t in self._graph[node]:
-            if t not in seen:
-                t_path = path + [t]
-                paths.append(tuple(t_path))
-                paths.extend(self.find_all_paths(t, seen[:], t_path))
-        return paths
-
-    def find_longest_paths(self, tip_node_ids: Optional[List[int]] = None) -> List[Tuple[int, ...]]:
-        """find longest paths in the graph, pass tip nodes for optimal search"""
-        if tip_node_ids:
-            all_paths = [p for ps in [self.find_all_paths(n) for n in tip_node_ids] for p in ps]
-        else:
-            all_paths = [p for ps in [self.find_all_paths(n) for n in set(self._graph)] for p in ps]
-        max_len = max(len(p) for p in all_paths)
-        longest_paths = [p for p in all_paths if len(p) == max_len]
-
-        return longest_paths
-
-
-def test_struct1():
-    ss = SystemElements()
-    ss.add_element([[-2, 2], [-1, 0]])
-    ss.add_element([[-2, 3], [-2, 2]])
-    ss.add_element([[-1, 4], [-2, 3]])
-    # ss.add_element([[-1, 4], [0, 5]])
-    # ss.add_element([[0, 5], [1, 5]])
-    # ss.add_element([[1, 5], [2, 5]])
-    # ss.add_element([[2, 5], [3, 5]])
-    # ss.add_element([[3, 5], [5, 2]])
-    ss.add_element([[-3, 4], [-2, 3]])
-    ss.add_element([[-4, 4], [-3, 4]])
-    ss.add_element([[-3, 5], [-3, 4]])
-    ss.add_element([[-2, 0], [-1, 0]])
-    ss.add_element([[-2, 1], [-2, 0]])
-    ss.add_element([[-2, -1], [-2, 0]])
-    ss.add_element([[-3, 0], [-2, 0]])
-    ss.add_element([[-4, 1], [-3, 0]])
-    ss.add_element([[-5, 2], [-4, 1]])
-    ss.add_element([[-4, -1], [-3, 0]])
-    ss.add_element([[-5, -2], [-4, -1]])
-    ss.add_element([[-1, 0], [0, 0]])
-    ss.add_element([[0, 0], [1, 0]])
-    ss.add_element([[2, 0], [3, 0]])
-    ss.add_element([[1, 0], [2, 0]])
-    ss.add_element([[2, 0], [3, 1]])
-    ss.point_load(10, 5)
-    ss.moment_load(1, 15)
-    # ss.add_element([[3, 1], [4, 1]])
-    # ss.add_element([[3, 1], [3, 2]])
-    # ss.add_element([[4, 1], [5, 2]])
-    # ss.add_element([[4, 1], [6, 2]])
-    ss.add_element([[1, 0], [-1, 1]])
-    ss.show_structure()
-    ass = Assembler(ss)
-    ass.assemble_structure(main_path=(15, 20))
-    # ass.assemble_structure(main_path=(7, 13))
-    # ass.plot_solve_order(ass.plot_order, show=True, save_figure=False, plotting_start_node=15)
-    [[print(f"section {index + 1}-{sub_index + 1}: {sympify(sub_string, evaluate=False)}") for sub_index, sub_string in
-      enumerate(string)] for index, string in enumerate(ass.sections_strings)]
-
-
-def test_struct2():
-    ss = SystemElements()
-    ss.add_element([[0, 0], [1, 0]])
-    ss.add_element([[1, 0], [1, 1]])
-    ss.add_element([[1, 0], [2, 0]])
-    ss.add_element([[2, 0], [3, 0]])
-    ss.add_element([[3, 0], [4, 1]])
-    ss.add_element([[4, 1], [5, 1]])
-    ss.point_load(2, Fy=10)
-    ss.point_load(3, Fy=-20)
-    ss.point_load(4, Fy=-30)
-    ss.point_load(5, Fx=-40)
-    ss.moment_load(2, Ty=-9)
-    ss.moment_load(1, 7)
-    ss.moment_load(3, 3)
-    ss.q_load(element_id=3, q=(-10, -20))
-    ss.add_support_roll(4)
-    ss.add_support_hinged(5)
-    # ss.show_structure()
-    ss.solve()
-    ss.show_reaction_force(show=False)
-    ass = Assembler(ss)
-    ass.assemble_structure(main_path=Setting.longest)
-    # [[print(f"section {element.id}-{sub_index + 1}: {sympify(sub_string, evaluate=False)}") for sub_index, sub_string in
-    #   enumerate(string)] for element, string in ass.sections_strings.items()]
-    # [print(element.id, values) for element, values in ass.sections_strings.items()]
-    [print(element.id, values) for element, values in ass.internal_stresses_dict.items()]
-
-
-if __name__ == "__main__":
-    test_struct2()
