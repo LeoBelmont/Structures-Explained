@@ -10,7 +10,7 @@ class pdf_generator:
         self.mng = manager
         self.calc = calculator
 
-    def generate_pdf(self, language, pdf_path, filename):
+    def generate_pdf(self, language, pdf_path, filename, pdf_mode):
         doc = Document(document_options="a4paper,12pt", documentclass="article")
         doc.preamble.append(NoEscape(header.PDFsettings))
 
@@ -19,13 +19,15 @@ class pdf_generator:
 
         doc.append(NoEscape(header.makeCover(tpdf.title, language)))
 
-        self.append_cross_section_figure(doc, tpdf)
+        if pdf_mode == "complete":
 
-        self.append_static_moment(doc, tpdf)
+            self.append_cross_section_figure(doc, tpdf)
 
-        self.append_centroid(doc, tpdf)
+            self.append_static_moment(doc, tpdf)
 
-        self.append_moment_inertia(doc, tpdf)
+            self.append_centroid(doc, tpdf)
+
+            self.append_moment_inertia(doc, tpdf)
 
         if self.mng.normal_stress_data_list:
             self.append_normal_stress(doc, tpdf)

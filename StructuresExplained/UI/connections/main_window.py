@@ -11,12 +11,16 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
 # SX files
-from StructuresExplained.solutions import functions
+from StructuresExplained.solutions import settings
 from StructuresExplained.UI import resources
 from StructuresExplained.UI import loadingPrompt, loadFilePrompt
 from StructuresExplained.UI.connections.structure import connections as st_connections
 from StructuresExplained.UI.connections.cross_section import connections as cs_connections
 from StructuresExplained.UI.connections.stress_states import connections as ss_connections
+
+import matplotlib
+
+matplotlib.use("Qt5Agg")
 
 
 class connections:
@@ -24,7 +28,6 @@ class connections:
         self.mw = main_window
         self.tenshi = tenshi
         self.app = app
-        self.ss = ss_connections(self.mw, self.visualize)
 
     def configUI(self):
         if platform.system() == "Windows":
@@ -93,7 +96,7 @@ class connections:
 
         self.connect_ui()
         # self.connect_structure()
-        # self.connect_cross_section()
+        self.connect_cross_section()
         self.connect_stress_states()
 
         # self.mw.blankss = pickle.dumps(self.mw.ss)
@@ -120,25 +123,25 @@ class connections:
         self.mw.label.setText(_translate("tenshi", "Construir"))
         self.mw.show_supports.setToolTip(_translate("tenshi", "Visualizar reações dos apoios"))
         self.mw.show_diagram.setText(_translate("tenshi", "Diagrama \n"
-                                                       "de Corpo \n"
-                                                       "Livre"))
+                                                          "de Corpo \n"
+                                                          "Livre"))
         self.mw.show_moment.setToolTip(_translate("tenshi", "Visualizar momento fletor"))
         self.mw.label_2.setText(_translate("tenshi", "Visualizar"))
         self.mw.toolButton_5.setToolTip(_translate("tenshi", "Adicionar esforços pontuais"))
         self.mw.toolBox.setItemText(self.mw.toolBox.indexOf(self.mw.page_9), _translate("tenshi", "Estrutura"))
         self.mw.toolButton_11.setText(_translate("tenshi", "Tensão de \n"
-                                                        "Cisalha-\n"
-                                                        "mento\n"
-                                                        "e Fluxo"))
+                                                           "Cisalha-\n"
+                                                           "mento\n"
+                                                           "e Fluxo"))
         self.mw.toolButton_8.setToolTip(_translate("tenshi", "Adicionar semicírculos"))
         self.mw.toolButton_9.setToolTip(_translate("tenshi", "Dados / Resultados"))
         self.mw.toolButton_9.setText(_translate("tenshi", "Dados \n"
-                                                       "Gerais"))
+                                                          "Gerais"))
         self.mw.toolButton_7.setToolTip(_translate("tenshi", "Adicionar retângulos"))
         self.mw.label_84.setText(_translate("tenshi", "Construir"))
         self.mw.label_85.setText(_translate("tenshi", "Visualizar"))
         self.mw.toolButton_2.setText(_translate("tenshi", "Tensão\n"
-                                                       "Normal"))
+                                                          "Normal"))
         self.mw.show_sec.setToolTip(_translate("tenshi", "Visualizar seção transversal"))
         self.mw.label_81.setText(_translate("tenshi", "Calcular"))
         self.mw.toolBox.setItemText(self.mw.toolBox.indexOf(self.mw.page_10), _translate("tenshi", "Seção Transversal"))
@@ -270,7 +273,7 @@ class connections:
         self.mw.circle_apply.setText(_translate("tenshi", "Aplicar"))
         self.mw.circle_remove.setText(_translate("tenshi", "Remover"))
         self.mw.label_128.setText(_translate("tenshi",
-                                          "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adicionar semicírculos impossibilitará o cálculo da tensão de cisalhamento e fluxo.</span></p></body></html>"))
+                                             "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adicionar semicírculos impossibilitará o cálculo da tensão de cisalhamento e fluxo.</span></p></body></html>"))
         self.mw.label_61.setText(_translate("tenshi", "Momento Estático em Y (Origem)"))
         self.mw.label_62.setText(_translate("tenshi", "Momento de Inércia em Z (CG)"))
         self.mw.label_63.setText(_translate("tenshi", "Momento de Inércia em Y (CG)"))
@@ -383,7 +386,7 @@ class connections:
         self.mw.save_strucutre_text = "Estrutura"
         self.mw.save_strucutre_title = "Salvar Estrutura"
         self.mw.static_warning_str = "Apenas disponível para estruturas estáticas " \
-                                  "(que contenham um apoio móvel e um apoio fixo ou um engaste apenas)."
+                                     "(que contenham um apoio móvel e um apoio fixo ou um engaste apenas)."
         self.mw.warning_str = "É necessário mais informações"
         self.mw.warning_title = "Erro"
         self.mw.qload_warning = "Os valores inicial e final precisam ter o mesmo sinal"
@@ -406,17 +409,17 @@ class connections:
         self.mw.close_text = "Tem certeza que deseja sair? É possível que haja estruturas não salvas."
         self.mw.howtouse_title = "Como Utilizar"
         self.mw.howtouse_text = ("Manual de utilização: link aqui\n"
-                              "Exemplos de utilização: link aqui")
+                                 "Exemplos de utilização: link aqui")
         self.mw.about_title = "Sobre"
         self.mw.about_text = ("Desenvolvido como trabalho de Iniciação Científica na EESC-USP em 2020.\n"
-                           "\n"
-                           "Desenvolvido por Leonardo de Souza Bornia\n"
-                           "\n"
-                           "Agradecimentos:\n"
-                           "Eng. Me. Henrique Borges Garcia\n"
-                           "Prof. Me. Gustavo Lahr\n"
-                           "Prof. Dr. Glauco Augusto de Paula Caurin\n"
-                           "Fundação de Apoio à Física e à Química\n")
+                              "\n"
+                              "Desenvolvido por Leonardo de Souza Bornia\n"
+                              "\n"
+                              "Agradecimentos:\n"
+                              "Eng. Me. Henrique Borges Garcia\n"
+                              "Prof. Me. Gustavo Lahr\n"
+                              "Prof. Dr. Glauco Augusto de Paula Caurin\n"
+                              "Fundação de Apoio à Física e à Química\n")
 
     def retranslateUiEN(self):
         _translate = QtCore.QCoreApplication.translate
@@ -434,25 +437,25 @@ class connections:
         self.mw.label.setText(_translate("tenshi", "Build"))
         self.mw.show_supports.setToolTip(_translate("tenshi", "Visualize support reactions"))
         self.mw.show_diagram.setText(_translate("tenshi", "Free \n"
-                                                       "Body \n"
-                                                       "Diagram"))
+                                                          "Body \n"
+                                                          "Diagram"))
         self.mw.show_moment.setToolTip(_translate("tenshi", "Visualize bending moment"))
         self.mw.label_2.setText(_translate("tenshi", "Visualize"))
         self.mw.toolButton_5.setToolTip(_translate("tenshi", "Add point loads"))
         self.mw.toolBox.setItemText(self.mw.toolBox.indexOf(self.mw.page_9), _translate("tenshi", "Structure"))
         self.mw.toolButton_11.setText(_translate("tenshi", "Shear\n"
-                                                        "Stress\n"
-                                                        "and\n"
-                                                        "Flow"))
+                                                           "Stress\n"
+                                                           "and\n"
+                                                           "Flow"))
         self.mw.toolButton_8.setToolTip(_translate("tenshi", "Add circular sectors"))
         self.mw.toolButton_9.setToolTip(_translate("tenshi", "Data / Results"))
         self.mw.toolButton_9.setText(_translate("tenshi", "General \n"
-                                                       "Data"))
+                                                          "Data"))
         self.mw.toolButton_7.setToolTip(_translate("tenshi", "Add rectangles"))
         self.mw.label_84.setText(_translate("tenshi", "Build"))
         self.mw.label_85.setText(_translate("tenshi", "Visualize"))
         self.mw.toolButton_2.setText(_translate("tenshi", "Normal\n"
-                                                       "Stress"))
+                                                          "Stress"))
         self.mw.show_sec.setToolTip(_translate("tenshi", "Visualize cross sections"))
         self.mw.label_81.setText(_translate("tenshi", "Calculate"))
         self.mw.toolBox.setItemText(self.mw.toolBox.indexOf(self.mw.page_10), _translate("tenshi", "Cross Section"))
@@ -585,7 +588,7 @@ class connections:
         self.mw.circle_apply.setText(_translate("tenshi", "Apply"))
         self.mw.circle_remove.setText(_translate("tenshi", "Remove"))
         self.mw.label_128.setText(_translate("tenshi",
-                                          "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adding semicircles will unable calculations of the shear stress and flux.</span></p></body></html>"))
+                                             "<html><head/><body><p align=\"center\"><span style=\" color:#ff5500;\">Adding semicircles will unable calculations of the shear stress and flux.</span></p></body></html>"))
         self.mw.label_59.setText(_translate("tenshi", "Data/Results"))
         self.mw.figureResultsButton.setText(_translate("tenshi", "Get Results from Figure"))
         self.mw.insertDataButton.setText(_translate("tenshi", "Insert Data"))
@@ -689,6 +692,7 @@ class connections:
         self.mw.actionP_gina_para_Download.setText(_translate("tenshi", "Download Manual and Examples"))
         self.mw.downloadPageButton.setText(_translate("tenshi", "Download Manual and Examples"))
         self.mw.fullscreenButton.setText(_translate("tenshi", "Toggle Fullscreen Mode"))
+        self.mw.gridBox.setText(_translate("tenshi", "Grid"))
 
         self.mw.load_structure_str = "Load Structure"
         self.mw.strucutre_type_str = "Structure(*.pkl)"
@@ -719,14 +723,14 @@ class connections:
         self.mw.howtouse_text = "User Manual and Utilization Examples available at:"
         self.mw.about_title = "About"
         self.mw.about_text = ("Developed as a Scientific Initiation work at EESC-USP (Brazil) in 2020.\n"
-                           "\n"
-                           "Developed by Leonardo de Souza Bornia\n"
-                           "\n"
-                           "Acknowledgements:\n"
-                           "Eng. Me. Henrique Borges Garcia\n"
-                           "Prof. Me. Gustavo Lahr\n"
-                           "Prof. Dr. Glauco Augusto de Paula Caurin\n"
-                           "Fundação de Apoio à Física e à Química\n")
+                              "\n"
+                              "Developed by Leonardo de Souza Bornia\n"
+                              "\n"
+                              "Acknowledgements:\n"
+                              "Eng. Me. Henrique Borges Garcia\n"
+                              "Prof. Me. Gustavo Lahr\n"
+                              "Prof. Dr. Glauco Augusto de Paula Caurin\n"
+                              "Fundação de Apoio à Física e à Química\n")
 
     def visualize(self, figure=None):
         self.mw.MplWidget.setGrid(self.mw.gridBox.isChecked())
@@ -846,7 +850,8 @@ class connections:
 
     def enable_buttons(self):
         if (len(self.mw.ss.supports_roll) + len(self.mw.ss.supports_hinged) + len(self.mw.ss.supports_spring_x) +
-            len(self.mw.ss.supports_spring_z) + len(self.mw.ss.supports_spring_y) >= 2 or len(self.mw.ss.supports_fixed) >= 1) \
+            len(self.mw.ss.supports_spring_z) + len(self.mw.ss.supports_spring_y) >= 2 or len(
+                    self.mw.ss.supports_fixed) >= 1) \
                 and (len(self.mw.ss.loads_point) + len(self.mw.ss.loads_q) + len(self.mw.ss.loads_moment)) >= 1:
             self.mw.show_diagram.setEnabled(True)
             self.mw.show_supports.setEnabled(True)
@@ -879,17 +884,17 @@ class connections:
                 self.mw.reset_struct_elems()
 
     def fontstruct(self):
-        i = functions.size
+        i = settings.size
         i, okPressed = QInputDialog.getInt(self, self.mw.font_size_str, self.mw.font_strucuture_str, i, 1, 100, 1)
         if okPressed:
-            functions.size = i
+            settings.size = i
             self.mw.last_figure.click()
 
     def fonteq(self):
-        i = functions.eqsize
+        i = settings.eqsize
         i, okPressed = QInputDialog.getInt(self, self.mw.font_size_str, self.mw.font_equations_str, i, 1, 100, 1)
         if okPressed:
-            functions.eqsize = i
+            settings.eqsize = i
             self.mw.last_figure.click()
 
     def UI_font(self):
@@ -907,14 +912,14 @@ class connections:
 
     def enter_presentation_mode(self):
         self.mw.isPresenting = True
-        #self.mw.menubar.setHidden(True)
+        # self.mw.menubar.setHidden(True)
         self.mw.stackedWidget.setHidden(True)
         self.mw.frame_6.setHidden(True)
         self.tenshi.showFullScreen()
 
     def exit_presentation_mode(self):
         self.mw.isPresenting = False
-        #self.mw.menubar.setHidden(False)
+        # self.mw.menubar.setHidden(False)
         self.mw.stackedWidget.setHidden(False)
         self.mw.frame_6.setHidden(False)
         self.tenshi.showNormal()
@@ -932,9 +937,10 @@ class connections:
             py = int(self.mw.deadzone_y.text())
             if self.mw.last_figure == self.mw.show_mohr:
                 if 'RIGHT' in str(event.button) and self.mw.mohr.sz is not None:
-                    self.mw.plot_to_ui(self.mw.mohr.calculate(self.mw.mohr.sx, self.mw.mohr.sy, self.mw.mohr.sz, self.mw.mohr.txy,
-                                                              self.mw.mohr.txz, self.mw.mohr.tyz,
-                                                              self.mw.MplWidget.canvas.figure))
+                    self.mw.plot_to_ui(
+                        self.mw.mohr.calculate(self.mw.mohr.sx, self.mw.mohr.sy, self.mw.mohr.sz, self.mw.mohr.txy,
+                                               self.mw.mohr.txz, self.mw.mohr.tyz,
+                                               self.mw.MplWidget.canvas.figure))
             elif self.mw.stackedWidget.currentIndex() == 0:
                 if 'LEFT' in str(event.button):
                     self.mw.beam_x1.setText(str(round(event.xdata, px)))
@@ -1023,7 +1029,7 @@ class connections:
         if self.mw.int_plot.isChecked():
             if self.mw.last_figure == self.mw.show_mohr and 'RIGHT' not in str(
                     event.button) and self.mw.MplWidget.canvas.figure.gca().name == "3d":
-                self.mw.plot_to_ui(self.mw.mohr.on_release(self.mw.MplWidget.canvas.figure))
+                self.ss.plot_to_ui(self.ss.on_release(self.mw.MplWidget.canvas.figure))
 
     def get_prompt_values(self):
         prompt = loadFilePrompt.Ui_load_prompt()
@@ -1112,7 +1118,6 @@ class connections:
         self.mw.sx.setText("10")
         self.mw.sy.setText("20")
         self.mw.txy.setText("30")
-        self.mw.mohr_apply.click()
         # self.visualize_structure()
         # self.mw.last_figure = self.st.show_structure
 
@@ -1196,7 +1201,7 @@ class connections:
         self.mw.save.triggered.connect(self.st.save_structure)
 
     def connect_cross_section(self):
-        self.cs = cs_connections(self.mw)
+        self.cs = cs_connections(self.mw, self)
         self.mw.solveresist.triggered.connect(self.cs.rm_solver)
         self.mw.rect_apply.clicked.connect(self.cs.add_rect)
         self.mw.circle_apply.clicked.connect(self.cs.add_cir)
@@ -1221,9 +1226,10 @@ class connections:
         self.mw.show_sec.clicked.connect(self.cs.plot_sec)
 
     def connect_stress_states(self):
+        self.ss = ss_connections(self.mw, self, self.visualize)
         self.mw.radio_plane.clicked.connect(self.ss.switch_states_plane)
         self.mw.radio_triple.clicked.connect(self.ss.switch_states_triple)
         self.mw.mohr_apply.clicked.connect(self.ss.draw_stress_state)
 
         self.mw.show_mohr.clicked.connect(self.ss.draw_stress_state)
-        self.mw.solvermohr.triggered.connect(self.ss.mohr_solver)
+        self.mw.solvermohr.triggered.connect(self.ss.generator_thread)

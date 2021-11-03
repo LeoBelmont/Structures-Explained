@@ -2,7 +2,7 @@ from sympy import Symbol, parse_expr
 from StructuresExplained.solutions.cross_section.calculator import calculator
 from StructuresExplained.solutions.cross_section.fig_generation import fig_generator
 from StructuresExplained.solutions.cross_section.pdf_generation import *
-from StructuresExplained.utils.util import save_figure, make_pdf_folder, make_figure_folder, delete_folder
+from StructuresExplained.utils.util import save_figure, make_folder, make_figure_folder, delete_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 
 from typing import (
@@ -12,7 +12,7 @@ from typing import (
 )
 
 
-class manager:
+class Manager:
 
     def __init__(self):
         self.calc = calculator()
@@ -25,35 +25,56 @@ class manager:
         self.shear_flux_data_list: List[shear_flux_data] = []
         self.shear_stress_data_list: List[shear_stress_data] = []
 
+        self.pdf_mode = "complete"
+
     def add_rectangular_subarea(self,
                                 upper_left: tuple,
-                                down_right: tuple
+                                down_right: tuple,
+                                subarea_id: Optional[int] = None,
                                 ):
         """
         upper_left: coordinate of upper left vertex of rectangle (x, y)
-
         down_right: coordinate of down right vertex of rectangle (x, y)
+        subarea_id: optional, can be used to modify an existing subarea
         """
 
-        self.rectangle_count += 1
-        self.calc.subareas_rectangle.update({self.rectangle_count: [upper_left[0], upper_left[1],
-                                                                    down_right[0], down_right[1]]})
+        if not subarea_id:
+            self.rectangle_count += 1
+        self.calc.subareas_rectangle.update(
+            {subarea_id if subarea_id else self.rectangle_count: [upper_left[0], upper_left[1],
+                                                                  down_right[0], down_right[1]]}
+        )
 
     def add_semicircular_subarea(self,
                                  center: tuple,
                                  radius: float,
-                                 angle: float
+                                 angle: float,
+                                 subarea_id: Optional[int] = None,
                                  ):
         """
         center: coordinate of the semicircle center (as if it were a full circle) (x, y)
-
         radius: radius of the semicircle
-
         angle: angle of the semicircle relative to x axis, clockwise
+        subarea_id: optional, can be used to modify an existing subarea
         """
 
-        self.semicircle_count += 1
-        self.calc.subareas_circle.update({self.semicircle_count: [center[0], center[1], radius, angle]})
+        if not subarea_id:
+            self.semicircle_count += 1
+        self.calc.subareas_circle.update(
+            {subarea_id if subarea_id else self.rectangle_count: [center[0], center[1], radius, angle]}
+        )
+
+    def remove_rectangular_subarea(self,
+                                   subarea_id,
+                                   ):
+        if self.calc.subareas_rectangle.get(subarea_id):
+            self.calc.subareas_rectangle.pop(subarea_id)
+
+    def remove_semicircular_subarea(self,
+                                    subarea_id,
+                                    ):
+        if self.calc.subareas_circle.get(subarea_id):
+            self.calc.subareas_circle.pop(subarea_id)
 
     def calculate_geometrical_properties(self):
         """calculates geometrical properties and stores them in the calculator instance calc"""
@@ -77,7 +98,8 @@ class manager:
     def show_cross_section(self,
                            show: Optional[bool] = False,
                            rectangle_subarea_id: Optional[int] = None,
-                           circle_subarea_id: Optional[int] = None
+                           circle_subarea_id: Optional[int] = None,
+                           figure: Optional[Figure] = None,
                            ):
         """
         you can pass a subarea ID if you want it to be highlighted in red. IDs must match the
@@ -90,7 +112,7 @@ class manager:
                              parse_expr(self.calc.total_cg_y),
                              )
 
-        fig = fgen.plot(rectangle_subarea_id, circle_subarea_id)
+        fig = fgen.plot(rectangle_subarea_id, circle_subarea_id, figure)
 
         if show:
             fig.show()
@@ -101,7 +123,7 @@ class manager:
                                 normal_force: float,
                                 y: Optional[Union[float, Symbol]] = Symbol('y'),
                                 z: Optional[Union[float, Symbol]] = Symbol('z'),
-                                append_to_pdf: bool = False,
+                                append_to_pdf: Optional[bool] = False,
                                 ):
         """calculates normal stress and appends the step by step solution to the PDF if append_to_pdf is True"""
 
@@ -110,31 +132,38 @@ class manager:
         if append_to_pdf:
             self.append_normal_stress(normal_stress, normal_force, moment_y, moment_x, y, z)
 
+        return normal_stress, moment_y, moment_x
+
     def calculate_neutral_line(self,
                                normal_force: float,
                                y: Optional[Union[float, Symbol]] = Symbol('y'),
                                z: Optional[Union[float, Symbol]] = Symbol('z'),
-                               append_to_pdf: bool = False,
+                               append_to_pdf: Optional[bool] = False,
+                               normal_stress: Optional[float] = None,
                                ):
         """calculates neutral line and appends the step by step solution to the PDF if append_to_pdf is True"""
 
-        normal_stress, neutral_line, moment_y, moment_x = self.calc.det_neutral_line(normal_force, y, z)
+        normal_stress, neutral_line, moment_y, moment_x = self.calc.det_neutral_line(normal_force, y, z, normal_stress)
 
         if append_to_pdf:
             self.append_neutral_line(normal_stress, neutral_line, normal_force, moment_y, moment_x, y, z)
 
+        return normal_stress, neutral_line, moment_y, moment_x
+
     def calculate_shear_flux(self,
                              shear_force: float,
                              cut_height: float,
-                             append_to_pdf: bool = False
+                             append_to_pdf: Optional[bool] = False,
                              ):
-        self.calc.calculate_static_moment_for_shear(cut_height)
+        static_moment = self.calc.calculate_static_moment_for_shear(cut_height)
 
         shear_flux = self.calc.det_shear_flux(shear_force)
 
         if append_to_pdf:
             self.append_shear_flux(shear_flux, shear_force, self.calc.static_moment_for_shear,
                                    self.calc.moment_inertia_x)
+
+        return shear_flux, static_moment
 
     def calculate_shear_stress(self,
                                shear_force: float,
@@ -144,13 +173,14 @@ class manager:
                                ):
         """calculates shear stress and appends the step by step solution to the PDF if append_to_pdf is True"""
 
-        self.calc.calculate_static_moment_for_shear(cut_height)
+        static_moment = self.calc.calculate_static_moment_for_shear(cut_height)
 
         shear_stress = self.calc.det_shear_stress(shear_force, thickness)
 
         if append_to_pdf:
-            self.append_shear_stress(shear_stress, shear_force, self.calc.static_moment_for_shear,
-                                     self.calc.moment_inertia_x, thickness)
+            self.append_shear_stress(shear_stress, shear_force, static_moment, self.calc.moment_inertia_x, thickness)
+
+        return shear_stress, static_moment
 
     def append_normal_stress(self,
                              normal_stress: str,
@@ -168,7 +198,7 @@ class manager:
                 moment_y,
                 moment_x,
                 y,
-                z
+                z,
             )
         )
 
@@ -206,7 +236,7 @@ class manager:
                 shear_flux,
                 shear_force,
                 static_moment,
-                moment_inertia_x
+                moment_inertia_x,
             )
         )
 
@@ -224,7 +254,7 @@ class manager:
                 shear_force,
                 static_moment,
                 moment_inertia_x,
-                thickness
+                thickness,
             )
         )
 
@@ -241,16 +271,24 @@ class manager:
         clear: delete figures generated for pdf after pdf is generated
         """
 
-        make_pdf_folder(pdf_path)
-        make_figure_folder(pdf_path)
+        pdf_mode = self.determine_pdf_mode()
+        if pdf_mode is None:
+            raise ValueError("Not enough information to generate solution")
 
-        self.pdfgen = pdf_generator(self, self.calc)
-        figure = self.show_cross_section()
+        make_folder(pdf_path)
 
-        save_figure(figure, pdf_path + r"\figs\sectransv")
+        gen = pdf_generator(self, self.calc)
+
+        if pdf_mode == "complete":
+            make_figure_folder(pdf_path)
+
+            figure = self.show_cross_section()
+
+            save_figure(figure, pdf_path + r"\figs\sectransv")
+
         generate_logo(pdf_path)
 
-        self.pdfgen.generate_pdf(language, pdf_path, filename)
+        gen.generate_pdf(language, pdf_path, filename, pdf_mode)
 
         if clear:
             delete_folder(pdf_path + r'\figs')
@@ -261,9 +299,33 @@ class manager:
         self.shear_flux_data_list.clear()
         self.shear_stress_data_list.clear()
 
+    def has_subareas(self):
+        if self.calc.subareas_rectangle or self.calc.subareas_circle:
+            return True
+        return False
+
+    def has_geometrical_properties(self):
+        if self.calc.moment_x\
+                and self.calc.moment_y\
+                and self.calc.moment_inertia_x\
+                and self.calc.moment_inertia_y\
+                and self.calc.total_area:
+            return True
+        return False
+
+    def determine_pdf_mode(self):
+        if self.calc.subareas_circle or self.calc.subareas_rectangle:
+            pdf_mode = "complete"
+        elif not self.calc.subareas_circle and not self.calc.subareas_rectangle \
+                and self.has_geometrical_properties():
+            pdf_mode = "partial"
+        else:
+            return None
+        return pdf_mode
+
 
 if __name__ == "__main__":
-    test = manager()
+    test = Manager()
     test.add_rectangular_subarea(upper_left=(0, 10), down_right=(5, 0))
     test.add_rectangular_subarea(upper_left=(5, 10), down_right=(10, 0))
     # test.add_semicircular_subarea(center=(10, 5), radius=5, angle=90)
@@ -274,4 +336,4 @@ if __name__ == "__main__":
     test.calculate_shear_stress(shear_force=10, thickness=10, cut_height=5, append_to_pdf=True)
     test.print_results()
     test.show_cross_section(show=True)
-    test.generate_pdf("PT", "testpath")
+    # test.generate_pdf("PT", "testpath")

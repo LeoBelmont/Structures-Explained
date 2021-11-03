@@ -1,5 +1,5 @@
 from StructuresExplained.solutions.structure.internal_stresses.assembler import Assembler as ia
-from StructuresExplained.solutions.structure.manager.tools import make_folders
+from StructuresExplained.utils.util import make_pdf_folders
 from StructuresExplained.solutions.structure.reactions.assembler import Assembler as sa
 from StructuresExplained.solutions.structure.pdf_generation.generator import Generator
 from StructuresExplained.solutions.structure.fig_generation.artist import Artist
@@ -17,7 +17,7 @@ class manager:
         self.ss.show_structure()
         self.ss.show_reaction_force(show=True)
 
-        make_folders(target_dir)
+        make_pdf_folders(target_dir)
 
         self.__assemble_reactions()
 

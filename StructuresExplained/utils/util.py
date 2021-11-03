@@ -78,13 +78,17 @@ def scientific_notation_formatting(number):
     return a.split('E')[0].rstrip('0').rstrip('.') + 'E' + a.split('E')[1]
 
 
+def rounded_result(expr):
+    return sympify(round_expr(expr)).evalf()
+
+
 def save_figure(figure: plt.Figure, fig_path: str, transparent: Optional[bool] = True):
     figure.savefig(fig_path, transparent=transparent)
 
 
-def make_pdf_folder(pdf_path: str):
-    if not path.isdir(pdf_path):
-        mkdir(pdf_path)
+def make_folder(folder_path: str):
+    if not path.isdir(folder_path):
+        mkdir(folder_path)
 
 
 def make_figure_folder(pdf_path: str):
@@ -92,9 +96,15 @@ def make_figure_folder(pdf_path: str):
         makedirs(pdf_path + r"\figs")
 
 
-def delete_folder(pdf_path: str):
-    if path.isdir(pdf_path):
-        rmtree(pdf_path)
+def delete_folder(folder_path: str):
+    if path.isdir(folder_path):
+        rmtree(folder_path)
+
+
+def split_dir_filename(file_path: str):
+    path_ = re.search(r".+/", file_path).group()
+    filename = file_path.replace(path_, "").replace(".pdf", "")
+    return path_, filename
 
 
 class add_to_pdf:
@@ -142,3 +152,14 @@ def get_value_from_points(result, element_length, mul_value=None, polynomial_deg
     for degree, index in zip(range(polynomial_degree, -1, -1), range(polynomial_degree+1)):
         value += coefficients[index] * mul_value ** degree
     return value
+
+
+def make_pdf_folders(target_dir):
+    make_folder(target_dir)
+    make_figure_folder(target_dir)
+
+
+def set_axes_alpha(fig, alpha=0.2):
+    ax = fig.get_axes()
+    for i in range(len(ax)):
+        ax[i].patch.set_alpha(alpha)

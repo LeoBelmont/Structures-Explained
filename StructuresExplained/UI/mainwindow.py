@@ -19,12 +19,13 @@ from matplotlib.pyplot import savefig
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
+
 # SX files
 from StructuresExplained.UI.mplwidget import MplWidget
 from StructuresExplained.UI import loadingPrompt, loadFilePrompt
-from StructuresExplained.solutions.structure.sm_solution import Teacher
+from StructuresExplained.solutions.structure.manager import manager as st_manager
 from StructuresExplained.solutions.stress_states.manager import manager as ss_manager
-from StructuresExplained.solutions.cross_section.manager import manager as cs_manager
+from StructuresExplained.solutions.cross_section.manager import Manager as cs_manager
 from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
 from StructuresExplained.UI.connections.main_window import connections as ui_connections
 

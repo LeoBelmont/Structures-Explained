@@ -56,7 +56,7 @@ class translate_PDF_cross_section:
         self.shear_stress_var = r"T_{cisalhamento} ="
 
     def translateEN(self):
-        self.title = r"Seção Transversal"
+        self.title = r"Resolução da Seção Transversal"
         self.step_split = r"Subdividir a geometria da seção transversal em formas geométricas (subáreas) de " \
                           r"propriedades conhecidas"
         self.figure_label = r"\label{fig:estrutura} Estrutura com subáreas contornadas de preto"
@@ -70,15 +70,16 @@ class translate_PDF_cross_section:
         self.centroid_x = r"Cálculo do centroide em relação ao eixo X:"
         self.centroid_y = r"Cálculo do centroide em relação ao eixo Y:"
         self.step_moment_inertia = r"Calcular os momentos de inércia em relação aos eixos de interesse"
-        self.moment_inertia_tip = r"Quando necessário (ou, na dúvida, sempre), aplicar o teorema dos eixos paralelos \\"
+        self.moment_inercia_tip = r"Quando necessário (ou, na dúvida, sempre), aplicar o teorema dos eixos paralelos \\"
         self.theorem_formula = r"Teorema dos eixos paralelos: I' = I + A * d² \\"
-        self.moment_inertia_x = r"Cálculo do Momento de Inércia em relação a X:"
-        self.moment_inertia_x_rect_formula = r"I_{x_{(retângulos)}} = \frac{base \cdot altura^3}{12}"
-        self.moment_inertia_x_circ_formula = r"I_{x_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}"
-        self.moment_inertia_y = r"Cálculo do Momento de Inércia em relação a Y:"
-        self.moment_inertia_y_rect_formula = r"I_{y_{(retângulos)}} = \frac{base^3 \cdot altura}{12}"
-        self.moment_inertia_y_circ_formula = r"I_{y_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}"
-        self.step_normal_stress_neutral_line = r"Calcular a Tensão Normal e Linha Neutra"
+        self.moment_inercia_x = r"Cálculo do Momento de Inércia em relação a X:"
+        self.moment_inercia_x_rect_formula = r"I_{x_{(retângulos)}} = \frac{base \cdot altura^3}{12}"
+        self.moment_inercia_x_circ_formula = r"I_{x_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}"
+        self.moment_inercia_y = r"Cálculo do Momento de Inércia em relação a Y:"
+        self.moment_inercia_y_rect_formula = r"I_{y_{(retângulos)}} = \frac{base^3 \cdot altura}{12}"
+        self.moment_inercia_y_circ_formula = r"I_{y_{(semi-circunferência)}} = \frac{\pi \cdot raio^4}{8}"
+        self.step_normal_stress = r"Calcular a Tensão Normal"
+        self.step_neutral_line = r"Calcular a Linha Neutra"
         self.normal_stress_formula = r"Fórmula da Tensão Normal"
         self.neutral_line_formula = r"Fórmula da Linha Neutra"
         self.neutral_line_tip = r"A linha neutra se encontra onde a Tensão Normal é 0, portanto para encontrar" \

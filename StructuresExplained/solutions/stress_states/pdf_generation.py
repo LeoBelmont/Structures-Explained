@@ -209,7 +209,7 @@ class append_triple_state:
                     self.gen.pdf.add_equation(latex(simplify(numeric)) + r'=0')
 
     def append_results(self):
-        with self.gen.doc.create(Section(self.gen.tpdf.get_internal_results)):
+        with self.gen.doc.create(Section(self.gen.tpdf.results)):
             with self.gen.doc.create(Subsection(self.gen.tpdf.main_stress)):
                 self.gen.doc.append(NoEscape(self.gen.tpdf.main_stress_roots_tip))
                 self.gen.pdf.add_equation(r"\sigma_1 = " + f"{round(self.res.sigma_1, 2)}")

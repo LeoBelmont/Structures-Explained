@@ -8,6 +8,7 @@ from typing import (
     List,
     Dict,
     Any,
+    Optional,
 )
 
 
@@ -181,10 +182,12 @@ class calculator:
     def det_neutral_line(self,
                          normal_force: float,
                          y: float,
-                         z: float
+                         z: float,
+                         normal_stress: Optional[float] = None,
                          ):
 
-        normal_stress, _, _ = self.det_normal_stress(normal_force, y, z)
+        if not normal_stress:
+            normal_stress, _, _ = self.det_normal_stress(normal_force, y, z)
 
         if (self.moment_y != "0" and type(z) == Symbol) and (type(y) != Symbol or self.moment_x == "0"):
             self.neutral_line = f"z = {solve(normal_stress, z)[0]}"
@@ -193,7 +196,7 @@ class calculator:
             self.neutral_line = "No neutral line"
 
         else:
-            self.neutral_line = f"y = {solve(normal_stress, y)}"
+            self.neutral_line = f"y = {solve(normal_stress, y)[0]}"
 
         return normal_stress, self.neutral_line, self.moment_y, self.moment_x
 

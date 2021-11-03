@@ -1,13 +1,16 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Wedge, Rectangle
 import numpy
-from StructuresExplained.solutions import functions
+from StructuresExplained.solutions import settings
 from StructuresExplained.utils.util import round_expr
 
 from typing import (
     Optional,
     Union,
 )
+
+import matplotlib
+matplotlib.use("Qt5Agg")
 
 
 class fig_generator:
@@ -24,7 +27,7 @@ class fig_generator:
         self.subplot: Union[plt.axes, None] = None
 
     def plot_plain_state(self,
-                         figure: Optional[plt.Figure] = plt.figure(dpi=100)
+                         figure: plt.Figure
                          ):
 
         self.plot_basics(figure)
@@ -36,7 +39,7 @@ class fig_generator:
         return self.fig
 
     def plot_triple_state(self,
-                          figure: Optional[plt.Figure] = plt.figure(dpi=100)
+                          figure: plt.Figure
                           ):
 
         self.plot_basics(figure)
@@ -48,10 +51,6 @@ class fig_generator:
         return self.fig
 
     def plot_basics(self, figure: plt.Figure):
-        if figure is None:
-            figure = plt.figure()
-        else:
-            figure.clear()
 
         self.fig = figure
 
@@ -79,29 +78,29 @@ class fig_generator:
     def plot_sigma_1_and_2(self):
         # sigma 1
         self.subplot.plot(self.res.sigma_1, 0, 'ro')
-        self.subplot.text(self.res.sigma_1, 0, f'σ1 = {round_expr(self.res.sigma_1)}', size=functions.size, ha='right',
+        self.subplot.text(self.res.sigma_1, 0, f'σ1 = {round_expr(self.res.sigma_1)}', size=settings.size, ha='right',
                           va='bottom', bbox=self.bbox_setting)
 
         # sigma 2
         self.subplot.plot(self.res.sigma_2, 0, 'ro')
-        self.subplot.text(self.res.sigma_2, 0, f'σ2 = {round_expr(self.res.sigma_2)}', size=functions.size, ha='left',
+        self.subplot.text(self.res.sigma_2, 0, f'σ2 = {round_expr(self.res.sigma_2)}', size=settings.size, ha='left',
                           va='top', bbox=self.bbox_setting)
 
     def plot_sigma_3(self):
         self.subplot.plot(self.res.sigma_3, 0, 'ro')
-        self.subplot.text(self.res.sigma_3, 0, f'σ3 = {round_expr(self.res.sigma_3)}', size=functions.size, ha='left',
+        self.subplot.text(self.res.sigma_3, 0, f'σ3 = {round_expr(self.res.sigma_3)}', size=settings.size, ha='left',
                           va='bottom', bbox=self.bbox_setting)
 
     def plot_max_shear(self):
         # Tmax
         self.subplot.plot(self.res.center, self.res.max_shear, 'ro')
         self.subplot.text(self.res.center, self.res.max_shear, f'τmax = {round_expr(self.res.max_shear)}',
-                          size=functions.size, ha='center', va='bottom', bbox=self.bbox_setting)
+                          size=settings.size, ha='center', va='bottom', bbox=self.bbox_setting)
 
         # Tmin
         self.subplot.plot(self.res.center, -self.res.max_shear, 'ro')
         self.subplot.text(self.res.center, -self.res.max_shear, f'τmin = {round_expr(-self.res.max_shear)}',
-                          size=functions.size, ha='center', va='top', bbox=self.bbox_setting)
+                          size=settings.size, ha='center', va='top', bbox=self.bbox_setting)
 
     def plot_circle_plain_state(self):
         self.subplot.add_patch(
@@ -127,7 +126,7 @@ class fig_generator:
     def plot_circles_angle(self):
         # plot angle value
         self.subplot.text(self.res.center, self.res.max_shear / 8,
-                          f'θ = {round_expr(abs(self.res.angle) * (180 / numpy.pi))}°', size=functions.size,
+                          f'θ = {round_expr(abs(self.res.angle) * (180 / numpy.pi))}°', size=settings.size,
                           ha='center', va='center', color=self.color_scheme.arrow_color, bbox=self.bbox_setting)
 
         start, finish = self.det_start_finish()
@@ -153,16 +152,16 @@ class fig_generator:
         self.subplot.arrow(0.25, 0.76, 0.41, 0, width=0.02, shape='right', fc=arrow_color_fc, ec=arrow_color_ec)
         self.subplot.arrow(0.24, 0.75, 0, -0.41, width=0.02, shape='left', fc=arrow_color_fc, ec=arrow_color_ec)
         self.subplot.arrow(0.76, 0.25, 0, 0.41, width=0.02, shape='left', fc=arrow_color_fc, ec=arrow_color_ec)
-        self.subplot.annotate(f'σy = {self.res.sigma_y}', (0.58, 0.9), size=functions.size, ha='left', va='top')
-        self.subplot.annotate(f'σx = {self.res.sigma_x}', (0.82, 0.4), size=functions.size, ha='left', va='center')
-        self.subplot.annotate(f'τxy = {self.res.tau_xy}', (0.8, 0.8), size=functions.size, ha='left', va='top')
+        self.subplot.annotate(f'σy = {self.res.sigma_y}', (0.58, 0.9), size=settings.size, ha='left', va='top')
+        self.subplot.annotate(f'σx = {self.res.sigma_x}', (0.82, 0.4), size=settings.size, ha='left', va='center')
+        self.subplot.annotate(f'τxy = {self.res.tau_xy}', (0.8, 0.8), size=settings.size, ha='left', va='top')
 
         self.subplot.set_aspect('equal', 'datalim')
         self.subplot.axis('off')
 
     def plot_square_angle(self):
         self.subplot.annotate(f'{round_expr((abs(self.res.angle) * (180 / numpy.pi)) / 2)}°', (0.5, 0.5),
-                              size=functions.size, ha='center', va='bottom', color='blue')
+                              size=settings.size, ha='center', va='bottom', color='blue')
 
         start, finish = self.det_start_finish()
 
@@ -230,17 +229,17 @@ class fig_generator:
         self.subplot.quiver(1, 0, 0, 0, -1, 0, length=0.5, color=quiver_color, normalize=True)
         self.subplot.quiver(1, 0, 0, 0, 0, 1, length=0.5, color=quiver_color, normalize=True)
 
-        self.subplot.text(0.1, 0.1, 1.3, f"σy = {self.res.sigma_y}", color=text_color, fontsize=functions.size)
-        self.subplot.text(0.1, 0.1, 1.05, f"τyx = {self.res.tau_xy}", color=text_color, fontsize=functions.size)
-        self.subplot.text(-0.1, -0.5, 1.05, f"τyz = {self.res.tau_yz}", color=text_color, fontsize=functions.size)
+        self.subplot.text(0.1, 0.1, 1.3, f"σy = {self.res.sigma_y}", color=text_color, fontsize=settings.size)
+        self.subplot.text(0.1, 0.1, 1.05, f"τyx = {self.res.tau_xy}", color=text_color, fontsize=settings.size)
+        self.subplot.text(-0.1, -0.5, 1.05, f"τyz = {self.res.tau_yz}", color=text_color, fontsize=settings.size)
 
-        self.subplot.text(0.2, -1.25, 0.5, f"τzy = {self.res.tau_yz}", color=text_color, fontsize=functions.size)
-        self.subplot.text(-0.15, -1.5, 0.1, f"σz = {self.res.sigma_z}", color=text_color, fontsize=functions.size)
-        self.subplot.text(0.2, -1.25, 0.1, f"τzx = {self.res.tau_xz}", color=text_color, fontsize=functions.size)
+        self.subplot.text(0.2, -1.25, 0.5, f"τzy = {self.res.tau_yz}", color=text_color, fontsize=settings.size)
+        self.subplot.text(-0.15, -1.5, 0.1, f"σz = {self.res.sigma_z}", color=text_color, fontsize=settings.size)
+        self.subplot.text(0.2, -1.25, 0.1, f"τzx = {self.res.tau_xz}", color=text_color, fontsize=settings.size)
 
-        self.subplot.text(1, 0.1, 0.4, f"τxy = {self.res.tau_xy}", color=text_color, fontsize=functions.size)
-        self.subplot.text(1, -0.6, 0.1, f"τxz = {self.res.tau_xz}", color=text_color, fontsize=functions.size)
-        self.subplot.text(1.25, 0.1, 0.05, f"σx = {self.res.sigma_x}", color=text_color, fontsize=functions.size)
+        self.subplot.text(1, 0.1, 0.4, f"τxy = {self.res.tau_xy}", color=text_color, fontsize=settings.size)
+        self.subplot.text(1, -0.6, 0.1, f"τxz = {self.res.tau_xz}", color=text_color, fontsize=settings.size)
+        self.subplot.text(1.25, 0.1, 0.05, f"σx = {self.res.sigma_x}", color=text_color, fontsize=settings.size)
 
         # set viewing angle if returning from 2D plot
         # if self.azim is not None:

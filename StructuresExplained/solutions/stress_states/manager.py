@@ -1,7 +1,10 @@
+from matplotlib.pyplot import Figure
+from matplotlib import pyplot as plt
+
 from StructuresExplained.solutions.stress_states.calculator import calculator_plain_state, calculator_triple_state
 from StructuresExplained.solutions.stress_states.fig_generation import fig_generator
 from StructuresExplained.solutions.stress_states.pdf_generation import pdf_generator
-from StructuresExplained.utils.util import save_figure, make_pdf_folder, make_figure_folder, delete_folder
+from StructuresExplained.utils.util import save_figure, make_folder, make_figure_folder, delete_folder
 from StructuresExplained.pdfconfig.logo import generate_logo
 
 from typing import (
@@ -54,31 +57,35 @@ class manager:
 
     def plot_plain_state(self,
                          background_scheme: Optional[str] = "bright",
-                         show: Optional[bool] = False
+                         show: Optional[bool] = False,
+                         fig: Optional[Figure] = plt.figure(),
                          ):
 
+        fig.clear()
         fgen = fig_generator(self.plain_state, background_scheme)
 
-        fig = fgen.plot_plain_state()
+        plot = fgen.plot_plain_state(fig)
 
         if show:
-            fig.show()
+            plt.show()
         else:
-            return fig
+            return plot
 
     def plot_triple_state(self,
                           background_scheme: Optional[str] = "bright",
-                          show: Optional[bool] = False
+                          show: Optional[bool] = False,
+                          fig: Optional[Figure] = plt.figure(),
                           ):
 
+        fig.clear()
         fgen = fig_generator(self.triple_state, background_scheme)
 
-        fig = fgen.plot_triple_state()
+        plot = fgen.plot_triple_state(fig)
 
         if show:
-            fig.show()
+            plt.show()
         else:
-            return fig
+            return plot
 
     def generate_pdf_plain_state(self,
                                  language: str,
@@ -93,7 +100,7 @@ class manager:
         clear: delete figures generated for pdf after pdf is generated
         """
 
-        make_pdf_folder(pdf_path)
+        make_folder(pdf_path)
         make_figure_folder(pdf_path)
 
         self.pdfgen = pdf_generator(self, self.plain_state)
@@ -120,7 +127,7 @@ class manager:
         clear: delete figures generated for pdf after pdf is generated
         """
 
-        make_pdf_folder(pdf_path)
+        make_folder(pdf_path)
         make_figure_folder(pdf_path)
 
         self.pdfgen = pdf_generator(self, self.triple_state)
@@ -134,38 +141,14 @@ class manager:
         if clear:
             delete_folder(pdf_path + r'\figs')
 
-    def on_release(self, fig):
-        if 80 < abs(float(fig.gca(projection="3d").azim)) < 100 and -10 < abs(
-                float(fig.gca(projection="3d").elev)) < 10:
-            fig.clear()
-            return self.plain_state(self.sx, self.sy, self.txy, fig)
-        elif -10 < abs(float(fig.gca(projection="3d").azim)) < 10 and -10 < abs(
-                float(fig.gca(projection="3d").elev)) < 10:
-            fig.clear()
-            return self.plain_state(self.sz, self.sy, self.tyz, fig)
-        elif -10 < abs(float(fig.gca(projection="3d").azim)) < 10 and 80 < abs(
-                float(fig.gca(projection="3d").elev)) < 100:
-            fig.clear()
-            return self.plain_state(self.sz, self.sx, self.txz, fig)
-        elif 170 < abs(float(fig.gca(projection="3d").azim)) < 190 and -10 < abs(
-                float(fig.gca(projection="3d").elev)) < 10:
-            fig.clear()
-            return self.plain_state(self.sz, self.sy, self.tyz, fig)
-        elif 80 < abs(float(fig.gca(projection="3d").azim)) < 100 and 80 < abs(
-                float(fig.gca(projection="3d").elev)) < 100:
-            fig.clear()
-            return self.plain_state(self.sz, self.sx, self.txz, fig)
-        else:
-            return fig
-
 
 if __name__ == "__main__":
     test = manager()
     test.calculate_plain_state(10, 20, 30)
-    test.print_results_plain_state()
+    # test.print_results_plain_state()
     test.plot_plain_state(show=True)
     # test.generate_pdf_plain_state("PT")
-    test.calculate_triple_state(10, 20, 30, 40, 50, 60)
-    test.print_results_triple_state()
-    test.plot_triple_state(show=True)
+    # test.calculate_triple_state(10, 20, 30, 40, 50, 60)
+    # test.print_results_triple_state()
+    # test.plot_triple_state(show=True)
     # test.generate_pdf_triple_state("PT")
