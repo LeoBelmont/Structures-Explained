@@ -1,6 +1,6 @@
 from anastruct import SystemElements
 
-from StructuresExplained.solutions.structure.manager.manager import manager
+from StructuresExplained.solutions.structure.manager.manager import Manager
 
 
 def test_struct():
@@ -24,8 +24,8 @@ def test_struct():
     ss.add_support_hinged(5)
     # ss.add_support_fixed(3)
 
-    mn = manager(ss)
-    mn.generator(target_dir=r"C:\testfolder")
+    mn = Manager(ss)
+    mn.generate_pdf(pdf_path=r"C:\testfolder")
 
 
 if __name__ == "__main__":

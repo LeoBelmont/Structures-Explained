@@ -10,7 +10,12 @@ from StructuresExplained.utils.util import get_relative_element_by_coordinates, 
 class Artist:
     fig_counter = 0
 
-    def __init__(self, system_elements, node_order=None, assemble_order=None, target_dir="tmp"):
+    def __init__(self,
+                 system_elements,
+                 node_order=None,
+                 assemble_order=None,
+                 target_dir="tmp",
+                 ):
         self.ss = system_elements
         self.branch_ss = SystemElements()
         self.assemble_order = assemble_order
@@ -77,10 +82,10 @@ class Artist:
             if plotting_start_node in branch:
                 plot_iterations = True
             if show and plot_iterations:
-                self.branch_ss.show_structure(show=False, subplot=(figure, subplot))
+                self.branch_ss.show_structure(show=False, figure=(figure, subplot))
                 figure.show()
             if save_figure and plot_iterations:
-                fig = self.branch_ss.show_structure(show=False, subplot=(figure, subplot))
+                fig = self.branch_ss.show_structure(show=False, figure=(figure, subplot))
                 fig.savefig(fr'{self.target_dir}\figs\structure{element_id}')
 
     def generate_figures_for_pdf(self):

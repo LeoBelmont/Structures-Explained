@@ -252,18 +252,18 @@ class fig_generator:
         if sigma_list[0] < 0 < sigma_list[-1]:
             self.subplot.spines['left'].set_position('zero')
             self.subplot.spines['right'].set_color('none')
-            self.subplot.set_xlabel('σ', fontsize=13, loc='right')
+            self.subplot.set_xlabel('σ', fontsize=settings.size, loc='right')
 
         elif sigma_list[-1] < 0:
             self.subplot.spines['left'].set_position(('axes', 1))
             self.subplot.spines['left'].set_color('none')
-            self.subplot.set_xlabel('σ', fontsize=13, loc='left')
+            self.subplot.set_xlabel('σ', fontsize=settings.size, loc='left')
 
         elif sigma_list[0] > 0:
             self.subplot.spines['right'].set_color('none')
-            self.subplot.set_xlabel('σ', fontsize=13, loc='right')
+            self.subplot.set_xlabel('σ', fontsize=settings.size, loc='right')
 
-        self.subplot.set_ylabel('τ', rotation=0, fontsize=13, loc='top')
+        self.subplot.set_ylabel('τ', rotation=0, fontsize=settings.size, loc='top')
         self.subplot.spines['top'].set_color('none')
         self.subplot.spines['bottom'].set_position('zero')
 
@@ -275,8 +275,9 @@ class fig_generator:
 
 class color_scheme:
     def __init__(self, background: str):
-        self.arrow_color = "black"
         if background == "dark":
             self.edgecolor = "white"
+            self.arrow_color = "white"
         elif background == "bright":
             self.edgecolor = "black"
+            self.arrow_color = "black"

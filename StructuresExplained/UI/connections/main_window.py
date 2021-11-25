@@ -95,11 +95,10 @@ class connections:
         self.mw.tyz.setValidator(QtGui.QDoubleValidator())
 
         self.connect_ui()
-        # self.connect_structure()
+        self.connect_structure()
         self.connect_cross_section()
         self.connect_stress_states()
 
-        # self.mw.blankss = pickle.dumps(self.mw.ss)
         # self.mw.blanksig = pickle.dumps(self.mw.sig)
 
         # speech recognition (unfinished)
@@ -735,7 +734,6 @@ class connections:
     def visualize(self, figure=None):
         self.mw.MplWidget.setGrid(self.mw.gridBox.isChecked())
         self.mw.MplWidget.plot(figure)
-        self.mw.MplWidget.set_background_alpha()
         self.figurefix()
         if self.mw.last_figure == self.mw.show_mohr:
             self.mw.MplWidget.fix_plot_scale()
@@ -763,19 +761,26 @@ class connections:
             self.figurefix()
             self.mw.last_figure = None
 
-    def load_file(self):
-        file, ok = QFileDialog.getOpenFileName(self, self.mw.load_structure_str, "", self.mw.strucutre_type_str)
+    def save_structure(self):
+        file, ok = QFileDialog.getSaveFileName(self.mw, self.mw.save_strucutre_title,
+                                               self.mw.save_strucutre_text, self.mw.strucutre_type_str)
         if ok:
-            struct, cross, mohr = self.mw.get_prompt_values()
+            with open(f'{file}', 'wb') as f:
+                pickle.dump((self.st.ss, self.cs.mn, self.ss.mng), f)
+
+    def load_file(self):
+        file, ok = QFileDialog.getOpenFileName(self.mw, self.mw.load_structure_str, "", self.mw.strucutre_type_str)
+        if ok:
+            struct, cross, mohr = self.get_prompt_values()
             if struct:
-                self.mw.load_structure_aux(file)
+                self.st.load_structure_aux(file)
             if cross:
-                self.mw.load_cross_section_aux(file)
+                self.cs.load_cross_section_aux(file)
             if mohr:
-                self.mw.load_mohr_aux(file)
-            self.mw.states.append(pickle.dumps(self.mw.ss))
-            self.mw.enable_buttons()
-            self.mw.change_to_loaded_figure()
+                self.ss.load_mohr_aux(file)
+            self.st.states.append(pickle.dumps(self.st.ss))
+            self.enable_buttons()
+            self.change_to_loaded_figure()
 
     def change_to_loaded_figure(self):
         if self.mw.struct_loaded:
@@ -849,10 +854,10 @@ class connections:
         self.mw.MplWidget.resize(x, y)
 
     def enable_buttons(self):
-        if (len(self.mw.ss.supports_roll) + len(self.mw.ss.supports_hinged) + len(self.mw.ss.supports_spring_x) +
-            len(self.mw.ss.supports_spring_z) + len(self.mw.ss.supports_spring_y) >= 2 or len(
-                    self.mw.ss.supports_fixed) >= 1) \
-                and (len(self.mw.ss.loads_point) + len(self.mw.ss.loads_q) + len(self.mw.ss.loads_moment)) >= 1:
+        if (len(self.st.ss.supports_roll) + len(self.st.ss.supports_hinged) + len(self.st.ss.supports_spring_x) +
+            len(self.st.ss.supports_spring_z) + len(self.st.ss.supports_spring_y) >= 2 or len(
+                    self.st.ss.supports_fixed) >= 1) \
+                and (len(self.st.ss.loads_point) + len(self.st.ss.loads_q) + len(self.st.ss.loads_moment)) >= 1:
             self.mw.show_diagram.setEnabled(True)
             self.mw.show_supports.setEnabled(True)
             self.mw.show_normal.setEnabled(True)
@@ -860,7 +865,7 @@ class connections:
             self.mw.show_moment.setEnabled(True)
             self.mw.show_displacement.setEnabled(True)
         else:
-            self.mw.disable_buttons()
+            self.disable_buttons()
 
     def disable_buttons(self):
         self.mw.show_diagram.setEnabled(False)
@@ -872,27 +877,30 @@ class connections:
 
     def undo_previous(self):
         if self.mw.last_figure != self.mw.show_sec and self.mw.last_figure != self.mw.show_mohr:
-            if len(self.mw.states) != 0:
-                del self.mw.states[-1]
-            if len(self.mw.states) != 0:
-                self.mw.ss = pickle.loads(self.mw.states[-1])
-                self.mw.visualize(self.mw.ss.show_structure(show=False, figure=self.mw.MplWidget.canvas.figure))
-                self.mw.enable_buttons()
-                if self.mw.solvetrue == True:
-                    self.mw.solvetrue = False
+            if len(self.st.states) != 0:
+                del self.st.states[-1]
+            if len(self.st.states) != 0:
+                self.st.ss = pickle.loads(self.st.states[-1])
+                self.mw.MplWidget.canvas.figure.clear()
+                ax = self.mw.MplWidget.canvas.figure.add_subplot(111)
+                ax.patch.set_alpha(0.2)
+                self.visualize(self.st.ss.show_structure(show=False, figure=(self.mw.MplWidget.canvas.figure, ax)))
+                self.enable_buttons()
+                if self.st.was_solved:
+                    self.st.was_solved = False
             else:
-                self.mw.reset_struct_elems()
+                self.st.reset_struct_elems()
 
     def fontstruct(self):
         i = settings.size
-        i, okPressed = QInputDialog.getInt(self, self.mw.font_size_str, self.mw.font_strucuture_str, i, 1, 100, 1)
+        i, okPressed = QInputDialog.getInt(self.mw, self.mw.font_size_str, self.mw.font_strucuture_str, i, 1, 100, 1)
         if okPressed:
             settings.size = i
             self.mw.last_figure.click()
 
     def fonteq(self):
         i = settings.eqsize
-        i, okPressed = QInputDialog.getInt(self, self.mw.font_size_str, self.mw.font_equations_str, i, 1, 100, 1)
+        i, okPressed = QInputDialog.getInt(self.mw, self.mw.font_size_str, self.mw.font_equations_str, i, 1, 100, 1)
         if okPressed:
             settings.eqsize = i
             self.mw.last_figure.click()
@@ -900,15 +908,15 @@ class connections:
     def UI_font(self):
         font, ok = QtWidgets.QFontDialog.getFont()
         if ok:
-            for name, obj in inspect.getmembers(self):
+            for name, obj in inspect.getmembers(self.mw):
                 if isinstance(obj, QtWidgets.QLabel):
                     obj.setFont(font)
 
     def toggle_presentation_mode(self):
         if self.mw.isPresenting:
-            self.mw.exit_presentation_mode()
+            self.exit_presentation_mode()
         else:
-            self.mw.enter_presentation_mode()
+            self.enter_presentation_mode()
 
     def enter_presentation_mode(self):
         self.mw.isPresenting = True
@@ -936,11 +944,10 @@ class connections:
             px = int(self.mw.deadzone_x.text())
             py = int(self.mw.deadzone_y.text())
             if self.mw.last_figure == self.mw.show_mohr:
-                if 'RIGHT' in str(event.button) and self.mw.mohr.sz is not None:
-                    self.mw.plot_to_ui(
-                        self.mw.mohr.calculate(self.mw.mohr.sx, self.mw.mohr.sy, self.mw.mohr.sz, self.mw.mohr.txy,
-                                               self.mw.mohr.txz, self.mw.mohr.tyz,
-                                               self.mw.MplWidget.canvas.figure))
+                if 'RIGHT' in str(event.button) and self.ss.current_state == "triple":
+                    self.ss.plot_to_ui(
+                        self.ss.mng.plot_triple_state(background_scheme="dark", fig=self.mw.MplWidget.canvas.figure)
+                    )
             elif self.mw.stackedWidget.currentIndex() == 0:
                 if 'LEFT' in str(event.button):
                     self.mw.beam_x1.setText(str(round(event.xdata, px)))
@@ -955,8 +962,10 @@ class connections:
                 elif 'RIGHT' in str(event.button):
                     distance = 1e20
                     id = ""
-                    for keys, values in self.mw.ss.node_map.items():
-                        id_, x, y, _, _, _ = self.mw.teach.fetcher(self.mw.ss.node_map.get(keys))
+                    for key, value in self.st.ss.node_map.items():
+                        id_ = self.st.ss.node_map.get(key).id
+                        x = self.st.ss.node_map.get(key).vertex.x
+                        y = self.st.ss.node_map.get(key).vertex.y
                         xdistance = event.xdata - x
                         ydistance = event.ydata - y
                         new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
@@ -967,8 +976,10 @@ class connections:
             elif self.mw.stackedWidget.currentIndex() == 2:
                 distance = 1e20
                 id = ""
-                for keys, values in self.mw.ss.node_map.items():
-                    id_, x, y, _, _, _ = self.mw.teach.fetcher(self.mw.ss.node_map.get(keys))
+                for key, value in self.st.ss.node_map.items():
+                    id_ = self.st.ss.node_map.get(key).id
+                    x = self.st.ss.node_map.get(key).vertex.x
+                    y = self.st.ss.node_map.get(key).vertex.y
                     xdistance = event.xdata - x
                     ydistance = event.ydata - y
                     new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
@@ -979,8 +990,10 @@ class connections:
             elif self.mw.stackedWidget.currentIndex() == 3:
                 distance = 1e20
                 id = ""
-                for keys, values in self.mw.ss.node_map.items():
-                    id_, x, y, _, _, _ = self.mw.teach.fetcher(self.mw.ss.node_map.get(keys))
+                for key, value in self.st.ss.node_map.items():
+                    id_ = self.st.ss.node_map.get(key).id
+                    x = self.st.ss.node_map.get(key).vertex.x
+                    y = self.st.ss.node_map.get(key).vertex.y
                     xdistance = event.xdata - x
                     ydistance = event.ydata - y
                     new_distance = np.sqrt(xdistance ** 2 + ydistance ** 2)
@@ -999,20 +1012,21 @@ class connections:
                     return abs(nearestDistance)
 
                 nearest = 1e20
-                for keys, values in self.mw.ss.element_map.items():
-                    _, xi, yi, _, _, _ = self.mw.teach.fetcher(
-                        self.mw.ss.node_map.get(self.mw.ss.element_map.get(keys).node_id1))
-                    id_, xf, yf, _, _, _ = self.mw.teach.fetcher(
-                        self.mw.ss.node_map.get(self.mw.ss.element_map.get(keys).node_id2))
+                for key, value in self.st.ss.element_map.items():
+                    xi = self.st.ss.node_map.get(self.st.ss.element_map.get(key).node_id1).vertex.x
+                    yi = self.st.ss.node_map.get(self.st.ss.element_map.get(key).node_id1).vertex.y
+
+                    xf = self.st.ss.node_map.get(self.st.ss.element_map.get(key).node_id2).vertex.x
+                    yf = self.st.ss.node_map.get(self.st.ss.element_map.get(key).node_id2).vertex.y
+
                     xarray = np.linspace(xi, xf, 11)
                     yarray = np.linspace(yi, yf, 11)
                     newNearest = find_nearest(xarray, yarray, event.xdata, event.ydata)
                     if newNearest < nearest:
                         nearest = newNearest
-                        self.mw.qload_pos.setText(str(self.mw.ss.element_map.get(keys).id))
-                    if keys == len(self.mw.ss.node_map) - 1:
+                        self.mw.qload_pos.setText(str(self.st.ss.element_map.get(key).id))
+                    if key == len(self.st.ss.node_map) - 1:
                         break
-
             elif self.mw.stackedWidget.currentIndex() == 5:
                 if 'LEFT' in str(event.button):
                     self.mw.rect_x1.setText(str(round(event.xdata, px)))
@@ -1029,7 +1043,7 @@ class connections:
         if self.mw.int_plot.isChecked():
             if self.mw.last_figure == self.mw.show_mohr and 'RIGHT' not in str(
                     event.button) and self.mw.MplWidget.canvas.figure.gca().name == "3d":
-                self.ss.plot_to_ui(self.ss.on_release(self.mw.MplWidget.canvas.figure))
+                self.ss.on_release(self.mw.MplWidget.canvas.figure)
 
     def get_prompt_values(self):
         prompt = loadFilePrompt.Ui_load_prompt()
@@ -1076,10 +1090,16 @@ class connections:
             self.mw.MplWidget.interactive_mode(1)
 
     def aboutDialog(self):
-        QMessageBox.about(self, self.mw.about_title, self.mw.about_text)
+        QMessageBox.about(self.mw, self.mw.about_title, self.mw.about_text)
 
-    def showDownloadPage(self):
+    def open_repository(self):
         webbrowser.open("https://github.com/LeoBelmont/Structures-Explained/releases")
+
+    def download_manual(self):
+        webbrowser.open("https://github.com/LeoBelmont/Structures-Explained/releases/download/v1.0.1/Manual-PT.pdf")
+
+    def download_examples(self):
+        webbrowser.open("https://github.com/LeoBelmont/Structures-Explained/releases/download/v1.0.1/Examples-PT.pdf")
 
     def replotGrid(self):
         self.mw.MplWidget.setGrid(self.mw.gridBox.isChecked())
@@ -1118,8 +1138,8 @@ class connections:
         self.mw.sx.setText("10")
         self.mw.sy.setText("20")
         self.mw.txy.setText("30")
-        # self.visualize_structure()
-        # self.mw.last_figure = self.st.show_structure
+        self.st.visualize_structure()
+        self.mw.last_figure = self.mw.show_structure
 
     def eventFilter(self, obj, event):
         if event.type() == QtCore.QEvent.HoverEnter:
@@ -1132,9 +1152,12 @@ class connections:
 
         return False
 
-    def setupLoading(self):
+    def setupLoading(self, pdf_generator_thread):
         self.mw.loadingScreen = QtWidgets.QDialog()
-        self.mw.loadingUi = loadingPrompt.Ui_loading_prompt(self.mw.language, self.mw.loadingScreen)
+        self.mw.loadingUi = loadingPrompt.Ui_loading_prompt(self.mw.language,
+                                                            self.mw.loadingScreen,
+                                                            pdf_generator_thread,
+                                                            )
         self.mw.loadingUi.setupUi()
 
     def connect_ui(self):
@@ -1171,11 +1194,12 @@ class connections:
         self.mw.light_theme_button.triggered.connect(self.light_theme)
         self.mw.dark_theme_button.triggered.connect(self.dark_theme)
         self.mw.aboutButton.triggered.connect(self.aboutDialog)
-        self.mw.downloadPageButton.triggered.connect(self.showDownloadPage)
+        self.mw.downloadPageButton.triggered.connect(self.download_manual)
         self.mw.fullscreenButton.triggered.connect(self.toggle_presentation_mode)
+        self.mw.save.triggered.connect(self.save_structure)
 
     def connect_structure(self):
-        self.st = st_connections(self.mw)
+        self.st = st_connections(self.mw, self)
         self.mw.beam_apply.clicked.connect(self.st.add_beam)
         self.mw.utilizeinfo.stateChanged.connect(self.st.beam_info)
         self.mw.elementtype.currentIndexChanged.connect(self.st.element_type_list)
@@ -1198,7 +1222,6 @@ class connections:
         self.mw.solvestatic.triggered.connect(self.st.static_solver)
         self.mw.resetloads.triggered.connect(self.st.reset)
         self.mw.resetall.triggered.connect(self.st.reset_struct_elems)
-        self.mw.save.triggered.connect(self.st.save_structure)
 
     def connect_cross_section(self):
         self.cs = cs_connections(self.mw, self)

@@ -12,6 +12,7 @@ class connections:
         self.fn = functions
         self.visualize = visualize
         self.mng = manager()
+        self.current_state = None
 
     def generator_thread(self, clean=True):
         if find_executable('latex'):
@@ -21,25 +22,30 @@ class connections:
                     try:
                         self.mw.toolBox.setCurrentIndex(2)
                         self.mw.MplWidget.fix_plot_scale()
-                        self.fn.setupLoading()
                         pdf_dir, filename = split_dir_filename(file)
                         make_pdf_folders(pdf_dir)
                         if self.mw.radio_plane.isChecked():
-                            thread = PDFGeneratorThread(self.mw.loadingScreen,
-                                                        self.mng.generate_pdf_plain_state,
-                                                        self.mw.language,
-                                                        pdf_path=pdf_dir,
-                                                        filename=filename,
-                                                        )
+                            pdf_generator_thread = PDFGeneratorThread(
+                                self.mng.generate_pdf_plain_state,
+                                self.mw.language,
+                                pdf_path=pdf_dir,
+                                filename=filename,
+                            )
                         else:
-                            thread = PDFGeneratorThread(self.mw.loadingScreen,
-                                                        self.mng.generate_pdf_triple_state,
-                                                        self.mw.language,
-                                                        pdf_path=pdf_dir,
-                                                        filename=filename,
-                                                        )
-                        thread.start()
+                            pdf_generator_thread = PDFGeneratorThread(
+                                self.mng.generate_pdf_triple_state,
+                                self.mw.language,
+                                pdf_path=pdf_dir,
+                                filename=filename,
+                            )
+
+                        self.fn.setupLoading(pdf_generator_thread)
+
+                        pdf_generator_thread.finished.connect(self.on_finished)
+
+                        pdf_generator_thread.start()
                         self.mw.loadingScreen.exec_()
+
                         if not self.mw.loadingUi.userTerminated:
                             self.fn.pdf_generated_prompt()
                         if clean:
@@ -50,10 +56,13 @@ class connections:
                 self.fn.warning()
         else:
             self.fn.latex_warning()
-    
+
+    def on_finished(self):
+        self.mw.loadingScreen.close()
+
     def load_mohr_aux(self, file):
         with open(f'{file}', 'rb') as f:
-            _, _, self.mw.mohr = pickle.load(f)
+            _, _, self.mng = pickle.load(f)
         self.mw.mohr_loaded = True
 
     def draw_stress_state(self):
@@ -66,13 +75,15 @@ class connections:
         if self.mw.radio_plane.isChecked():
             if sx != '' and sy != '' and txy != '':
                 self.draw_plain_state(sx, sy, txy, self.mw.MplWidget.canvas.figure)
+                self.current_state = "plane"
             else:
-                self.mw.warning()
+                self.fn.warning()
         elif self.mw.radio_triple.isChecked():
             if sx != '' and sy != '' and sz != '' and txy != '' and txz != '' and tyz != '':
                 self.draw_triple_state(sx, sy, sz, txy, txz, tyz, self.mw.MplWidget.canvas.figure)
+                self.current_state = "triple"
             else:
-                self.mw.warning()
+                self.fn.warning()
 
     def draw_plain_state(self, sx, sy, txy, figure):
         self.mng.calculate_plain_state(float(sx), float(sy), float(txy))
@@ -85,7 +96,7 @@ class connections:
         self.plot_to_ui(
             self.mng.plot_triple_state(show=False, background_scheme="dark", fig=figure)
         )
-    
+
     def switch_states_plane(self):
         self.mw.label_19.setHidden(True)
         self.mw.label_20.setHidden(True)
@@ -107,32 +118,32 @@ class connections:
         self.mw.sz.setHidden(False)
         self.mw.txz.setHidden(False)
         self.mw.tyz.setHidden(False)
-        
+
     def plot_to_ui(self, figure):
         self.visualize(figure)
+        ax = figure.get_axes()
+        for i in range(len(ax)):
+            ax[i].patch.set_alpha(0)
         self.mw.last_figure = self.mw.show_mohr
-        self.mw.MplWidget.set_background_alpha(0)
 
     def on_release(self, fig):
         if 80 < abs(float(fig.gca(projection="3d").azim)) < 100 and -10 < abs(
                 float(fig.gca(projection="3d").elev)) < 10:
             fig.clear()
-            return self.mng.plain_state(self.mw.sx, self.mw.sy, self.mw.txy, fig)
+            self.draw_plain_state(self.mw.sx.text(), self.mw.sy.text(), self.mw.txy.text(), fig)
         elif -10 < abs(float(fig.gca(projection="3d").azim)) < 10 and -10 < abs(
                 float(fig.gca(projection="3d").elev)) < 10:
             fig.clear()
-            return self.mng.plain_state(self.mw.sz, self.mw.sy, self.mw.tyz, fig)
+            self.draw_plain_state(self.mw.sz.text(), self.mw.sy.text(), self.mw.tyz.text(), fig)
         elif -10 < abs(float(fig.gca(projection="3d").azim)) < 10 and 80 < abs(
                 float(fig.gca(projection="3d").elev)) < 100:
             fig.clear()
-            return self.mng.plain_state(self.mw.sz, self.mw.sx, self.mw.txz, fig)
+            self.draw_plain_state(self.mw.sz.text(), self.mw.sx.text(), self.mw.txz.text(), fig)
         elif 170 < abs(float(fig.gca(projection="3d").azim)) < 190 and -10 < abs(
                 float(fig.gca(projection="3d").elev)) < 10:
             fig.clear()
-            return self.mng.plain_state(self.mw.sz, self.mw.sy, self.mw.tyz, fig)
+            self.draw_plain_state(self.mw.sz.text(), self.mw.sy.text(), self.mw.tyz.text(), fig)
         elif 80 < abs(float(fig.gca(projection="3d").azim)) < 100 and 80 < abs(
                 float(fig.gca(projection="3d").elev)) < 100:
             fig.clear()
-            return self.mng.plain_state(self.mw.sz, self.mw.sx, self.mw.txz, fig)
-        else:
-            return fig
+            self.draw_plain_state(self.mw.sz.text(), self.mw.sx.text(), self.mw.txz.text(), fig)

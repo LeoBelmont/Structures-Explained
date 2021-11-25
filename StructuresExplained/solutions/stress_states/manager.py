@@ -20,7 +20,7 @@ class manager:
     def calculate_plain_state(self,
                               sigma_x: float,
                               sigma_y: float,
-                              tau_xy: float
+                              tau_xy: float,
                               ):
 
         self.plain_state.sigma_x = sigma_x
@@ -34,7 +34,7 @@ class manager:
                                sigma_z: float,
                                tau_xy: float,
                                tau_xz: float,
-                               tau_yz: float
+                               tau_yz: float,
                                ):
 
         self.triple_state.sigma_x = sigma_x

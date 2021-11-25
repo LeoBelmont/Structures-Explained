@@ -8,12 +8,13 @@ from StructuresExplained.utils.util import add_to_pdf, append_step, append_resul
 
 
 class Generator:
-    def __init__(self, support_results, internal_results, system_elements, language, target_dir):
+    def __init__(self, support_results, internal_results, system_elements, language, target_dir, filename):
         self.sr = support_results
         self.ir = internal_results
         self.ss = system_elements
         self.language = language
         self.target_dir = target_dir
+        self.filename = filename
         self.doc = Document(document_options="a4paper,12pt", documentclass="article")
         self.pdf = add_to_pdf(self.doc)
         self.tpdf = translate_PDF_structure(language)
@@ -239,7 +240,7 @@ class Generator:
                     fig_momentofletor.add_caption(NoEscape(self.tpdf.internal_diagrams_moment_label))
 
     def generate(self):
-        self.doc.generate_pdf(fr'{self.target_dir}\resolucao',
+        self.doc.generate_pdf(fr'{self.target_dir}\{self.filename}',
                               compiler='pdflatex',
                               win_no_console=True,
                               compiler_args=["-enable-installer"])

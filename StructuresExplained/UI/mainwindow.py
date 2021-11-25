@@ -35,9 +35,7 @@ class Ui_tenshi(QWidget):
         super().__init__(*args, **kwargs)
 
         self.undocounter = -1
-        self.solvetrue = False
         self.last_figure = None
-        self.states = []
         self.struct_loaded = False
         self.cross_loaded = False
         self.mohr_loaded = False

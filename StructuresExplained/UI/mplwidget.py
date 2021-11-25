@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.ticker as ticker
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 import matplotlib.backends.backend_qt5 as qt5
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
@@ -56,11 +56,13 @@ class MplWidget(QWidget):
             self.canvas.figure.clear()
             self.canvas.figure.add_subplot(111)
             self.set_background_alpha()
+            self.set_subplot_alpha()
             self.setGrid(has_grid)
         else:
             # new_figure._original_dpi = 100
             self.canvas.figure = new_figure
             self.set_background_alpha()
+            self.set_subplot_alpha()
 
         plt.tight_layout()
         self.canvas.draw()
@@ -71,6 +73,11 @@ class MplWidget(QWidget):
 
     def set_background_alpha(self, alpha=0):
         self.canvas.figure.patch.set_alpha(alpha)
+
+    def set_subplot_alpha(self, alpha=0.2):
+        subplots = [plt.gca()]
+        for subplot in subplots:
+            subplot.patch.set_alpha(alpha)
 
     def set_aspect_ratio_equal(self):
         ax = self.canvas.figure.get_axes()

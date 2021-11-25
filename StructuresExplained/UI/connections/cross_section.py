@@ -2,7 +2,6 @@ from sympy import Symbol
 from PyQt5.QtWidgets import QMessageBox, QFileDialog
 from distutils.spawn import find_executable
 import matplotlib.pyplot as plt
-import os
 import pickle
 from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
 from StructuresExplained.solutions.cross_section.manager import Manager
@@ -247,17 +246,23 @@ class connections:
                 if ok:
                     try:
                         self.mw.toolBox.setCurrentIndex(1)
-                        self.fn.setupLoading()
                         pdf_dir, filename = split_dir_filename(file)
                         make_pdf_folders(pdf_dir)
-                        thread = PDFGeneratorThread(self.mw.loadingScreen,
-                                                    self.mn.generate_pdf,
-                                                    self.mw.language,
-                                                    pdf_path=pdf_dir,
-                                                    filename=filename,
-                                                    )
-                        thread.start()
+
+                        pdf_generator_thread = PDFGeneratorThread(
+                            self.mn.generate_pdf,
+                            self.mw.language,
+                            pdf_path=pdf_dir,
+                            filename=filename,
+                        )
+
+                        self.fn.setupLoading(pdf_generator_thread)
+
+                        pdf_generator_thread.finished.connect(self.on_finished)
+
+                        pdf_generator_thread.start()
                         self.mw.loadingScreen.exec_()
+
                         if not self.mw.loadingUi.userTerminated:
                             self.fn.pdf_generated_prompt()
                         if clean:
@@ -268,6 +273,9 @@ class connections:
                 self.fn.warning()
         else:
             self.fn.latex_warning()
+
+    def on_finished(self):
+        self.mw.loadingScreen.close()
 
     def rm_savefig(self):
         plt.style.use('default')
