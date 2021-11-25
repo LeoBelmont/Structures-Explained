@@ -17,7 +17,7 @@ class translate_PDF_Mohr:
         self.center_solving = r"Cálculo do centro"
         self.center_formula = r"Fórmula do centro"
         self.center = r"centro"
-        self.angle_solving = 'rCalculo do ângulo'
+        self.angle_solving = r'Cálculo do ângulo'
         self.angle_formula = r'Fórmula do ângulo'
         self.doing_math = r'Realizando a conta'
         self.angle_tip = r'Deve-se dividir o ângulo encontrado no círculo de Mohr por 2 para encontrar o ângulo' \
@@ -62,7 +62,7 @@ class translate_PDF_Mohr:
         self.center_solving = r"Cálculo do centro"
         self.center_formula = r"Fórmula do centro"
         self.center = r"centro"
-        self.angle_solving = r'Calculo do ângulo'
+        self.angle_solving = r'Cálculo do ângulo'
         self.angle_formula = r'Fórmula do ângulo'
         self.doing_math = r'Realizando a conta'
         self.angle_tip = r'Deve-se dividir o ângulo encontrado no círculo de Mohr por 2 para encontrar o ângulo real, portanto:'

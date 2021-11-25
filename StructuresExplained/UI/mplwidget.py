@@ -2,11 +2,15 @@ from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.ticker as ticker
-import matplotlib.pyplot as plt
-import matplotlib.backends.backend_qt5 as qt5agg
+from matplotlib import pyplot as plt
+import matplotlib.backends.backend_qt5 as qt5
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
 import numpy as np
+from matplotlib.figure import Figure
+
+import matplotlib
+matplotlib.use("Qt5Agg")
 
 
 class MplWidget(QWidget):
@@ -24,7 +28,7 @@ class MplWidget(QWidget):
         self.toolbar_buttons()
         self.toolbar = NavigationToolbar(self.canvas, self)
 
-        self.default_cursor = qt5agg.cursord[1]
+        self.default_cursor = qt5.cursord[1]
         self.cursor = QCursor(Qt.CrossCursor)
 
         self.vertical_layout = QVBoxLayout()
@@ -46,15 +50,19 @@ class MplWidget(QWidget):
             ('Save', 'Save the figure', 'filesave', 'save_figure'),
         )
 
-    def plot(self, new_figure=None, hasGrid=True):
+    def plot(self, new_figure: Figure = None, has_grid=True):
 
         if not new_figure:
             self.canvas.figure.clear()
             self.canvas.figure.add_subplot(111)
             self.set_background_alpha()
-            self.setGrid(hasGrid)
+            self.set_subplot_alpha()
+            self.setGrid(has_grid)
         else:
+            # new_figure._original_dpi = 100
             self.canvas.figure = new_figure
+            self.set_background_alpha()
+            self.set_subplot_alpha()
 
         plt.tight_layout()
         self.canvas.draw()
@@ -63,10 +71,13 @@ class MplWidget(QWidget):
         axes = self.canvas.figure.get_axes()
         axes.clear()
 
-    def set_background_alpha(self, alpha=0.2):
-        ax = self.canvas.figure.get_axes()
-        for i in range(len(ax)):
-            ax[i].patch.set_alpha(alpha)
+    def set_background_alpha(self, alpha=0):
+        self.canvas.figure.patch.set_alpha(alpha)
+
+    def set_subplot_alpha(self, alpha=0.2):
+        subplots = [plt.gca()]
+        for subplot in subplots:
+            subplot.patch.set_alpha(alpha)
 
     def set_aspect_ratio_equal(self):
         ax = self.canvas.figure.get_axes()
@@ -76,9 +87,9 @@ class MplWidget(QWidget):
 
     def interactive_mode(self, mode):
         if mode == 0:
-            qt5agg.cursord[1] = self.cursor
+            qt5.cursord[1] = self.cursor
         else:
-            qt5agg.cursord[1] = self.default_cursor
+            qt5.cursord[1] = self.default_cursor
 
         self.canvas.toolbar.set_cursor(1)
 

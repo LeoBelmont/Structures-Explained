@@ -4,25 +4,21 @@ import StructuresExplained.pdfconfig.logo
 
 class PDFGeneratorThread(QThread):
 
-    def __init__(self, loadingScreen, fig_grabber, PDF_generator, language, ss=None, file=None):
+    def __init__(self,
+                 PDF_generator,
+                 language,
+                 pdf_path: str = "pdf",
+                 filename: str = "solution",
+                 ):
         QThread.__init__(self)
-        self.loadingScreen = loadingScreen
-        self.fig_grabber = fig_grabber
         self.PDF_generator = PDF_generator
         self.language = language
-        self.ss = ss
-        self.file = file
+        self.pdf_path = pdf_path
+        self.filename = filename
 
     def __del__(self):
         self.wait()
 
     def run(self):
-        self.fig_grabber()
-        StructuresExplained.pdfconfig.logo.generate_logo()
-        if self.ss is None and self.file is None:
-            self.PDF_generator(self.language)
-        else:
-            self.PDF_generator(self.ss.supports_hinged, self.ss.supports_roll, self.ss.inclined_roll,
-                               self.ss.supports_fixed, self.ss.loads_moment, self.ss.loads_point, self.ss.loads_q,
-                               self.ss.loads_qi, self.ss.node_map, self.file, self.language)
-        self.loadingScreen.close()
+        StructuresExplained.pdfconfig.logo.generate_logo(pdf_path=self.pdf_path)
+        self.PDF_generator(self.language, pdf_path=self.pdf_path, filename=self.filename)

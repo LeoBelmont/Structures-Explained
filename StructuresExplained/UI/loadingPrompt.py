@@ -4,12 +4,17 @@ from PyQt5.QtCore import *
 
 
 class Ui_loading_prompt(QWidget):
-    def __init__(self, language, Dialog):
+    def __init__(self,
+                 language,
+                 Dialog,
+                 pdf_generator_thread,
+                 ):
         super().__init__()
 
         self.Dialog = Dialog
         self.userTerminated = False
         self.language = language
+        self.pdf_generator_thread = pdf_generator_thread
 
     def setupUi(self):
         self.Dialog.setObjectName("Dialog")
@@ -30,7 +35,7 @@ class Ui_loading_prompt(QWidget):
         self.label = QtWidgets.QLabel(self.Dialog)
         self.label.setFixedSize(QtCore.QSize(160, 90))
         self.label.setText("")
-        self.loadingGIF = QtGui.QMovie("../../../Novapasta/load.gif")
+        self.loadingGIF = QtGui.QMovie(fr":/Figures/load.gif")
         self.label.setMovie(self.loadingGIF)
         self.loadingGIF.start()
         self.label.setScaledContents(True)
@@ -72,3 +77,4 @@ class Ui_loading_prompt(QWidget):
     def cancelEvent(self):
         self.Dialog.close()
         self.userTerminated = True
+        self.pdf_generator_thread.exit()
