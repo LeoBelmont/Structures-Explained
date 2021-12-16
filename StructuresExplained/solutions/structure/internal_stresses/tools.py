@@ -92,3 +92,7 @@ def find_element(element_nodes, node_element_map):
         if element in node2_elements:
             return element
     return node1_elements[0]
+
+
+class NodePathError(ValueError):
+    pass

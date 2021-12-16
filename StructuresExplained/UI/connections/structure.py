@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QMessageBox, QFileDialog, QDialog
 from anastruct import SystemElements
 from distutils.spawn import find_executable
 from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
+from StructuresExplained.solutions.structure.internal_stresses.tools import NodePathError
 from StructuresExplained.utils.util import make_pdf_folders, split_dir_filename, delete_folder
 from StructuresExplained.solutions.structure.manager.manager import Manager
 from StructuresExplained.UI.pathprompt import PathPrompt
@@ -277,6 +278,7 @@ class connections:
                                     pdf_path=pdf_dir,
                                     filename=filename,
                                     solve_path=solve_path,
+                                    path_warning=self.fn.path_warning,
                                 )
 
                                 self.fn.setupLoading(pdf_generator_thread)
@@ -292,8 +294,7 @@ class connections:
                                     delete_folder(pdf_dir)
                                 self.ss.color_scheme = "dark"
                                 plt.style.use('dark_background')
-                            # except ValueError:
-                            #     self.fn.path_warning()
+
                             except:
                                 self.fn.latex_packages_warning()
                 else:

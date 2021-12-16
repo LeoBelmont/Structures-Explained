@@ -12,7 +12,7 @@ from StructuresExplained.solutions.structure.internal_stresses.graph import Grap
 from StructuresExplained.solutions.structure.internal_stresses.stack import Stresses_Stack
 from StructuresExplained.solutions.structure.internal_stresses.tools import assemble_element_connections, \
     node_to_element, is_branching, is_in_path, find_element, node_pair_to_element, are_stacks_connected
-
+from StructuresExplained.solutions.structure.internal_stresses.tools import NodePathError
 
 class Setting(Enum):
     random = "random"
@@ -155,14 +155,14 @@ class Assembler:
             for element in main_path:
                 partial_main_path = self.graph.find_path(element[0], element[1])
                 if partial_main_path is None:
-                    raise ValueError("No path found for given nodes")
+                    raise NodePathError("No path found for given nodes")
                 for value in partial_main_path:
                     if value == partial_main_path[0] and value in proper_main_path:
                         continue
                     if value not in proper_main_path:
                         proper_main_path.append(value)
                     else:
-                        raise ValueError("No path found for given nodes")
+                        raise NodePathError("No path found for given nodes")
             self.main_path_list = proper_main_path
 
         for node in self.main_path_list:
@@ -338,7 +338,10 @@ class Assembler:
         self.assemble_graph()
         if main_path == "longest" or main_path == "random":
             main_path = Setting(main_path)
-        self.assemble_main_path(main_path)
+        try:
+            self.assemble_main_path(main_path)
+        except NodePathError as npe:
+            raise npe
         self.assemble_other_paths()
         self.assemble_solve_order()
         self.plot_solve_order(target_dir=target_dir)

@@ -15,14 +15,16 @@ class PathPrompt(QWidget):
 
     def setupUi(self):
         self.Dialog.setObjectName("Dialog")
-        self.Dialog.resize(291, 166)
+        self.Dialog.resize(300, 174)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.Dialog.sizePolicy().hasHeightForWidth())
+        self.Dialog.setSizePolicy(sizePolicy)
+        self.Dialog.setMinimumSize(QtCore.QSize(300, 174))
+        self.Dialog.setMaximumSize(QtCore.QSize(300, 174))
         self.gridLayout = QtWidgets.QGridLayout(self.Dialog)
         self.gridLayout.setObjectName("gridLayout")
-        self.buttonBox = QtWidgets.QDialogButtonBox(self.Dialog)
-        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
-        self.gridLayout.addWidget(self.buttonBox, 1, 1, 1, 1)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
         self.radioButton = QtWidgets.QRadioButton(self.Dialog)
@@ -34,13 +36,35 @@ class PathPrompt(QWidget):
         self.radioButton_3 = QtWidgets.QRadioButton(self.Dialog)
         self.radioButton_3.setObjectName("radioButton_3")
         self.verticalLayout.addWidget(self.radioButton_3)
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
         self.label = QtWidgets.QLabel(self.Dialog)
+        self.label.setMaximumSize(QtCore.QSize(80, 16777215))
         self.label.setObjectName("label")
-        self.verticalLayout.addWidget(self.label)
+        self.horizontalLayout.addWidget(self.label)
         self.lineEdit = QtWidgets.QLineEdit(self.Dialog)
+        self.lineEdit.setMaximumSize(QtCore.QSize(50, 16777215))
         self.lineEdit.setObjectName("lineEdit")
-        self.verticalLayout.addWidget(self.lineEdit)
-        self.gridLayout.addLayout(self.verticalLayout, 0, 1, 1, 1)
+        self.horizontalLayout.addWidget(self.lineEdit)
+        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.label_2 = QtWidgets.QLabel(self.Dialog)
+        self.label_2.setMaximumSize(QtCore.QSize(80, 16777215))
+        self.label_2.setObjectName("label_2")
+        self.horizontalLayout_2.addWidget(self.label_2)
+        self.lineEdit_2 = QtWidgets.QLineEdit(self.Dialog)
+        self.lineEdit_2.setMaximumSize(QtCore.QSize(50, 16777215))
+        self.lineEdit_2.setText("")
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.horizontalLayout_2.addWidget(self.lineEdit_2)
+        self.verticalLayout.addLayout(self.horizontalLayout_2)
+        self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
+        self.buttonBox = QtWidgets.QDialogButtonBox(self.Dialog)
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setObjectName("buttonBox")
+        self.gridLayout.addWidget(self.buttonBox, 1, 0, 1, 1)
 
         if self.language == "PT":
             self.retranslateUi()
@@ -60,8 +84,8 @@ class PathPrompt(QWidget):
         self.Dialog.setWindowFlag(QtCore.Qt.WindowContextHelpButtonHint, False)
         self.Dialog.setWindowIcon(QtGui.QIcon(r':/Figures/LogoSX.ico'))
         self.radioButton.toggle()
-        # self.lineEdit.setValidator(QIntValidator())
-        # self.lineEdit.textChanged.connect(self.format_text)
+        self.lineEdit.setValidator(QIntValidator())
+        self.lineEdit_2.setValidator(QIntValidator())
 
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
@@ -69,7 +93,8 @@ class PathPrompt(QWidget):
         self.radioButton.setText(_translate("Dialog", "Fixo"))
         self.radioButton_2.setText(_translate("Dialog", "Aleatório"))
         self.radioButton_3.setText(_translate("Dialog", "Especificar Caminho dos Nós da Solução"))
-        self.label.setText(_translate("Dialog", "Utilize hífens para separar índices. Exemplo: 1-2-3"))
+        self.label.setText(_translate("Dialog", "Índice Inicial"))
+        self.label_2.setText(_translate("Dialog", "Índice Final"))
         self.warning_title = "Erro"
         self.warning_str = "O campo não pode estar vazio"
         self.invalid_warning_str = "Dados inválidos. Escreva inteiros separados por hífens."
@@ -80,7 +105,8 @@ class PathPrompt(QWidget):
         self.radioButton.setText(_translate("Dialog", "Fixed"))
         self.radioButton_2.setText(_translate("Dialog", "Random"))
         self.radioButton_3.setText(_translate("Dialog", "Specify Solution Node Path"))
-        self.label.setText(_translate("Dialog", "Use hyphens to separate indices. Example: 1-2-3"))
+        self.label.setText(_translate("Dialog", "Initial Index"))
+        self.label_2.setText(_translate("Dialog", "Final Index"))
         self.warning_title = "Error"
         self.warning_str = "Field can't be empty"
         self.invalid_warning_str = "Invalid data. Type whole numbers separated by hyphens."
@@ -95,11 +121,15 @@ class PathPrompt(QWidget):
             self.Dialog.close()
 
         elif self.radioButton_3.isChecked():
-            text = self.lineEdit.text()
-            if text != "":
+            text1 = self.lineEdit.text()
+            text2 = self.lineEdit_2.text()
+            if text1 != "" and text2 != "":
                 try:
-                    self.path = tuple(int(value) for value in text.split("-"))
-                    self.Dialog.close()
+                    self.path = (int(text1), int(text2))
+                    if len(self.path) != 2:
+                        self.invalid_warning()
+                    else:
+                        self.Dialog.close()
                 except ValueError:
                     self.invalid_warning()
             else:
@@ -110,12 +140,16 @@ class PathPrompt(QWidget):
         self.Dialog.close()
 
     def showStuff(self):
-        if self.radioButton_3.isChecked():
-            self.label.setHidden(False)
-            self.lineEdit.setHidden(False)
+        if not self.radioButton_3.isChecked():
+            self.label.setEnabled(False)
+            self.label_2.setEnabled(False)
+            self.lineEdit.setEnabled(False)
+            self.lineEdit_2.setEnabled(False)
         else:
-            self.label.setHidden(True)
-            self.lineEdit.setHidden(True)
+            self.label.setEnabled(True)
+            self.label_2.setEnabled(True)
+            self.lineEdit.setEnabled(True)
+            self.lineEdit_2.setEnabled(True)
 
     def warning(self):
         msg = QMessageBox()
@@ -130,14 +164,6 @@ class PathPrompt(QWidget):
         msg.setText(self.invalid_warning_str)
         msg.setIcon(QMessageBox.Warning)
         x = msg.exec_()
-
-    def format_text(self):
-        text = self.lineEdit.text()
-        try:
-            int(text[-1])
-            self.lineEdit.setText(text + "-")
-        except:
-            pass
 
 
 if __name__ == "__main__":

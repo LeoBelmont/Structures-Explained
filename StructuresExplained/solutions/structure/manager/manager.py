@@ -1,4 +1,5 @@
 from StructuresExplained.solutions.structure.internal_stresses.assembler import Assembler as ia
+from StructuresExplained.solutions.structure.internal_stresses.tools import NodePathError
 from StructuresExplained.utils.util import make_pdf_folders
 from StructuresExplained.solutions.structure.reactions.assembler import Assembler as sa
 from StructuresExplained.solutions.structure.pdf_generation.generator import Generator
@@ -28,7 +29,10 @@ class Manager:
 
         self.__assemble_reactions()
 
-        self.__assemble_internal_stresses(pdf_path, main_path)
+        try:
+            self.__assemble_internal_stresses(pdf_path, main_path)
+        except NodePathError as npe:
+            raise npe
 
         self.__make_figures(pdf_path)
 
@@ -39,7 +43,10 @@ class Manager:
 
     def __assemble_internal_stresses(self, target_dir, main_path):
         if main_path:
-            self.internal.assemble_structure(target_dir=target_dir, main_path=main_path),
+            try:
+                self.internal.assemble_structure(target_dir=target_dir, main_path=main_path)
+            except NodePathError as npe:
+                raise npe
         else:
             self.internal.assemble_structure(target_dir=target_dir)
 
