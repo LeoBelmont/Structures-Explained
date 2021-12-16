@@ -376,7 +376,9 @@ class connections:
         self.mw.showManualButton.setText(_translate("tenshi", "Mostrar Manual (requer Internet)"))
         self.mw.hideManualButton.setText(_translate("tenshi", "Esconder Manual"))
         self.mw.actionP_gina_para_Download.setText(_translate("tenshi", "Baixar Manual e Exemplos"))
-        self.mw.downloadPageButton.setText(_translate("tenshi", "Baixar Manual e Exemplos"))
+        self.mw.downloadManualButton.setText(_translate("tenshi", "Baixar Manual"))
+        self.mw.downloadExampleButton.setText(_translate("tenshi", "Baixar Exemplos"))
+        self.mw.SXPageButton.setText(_translate("tenshi", "Página do Structures Explained"))
         self.mw.reset_cross_section.setText(_translate("tenshi", "Tudo"))
         self.mw.fullscreenButton.setText(_translate("tenshi", "Alternar Modo Tela Cheia"))
 
@@ -398,6 +400,7 @@ class connections:
         self.mw.shear_warning_str = "Seções transversal não foi desenhada, contém setores circulares ou os resultados não foram obtidos da figura."
         self.mw.latex_error_str = "É necessário ter o Miktex instalado para gerar a resolução."
         self.mw.packages_error_str = "Algo deu errado. É provavel que você não tenha os pacotes do Latex instalados."
+        self.mw.path_error_str = "Não foi encontrado um caminho válido para a solução para os índices dados."
         self.mw.font_size_str = "Tamanho da Fonte"
         self.mw.font_strucuture_str = "Fonte da Estrutura:"
         self.mw.font_equations_str = "Fonte das Equações:"
@@ -689,7 +692,9 @@ class connections:
         self.mw.showManualButton.setText(_translate("tenshi", "Show Manual (requires Internet)"))
         self.mw.hideManualButton.setText(_translate("tenshi", "Hide Manual"))
         self.mw.actionP_gina_para_Download.setText(_translate("tenshi", "Download Manual and Examples"))
-        self.mw.downloadPageButton.setText(_translate("tenshi", "Download Manual and Examples"))
+        self.mw.downloadManualButton.setText(_translate("tenshi", "Download Manual"))
+        self.mw.downloadExampleButton.setText(_translate("tenshi", "Download Examples"))
+        self.mw.SXPageButton.setText(_translate("tenshi", "Structures Explained Page"))
         self.mw.fullscreenButton.setText(_translate("tenshi", "Toggle Fullscreen Mode"))
         self.mw.gridBox.setText(_translate("tenshi", "Grid"))
 
@@ -710,6 +715,7 @@ class connections:
         self.mw.shear_warning_str = "Cross section wasn't drawn, contains circular sectors or results weren't calculated from figure."
         self.mw.latex_error_str = "Please install Miktex to generate resolutions."
         self.mw.packages_error_str = "Something went wrong. It's likely you don't have the Latex packages installed."
+        self.mw.path_error_str = "No valid solution path was found for given indices."
         self.mw.font_size_str = "Font Size"
         self.mw.font_strucuture_str = "Structure Font:"
         self.mw.font_equations_str = "Equations Font:"
@@ -837,6 +843,13 @@ class connections:
         msg = QMessageBox()
         msg.setWindowTitle(self.mw.warning_title)
         msg.setText(self.mw.packages_error_str)
+        msg.setIcon(QMessageBox.Warning)
+        x = msg.exec_()
+
+    def path_warning(self):
+        msg = QMessageBox()
+        msg.setWindowTitle(self.mw.warning_title)
+        msg.setText(self.mw.path_error_str)
         msg.setIcon(QMessageBox.Warning)
         x = msg.exec_()
 
@@ -1194,7 +1207,9 @@ class connections:
         self.mw.light_theme_button.triggered.connect(self.light_theme)
         self.mw.dark_theme_button.triggered.connect(self.dark_theme)
         self.mw.aboutButton.triggered.connect(self.aboutDialog)
-        self.mw.downloadPageButton.triggered.connect(self.download_manual)
+        self.mw.downloadManualButton.triggered.connect(self.download_manual)
+        self.mw.downloadExampleButton.triggered.connect(self.download_examples)
+        self.mw.SXPageButton.triggered.connect(self.open_repository)
         self.mw.fullscreenButton.triggered.connect(self.toggle_presentation_mode)
         self.mw.save.triggered.connect(self.save_structure)
 

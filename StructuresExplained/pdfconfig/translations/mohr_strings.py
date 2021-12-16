@@ -45,7 +45,7 @@ class translate_PDF_Mohr:
                                 r" que $\sigma_1$ é sempre a maior tensão principal (o maior autovalor)" \
                                 r" $\sigma_3$ é sempre a menor tensão principal (o menor autovalor):"
         self.max_shear = r"Tensão de Cisalhamento Máxima"
-        self.subs_1_in_3 = r'Substituindo $\sigma_1$ e $\sigma_3$ na equação 2 obtemos $\tau_{max}$:'
+        self. subs_1_in_3 = r'Como a determinante neste caso é igual a zero, temos:'
         self.drawing_circle_3d = r"Desenhando o círculo de Mohr"
         self.drawing_circle_3d_label = r'\label{fig:estrutura} Estado Triplo de Tensões e círculo de Mohr'
         self.radius_var = r"T_{max} ="
@@ -88,7 +88,7 @@ class translate_PDF_Mohr:
                                 r" que $\sigma_1$ é sempre a maior tensão principal (o maior autovalor)" \
                                 r" $\sigma_3$ é sempre a menor tensão principal (o menor autovalor):"
         self.max_shear = r"Tensão de Cisalhamento Máxima"
-        self.subs_1_in_3 = r'Substituindo $\sigma_1$ e $\sigma_3$ na equação 2 obtemos $\tau_{max}$:'
+        self.subs_1_in_3 = r'Como a determinante neste caso é igual a zero, temos:'
         self.drawing_circle_3d = r"Desenhando o círculo de Mohr"
         self.drawing_circle_3d_label = r'\label{fig:estrutura} Estado Triplo de Tensões e círculo de Mohr'
         self.radius_var = r"T_{max} ="

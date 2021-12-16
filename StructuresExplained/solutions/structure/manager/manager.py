@@ -4,7 +4,6 @@ from StructuresExplained.solutions.structure.reactions.assembler import Assemble
 from StructuresExplained.solutions.structure.pdf_generation.generator import Generator
 from StructuresExplained.solutions.structure.fig_generation.artist import Artist
 from StructuresExplained.pdfconfig.logo import generate_logo
-from matplotlib.pyplot import Figure, Axes, figure
 from typing import Optional, Tuple
 
 
@@ -18,6 +17,7 @@ class Manager:
                      language: Optional[str] = "PT",
                      pdf_path: Optional[str] = "tmp",
                      filename: Optional[str] = "solution",
+                     main_path: Optional[str] = None,
                      ):
 
         self.ss.solve()
@@ -28,7 +28,7 @@ class Manager:
 
         self.__assemble_reactions()
 
-        self.__assemble_internal_stresses(pdf_path)
+        self.__assemble_internal_stresses(pdf_path, main_path)
 
         self.__make_figures(pdf_path)
 
@@ -37,8 +37,11 @@ class Manager:
     def __assemble_reactions(self):
         self.reactions.assemble_structure()
 
-    def __assemble_internal_stresses(self, target_dir):
-        self.internal.assemble_structure(target_dir=target_dir)
+    def __assemble_internal_stresses(self, target_dir, main_path):
+        if main_path:
+            self.internal.assemble_structure(target_dir=target_dir, main_path=main_path),
+        else:
+            self.internal.assemble_structure(target_dir=target_dir)
 
     def __make_figures(self, target_dir):
         self.__gen_pdf_figures(target_dir)

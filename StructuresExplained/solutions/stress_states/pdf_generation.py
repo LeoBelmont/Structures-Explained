@@ -3,7 +3,7 @@ from pylatex import Document, Section, Subsection, Figure, NoEscape
 from sympy import Symbol, latex, simplify
 from StructuresExplained.pdfconfig import header
 from StructuresExplained.pdfconfig.translations.mohr_strings import translate_PDF_Mohr
-from StructuresExplained.utils.util import add_to_pdf
+from StructuresExplained.utils.util import add_to_pdf, append_result
 
 
 class pdf_generator:
@@ -69,7 +69,7 @@ class append_plain_state:
                 self.gen.pdf.add_equation(
                     self.gen.tpdf.radius_var + r' \sqrt{(\frac{' + fr'{self.res.sigma_x}-{self.res.sigma_y}' +
                     '}{2})^2 +' + f'{self.res.tau_xy}' + '^ 2)}')
-                self.gen.pdf.add_equation(self.gen.tpdf.radius_var + f'{self.res.max_shear}')
+                self.gen.pdf.add_equation(self.gen.tpdf.radius_var + f'{append_result(self.res.max_shear)}')
 
     def append_main_stresses(self):
         with self.gen.doc.create(Section(self.gen.tpdf.main_stress_calculation)):
@@ -83,14 +83,14 @@ class append_plain_state:
                     r'\sigma_1 = \sqrt{\frac{' + f'{self.res.sigma_x}' + f'+ {self.res.sigma_y}' + r'}{2} + (\frac{'
                     + f'{self.res.sigma_x}' + ' - ' + f'{self.res.sigma_y}' + '}{2}) ^ 2 + ' + f'{self.res.tau_xy}'
                     + ' ^ 2}')
-                self.gen.pdf.add_equation(f'\\sigma_1 = {self.res.sigma_1}')
+                self.gen.pdf.add_equation(f'\\sigma_1 = {append_result(self.res.sigma_1)}')
 
             with self.gen.doc.create(Subsection(self.gen.tpdf.sigma_2_solving)):
                 self.gen.pdf.add_equation(
                     r'\sigma_2 = \sqrt{\frac{' + f'{self.res.sigma_x}' + f'+ {self.res.sigma_y}' + r'}{2} - (\frac{' +
                     f'{self.res.sigma_x}' + ' - ' + f'{self.res.sigma_y}' + '}{2}) ^ 2 + ' + f'{self.res.tau_xy}' +
                     ' ^ 2}')
-                self.gen.pdf.add_equation(f'\\sigma_2 = {self.res.sigma_2}')
+                self.gen.pdf.add_equation(f'\\sigma_2 = {append_result(self.res.sigma_2)}')
 
     def append_center(self):
         with self.gen.doc.create(Section(self.gen.tpdf.center_solving)):
@@ -100,7 +100,9 @@ class append_plain_state:
             with self.gen.doc.create(Subsection(self.gen.tpdf.center_solving)):
                 self.gen.pdf.add_equation(
                         self.gen.tpdf.center + r' = \frac{' + f'{self.res.sigma_x} +' + f'{self.res.sigma_y}' + '}{2}')
-                self.gen.pdf.add_equation(f'{self.gen.tpdf.center} = {(self.res.sigma_x + self.res.sigma_y) / 2}')
+                self.gen.pdf.add_equation(
+                    f'{self.gen.tpdf.center} = {append_result((self.res.sigma_x + self.res.sigma_y) / 2)}'
+                )
 
     def append_angle(self):
         with self.gen.doc.create(Section(self.gen.tpdf.angle_solving)):
@@ -112,9 +114,9 @@ class append_plain_state:
                 self.gen.pdf.add_equation(
                     r'\theta = \frac{arctan(\frac{' + f'{self.res.tau_xy}' + '}{' + f'{self.res.sigma_x}' +
                     f' - {(self.res.sigma_x + self.res.sigma_y) / 2}' + '}' + ')}{2}')
-                self.gen.pdf.add_equation(f'\\theta = {abs(self.res.angle * 180 / numpy.pi)}')
+                self.gen.pdf.add_equation(f'\\theta = {append_result(abs(self.res.angle * 180 / numpy.pi))}')
                 self.gen.doc.append(NoEscape(self.gen.tpdf.angle_tip))
-                self.gen.pdf.add_equation(f'\\theta = {abs(self.res.angle * 90 / numpy.pi)}')
+                self.gen.pdf.add_equation(f'\\theta = {append_result(abs(self.res.angle * 90 / numpy.pi))}')
 
     def append_result_drawing(self):
         with self.gen.doc.create(Section(self.gen.tpdf.drawing_circle_2d)):
@@ -212,15 +214,15 @@ class append_triple_state:
         with self.gen.doc.create(Section(self.gen.tpdf.results)):
             with self.gen.doc.create(Subsection(self.gen.tpdf.main_stress)):
                 self.gen.doc.append(NoEscape(self.gen.tpdf.main_stress_roots_tip))
-                self.gen.pdf.add_equation(r"\sigma_1 = " + f"{round(self.res.sigma_1, 2)}")
-                self.gen.pdf.add_equation(r"\sigma_2 = " + f"{round(self.res.sigma_2, 2)}")
-                self.gen.pdf.add_equation(r"\sigma_3 = " + f"{round(self.res.sigma_3, 2)}")
+                self.gen.pdf.add_equation(r"\sigma_1 = " + f"{append_result(self.res.sigma_1)}")
+                self.gen.pdf.add_equation(r"\sigma_2 = " + f"{append_result(self.res.sigma_2)}")
+                self.gen.pdf.add_equation(r"\sigma_3 = " + f"{append_result(self.res.sigma_3)}")
             with self.gen.doc.create(Subsection(self.gen.tpdf.max_shear)):
                 self.gen.doc.append(NoEscape(self.gen.tpdf.subs_1_in_3))
                 self.gen.pdf.add_equation(
                     self.gen.tpdf.radius_var +
-                    r' \frac{' + f'{round(self.res.sigma_1, 2)} - {round(self.res.sigma_3, 2)}' + r'}{2}')
-                self.gen.pdf.add_equation(self.gen.tpdf.radius_var + f" {round(self.res.max_shear, 2)}")
+                    r' \frac{' + f'{append_result(self.res.sigma_1)} - {append_result(self.res.sigma_3)}' + r'}{2}')
+                self.gen.pdf.add_equation(self.gen.tpdf.radius_var + f" {append_result(self.res.max_shear)}")
 
     def append_result_drawing(self):
         self.gen.doc.append(NoEscape(r'\newpage'))

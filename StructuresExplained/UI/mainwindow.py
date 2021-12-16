@@ -1,32 +1,10 @@
 import os
-import inspect
-import locale
-import platform
-import ctypes
 import sys
-import webbrowser
-import shutil
-import pickle
-import qdarkstyle
-import numpy as np
-from anastruct import SystemElements
-from distutils.spawn import find_executable
-from sympy.parsing.sympy_parser import parse_expr
-from decimal import Decimal
-from sympy import Symbol
-import matplotlib.pyplot as plt
-from matplotlib.pyplot import savefig
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import *
 
-
 # SX files
 from StructuresExplained.UI.mplwidget import MplWidget
-from StructuresExplained.UI import loadingPrompt, loadFilePrompt
-from StructuresExplained.solutions.structure.manager import manager as st_manager
-from StructuresExplained.solutions.stress_states.manager import manager as ss_manager
-from StructuresExplained.solutions.cross_section.manager import Manager as cs_manager
-from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
 from StructuresExplained.UI.connections.main_window import connections as ui_connections
 
 
@@ -1705,8 +1683,12 @@ class Ui_tenshi(QWidget):
         self.hideManualButton.setObjectName("hideManualButton")
         self.actionP_gina_para_Download = QtWidgets.QAction(tenshi)
         self.actionP_gina_para_Download.setObjectName("actionP_gina_para_Download")
-        self.downloadPageButton = QtWidgets.QAction(tenshi)
-        self.downloadPageButton.setObjectName("downloadPageButton")
+        self.downloadManualButton = QtWidgets.QAction(tenshi)
+        self.downloadManualButton.setObjectName("downloadManualButton")
+        self.downloadExampleButton = QtWidgets.QAction(tenshi)
+        self.downloadExampleButton.setObjectName("downloadExampleButton")
+        self.SXPageButton = QtWidgets.QAction(tenshi)
+        self.SXPageButton.setObjectName("SXPageButton")
         self.fullscreenButton = QtWidgets.QAction(tenshi)
         self.fullscreenButton.setObjectName("fullscreenButton")
         self.reset_cross_section = QtWidgets.QAction(tenshi)
@@ -1726,7 +1708,10 @@ class Ui_tenshi(QWidget):
         self.translate_menu.addAction(self.translate_nihongo)
         self.menuMudar_Temas.addAction(self.light_theme_button)
         self.menuMudar_Temas.addAction(self.dark_theme_button)
-        self.menuComo_utilizar.addAction(self.downloadPageButton)
+        self.menuComo_utilizar.addAction(self.downloadManualButton)
+        self.menuComo_utilizar.addAction(self.downloadExampleButton)
+        self.menuComo_utilizar.addSeparator()
+        self.menuComo_utilizar.addAction(self.SXPageButton)
         self.menuOp_es.addAction(self.menuResetar.menuAction())
         self.menuOp_es.addAction(self.menuFonte.menuAction())
         self.menuOp_es.addAction(self.menuMudar_Temas.menuAction())

@@ -154,6 +154,8 @@ class Assembler:
             main_path = node_to_element(main_path)
             for element in main_path:
                 partial_main_path = self.graph.find_path(element[0], element[1])
+                if partial_main_path is None:
+                    raise ValueError("No path found for given nodes")
                 for value in partial_main_path:
                     if value == partial_main_path[0] and value in proper_main_path:
                         continue
@@ -334,6 +336,8 @@ class Assembler:
                            ) -> None:
         self.find_tips()
         self.assemble_graph()
+        if main_path == "longest" or main_path == "random":
+            main_path = Setting(main_path)
         self.assemble_main_path(main_path)
         self.assemble_other_paths()
         self.assemble_solve_order()

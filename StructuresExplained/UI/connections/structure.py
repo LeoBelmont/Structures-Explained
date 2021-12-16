@@ -1,10 +1,12 @@
 import pickle
-from PyQt5.QtWidgets import QMessageBox, QFileDialog
+
+from PyQt5.QtWidgets import QMessageBox, QFileDialog, QDialog
 from anastruct import SystemElements
 from distutils.spawn import find_executable
 from StructuresExplained.pdfconfig.generator_thread import PDFGeneratorThread
 from StructuresExplained.utils.util import make_pdf_folders, split_dir_filename, delete_folder
 from StructuresExplained.solutions.structure.manager.manager import Manager
+from StructuresExplained.UI.pathprompt import PathPrompt
 from matplotlib import pyplot as plt
 
 
@@ -99,9 +101,9 @@ class connections:
 
     def show_support_stuff(self):
         if self.mw.support_roll.isChecked():
-            self.mw.support_angle.setHidden(False)
-            self.mw.label_113.setHidden(False)
-            self.mw.label_27.setHidden(False)
+            self.mw.support_angle.setHidden(True)  # Always true due to anaStruct bug
+            self.mw.label_113.setHidden(True)  # Always true due to anaStruct bug
+            self.mw.label_27.setHidden(True)  # Always true due to anaStruct bug
             self.mw.label_71.setHidden(True)
             self.mw.label_73.setHidden(True)
             self.mw.spring_k.setHidden(True)
@@ -111,11 +113,11 @@ class connections:
             self.mw.label_73.setHidden(False)
             self.mw.spring_k.setHidden(False)
             self.mw.spring_translation.setHidden(False)
-            self.mw.support_angle.setHidden(True)
+            self.mw.support_angle.setHidden(True)  # Always true due to anaStruct bug
             self.mw.label_27.setHidden(True)
             self.mw.label_127.setHidden(False)
         else:
-            self.mw.support_angle.setHidden(True)
+            self.mw.support_angle.setHidden(True)  # Always true due to anaStruct bug
             self.mw.label_27.setHidden(True)
             self.mw.label_71.setHidden(True)
             self.mw.label_73.setHidden(True)
@@ -248,43 +250,52 @@ class connections:
     def static_solver(self, clean=True):
         if find_executable('latex'):
             if self.mw.show_moment.isEnabled():
-                if (len(self.ss.supports_roll) == 1 and len(self.ss.supports_hinged) == 1)\
+                if (len(self.ss.supports_roll) == 1 and len(self.ss.supports_hinged) == 1) \
                         or (len(self.ss.supports_fixed) == 1):
-                    file, ok = QFileDialog.getSaveFileName(self.mw, self.mw.pdf_title, self.mw.pdf_text, "PDF (*.pdf)")
-                    if ok:
-                        try:
-                            self.mw.toolBox.setCurrentIndex(0)
-                            pdf_dir, filename = split_dir_filename(file)
-                            make_pdf_folders(pdf_dir)
+                    dialog = QDialog()
+                    prompt = PathPrompt(self.mw.language, dialog)
+                    dialog.exec_()
+                    if not prompt.userTerminated:
+                        solve_path = prompt.path
+                        file, ok = QFileDialog.getSaveFileName(
+                            self.mw, self.mw.pdf_title, self.mw.pdf_text, "PDF (*.pdf)"
+                        )
+                        if ok:
+                            try:
+                                self.mw.toolBox.setCurrentIndex(0)
+                                pdf_dir, filename = split_dir_filename(file)
+                                make_pdf_folders(pdf_dir)
 
-                            self.ss.color_scheme = "bright"
-                            plt.style.use('default')
+                                self.ss.color_scheme = "bright"
+                                plt.style.use('default')
 
-                            mn = Manager(self.ss)
+                                mn = Manager(self.ss)
 
-                            pdf_generator_thread = PDFGeneratorThread(
-                                mn.generate_pdf,
-                                self.mw.language,
-                                pdf_path=pdf_dir,
-                                filename=filename,
-                            )
+                                pdf_generator_thread = PDFGeneratorThread(
+                                    mn.generate_pdf,
+                                    self.mw.language,
+                                    pdf_path=pdf_dir,
+                                    filename=filename,
+                                    solve_path=solve_path,
+                                )
 
-                            self.fn.setupLoading(pdf_generator_thread)
+                                self.fn.setupLoading(pdf_generator_thread)
 
-                            pdf_generator_thread.finished.connect(self.on_finished)
+                                pdf_generator_thread.finished.connect(self.on_finished)
 
-                            pdf_generator_thread.start()
-                            self.mw.loadingScreen.exec_()
+                                pdf_generator_thread.start()
+                                self.mw.loadingScreen.exec_()
 
-                            if not self.mw.loadingUi.userTerminated:
-                                self.fn.pdf_generated_prompt()
-                            if clean:
-                                delete_folder(pdf_dir)
-                            self.ss.color_scheme = "dark"
-                            plt.style.use('dark_background')
-
-                        except:
-                            self.fn.latex_packages_warning()
+                                if not self.mw.loadingUi.userTerminated:
+                                    self.fn.pdf_generated_prompt()
+                                if clean:
+                                    delete_folder(pdf_dir)
+                                self.ss.color_scheme = "dark"
+                                plt.style.use('dark_background')
+                            # except ValueError:
+                            #     self.fn.path_warning()
+                            except:
+                                self.fn.latex_packages_warning()
                 else:
                     self.fn.static_warning()
             else:
