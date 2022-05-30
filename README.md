@@ -20,12 +20,6 @@ To do so clone the repository and install the following:
 
 matplotlib>=3.0, numpy>=1.15.4, pyqt5, qdarkstyle, pylatex, sympy
 
+You will also need my anaStruct fork, available at:
 
-You will also need my anaStruct fork, the current master utilizes the legacy branch, found at:
-
-https://github.com/LeoBelmont/anaStruct/tree/sx-legacy
-
-
-to install use:
-
-pip install git+git://github.com/LeoBelmont/anaStruct@sx-legacy
+https://github.com/LeoBelmont/anaStruct/
