@@ -162,8 +162,8 @@ class connections:
                     if self.mw.qload_final.text() == '':
                         self.mw.qload_final.setText(self.fn.filter(self.mw.qload_initial.text()))
                     self.ss.q_load(element_id=int(self.mw.qload_pos.text()),
-                                   q=(float(self.fn.filter(self.mw.qload_final.text())),
-                                      float(self.fn.filter(self.mw.qload_initial.text()))))
+                                   q=(float(self.fn.filter(self.mw.qload_initial.text())),
+                                      float(self.fn.filter(self.mw.qload_final.text()))))
                     self.mw.last_figure.click()
                     self.states.append(pickle.dumps(self.ss))
                     self.fn.enable_buttons()
